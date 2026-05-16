@@ -525,6 +525,8 @@ tr:last-child td{border-bottom:none;}
 .fc-loading-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.5px;}
 .fc-error{padding:20px;text-align:center;color:var(--ylw);font-family:var(--cond);}
 @keyframes loadPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+@keyframes starTwinkle{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+@keyframes cloudFloat{0%,100%{transform:translateX(0);}50%{transform:translateX(-1.5px);}}
 
 /* Header summary banner */
 .fc-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-radius:var(--rl);background:linear-gradient(135deg,rgba(26,111,255,0.08),rgba(167,139,250,0.05));border:1px solid var(--bdr);position:relative;overflow:hidden;flex-wrap:wrap;}
@@ -618,6 +620,89 @@ tr:last-child td{border-bottom:none;}
   .fc-block{padding:7px 6px;}
   .fc-block-temp{font-size:18px;}
 }
+
+/* ───── NEW FORECAST FEATURES ───── */
+
+/* Sunrise / Sunset row in day card titles */
+.fc-sun-times{display:flex;gap:11px;margin-top:5px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.3px;}
+.fc-sun-times span{display:inline-flex;align-items:center;gap:3px;}
+
+/* Best-day badge */
+.fc-best-badge{display:inline-block;margin-left:7px;padding:2px 8px;border-radius:10px;background:linear-gradient(135deg,rgba(46,201,122,0.25),rgba(46,201,122,0.10));border:1px solid var(--grn);color:var(--grn);font-family:var(--cond);font-size:10px;font-weight:800;letter-spacing:1.2px;animation:bestPulse 2.5s ease-in-out infinite;vertical-align:middle;}
+@keyframes bestPulse{0%,100%{box-shadow:0 0 0 0 rgba(46,201,122,0);}50%{box-shadow:0 0 0 6px rgba(46,201,122,0.18);}}
+
+/* Hourly precipitation timeline */
+.fc-precip-tl{margin:9px 0;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,0.18);border:1px solid var(--bdr);}
+.fc-precip-tl-lbl{font-family:var(--cond);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.fc-precip-svg{width:100%;height:28px;display:block;}
+
+/* "More details" button */
+.fc-detail-btn{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:9px;padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:rgba(77,184,255,0.04);color:var(--acc);font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:all .2s;}
+.fc-detail-btn:hover{background:rgba(77,184,255,0.10);border-color:var(--bdrb);transform:translateX(2px);}
+.fc-detail-btn:active{transform:translateX(0) scale(0.98);}
+.fc-detail-arr{font-size:16px;line-height:1;transition:transform .2s;}
+.fc-detail-btn:hover .fc-detail-arr{transform:translateX(3px);}
+
+/* Detail overlay modal */
+.fc-detail-overlay{position:fixed;inset:0;z-index:9999;background:rgba(2,8,15,0.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s;overflow-y:auto;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.fc-detail-card{position:relative;max-width:880px;width:100%;max-height:90vh;overflow-y:auto;border-radius:var(--rl);background:var(--card);border:1px solid var(--bdrb);box-shadow:0 30px 80px rgba(0,0,0,0.6);padding:24px;}
+@media(max-width:640px){.fc-detail-overlay{padding:8px;}.fc-detail-card{padding:14px;max-height:96vh;}.fc-detail-hourly,.fc-detail-models{font-size:11px;}.fc-detail-hourly th,.fc-detail-hourly td,.fc-detail-models th,.fc-detail-models td{padding:4px 6px;}}
+.fc-detail-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--bdr);background:rgba(255,255,255,0.05);color:var(--acc);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.fc-detail-close:hover{background:rgba(255,79,79,0.15);border-color:var(--red);color:var(--red);}
+.fc-detail-hd{border-bottom:1px solid var(--bdr);padding-bottom:14px;margin-bottom:16px;}
+.fc-detail-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;}
+@media(max-width:700px){.fc-detail-grid{grid-template-columns:1fr;gap:16px;}}
+.fc-detail-grid h4{font-family:var(--cond);font-size:13px;color:var(--acc);letter-spacing:1.3px;text-transform:uppercase;margin:0 0 9px 0;font-weight:800;}
+.fc-detail-hourly,.fc-detail-models{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:13px;}
+.fc-detail-hourly th,.fc-detail-models th{text-align:left;padding:6px 9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:700;}
+.fc-detail-hourly td,.fc-detail-models td{padding:6px 9px;border-bottom:1px solid rgba(255,255,255,0.02);color:#cce4ff;}
+.fc-detail-hourly tr:hover td,.fc-detail-models tr:hover td{background:rgba(77,184,255,0.04);}
+.fc-detail-stats{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-size:13px;}
+.fc-detail-stats > div{display:flex;justify-content:space-between;padding:6px 9px;border-radius:6px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);}
+.fc-detail-stats span{color:var(--muted);letter-spacing:.5px;}
+.fc-detail-stats b{color:#fff;font-weight:800;}
+
+/* Pause animations when tab is hidden — saves CPU/battery */
+body.tab-hidden *{animation-play-state:paused !important;}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important;}
+}
+
+/* ───── FONT BUMPS — improve overall readability ───── */
+/* Forecast cards: +15% */
+.fc-day-name-big{font-size:25px;}
+.fc-day-date-big{font-size:12px;}
+.fc-summary-desc{font-size:16px;}
+.fc-summary-tempo{font-size:34px;}
+.fc-summary-feels{font-size:12px;}
+.fc-meta-row{font-size:13px;}
+.fc-meta-l{font-size:10px;}
+.fc-meta-v{font-size:13px;}
+.fc-block-hd{font-size:10px;}
+.fc-block-temp{font-size:24px;}
+.fc-block-feels{font-size:10px;}
+.fc-block-stats{font-size:11px;}
+.fc-summary-t{font-size:13px;}
+.fc-conf-val{font-size:28px;}
+.fc-conf-lbl{font-size:10px;}
+.fc-model-badge{font-size:10.5px;padding:3px 9px;}
+
+/* METAR / SYNOP / Weather card chips: +8-10% */
+.chip-v{font-size:15px;}
+.chip-l{font-size:9px;}
+.chip-s{font-size:10px;}
+.wchip-v{font-size:18px;}
+.wchip-l{font-size:9px;}
+.wchip-s{font-size:10.5px;}
+.whero-val{font-size:36px;}
+.whero-feels{font-size:12px;}
+.sychip{font-size:12.5px;}
+.sychip-l{font-size:9.5px;}
+.sychip-v{font-size:13px;}
+
+/* Tab badges bumped slightly */
+.tbadge{font-size:10px;}
 
 /* Temperature colour ramp for SYNOP/METAR chips */
 .sychip.temp-xhot,.sychip.temp-xhot .sychip-v{color:#ff3c3c;background:rgba(255,60,60,0.10);}
@@ -898,7 +983,7 @@ tr:last-child td{border-bottom:none;}
   <!-- FORECAST — 6 embedded model maps for the ABC islands -->
   <div id="tab-forecast" class="tpanel hidden">
     <div class="shdr">
-      <div class="stitle">7-Day Forecast — ABC Islands</div>
+      <div class="stitle">4-Day Forecast — ABC Islands</div>
       <span id="fcStatus" style="color:var(--muted);font-size:9px;font-family:var(--mono);">Multi-model consensus · GFS + ECMWF + ICON</span>
     </div>
 
@@ -2720,16 +2805,15 @@ const FORECAST_MODELS = [
 
 // Fetch from all configured models in parallel
 async function fetchMultiModelForecast(){
-  // Open-Meteo natively supports CORS — use direct fetch (no proxy chain)
-  // Multiple models in ONE call via comma-separated `models=` parameter
-  // Response keys are suffixed: temperature_2m_gfs_seamless, temperature_2m_ecmwf_ifs025, etc.
-  const vars = 'temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,apparent_temperature';
+  // Open-Meteo: ONE batched call with all models comma-separated.
+  // Plus a separate compact call for daily astronomical & UV data (single-model is fine).
+  const vars = 'temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,apparent_temperature,uv_index';
   const modelKeys = FORECAST_MODELS.map(m => m.key).join(',');
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${ABC_LAT}&longitude=${ABC_LON}&hourly=${vars}&models=${modelKeys}&timezone=auto&forecast_days=4&wind_speed_unit=kn`;
+  const daily = 'sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max';
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${ABC_LAT}&longitude=${ABC_LON}&hourly=${vars}&daily=${daily}&models=${modelKeys}&timezone=auto&forecast_days=5&wind_speed_unit=kn`;
 
   let json;
   try {
-    // Direct fetch with a 6s timeout — fast path
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 6000);
     const res = await fetch(url, {signal: ctrl.signal});
@@ -2740,15 +2824,13 @@ async function fetchMultiModelForecast(){
     console.warn('Direct Open-Meteo fetch failed, falling back to proxy:', e.message);
     try {
       const r = await fetchURL(url);
-      if(!r.ok) return [];
+      if(!r.ok) return {forecasts:[], daily:null};
       json = JSON.parse(r.text);
-    } catch(e2){ return []; }
+    } catch(e2){ return {forecasts:[], daily:null}; }
   }
 
-  if(!json || !json.hourly || !json.hourly.time) return [];
+  if(!json || !json.hourly || !json.hourly.time) return {forecasts:[], daily:null};
 
-  // Split the suffix-keyed response into per-model objects so the rest of the
-  // consensus pipeline (unchanged) can keep working.
   const forecasts = [];
   for(const m of FORECAST_MODELS){
     const suffix = '_' + m.key;
@@ -2763,11 +2845,40 @@ async function fetchMultiModelForecast(){
     }
     if(hasAnyData) forecasts.push({model: m, data: {hourly: modelHourly}});
   }
-  return forecasts;
+  // Return both per-model data + the daily astro/UV summary
+  return {forecasts, daily: json.daily || null};
 }
 
 // Build per-day consensus with spread/agreement metrics
-function buildDailyConsensus(forecasts){
+// Build a compact 24-hour precipitation + temp timeline for one day
+function hourlyTimeline(forecasts, info){
+  if(!info || !info.hours) return [];
+  const out = [];
+  // For each hour in the day, get cross-model average precip / temp / pop
+  for(const hr of info.hours){
+    let precip = [], temp = [], pop = [], code = [];
+    for(const fc of forecasts){
+      const h = fc.data.hourly;
+      if(!h || h.time[hr.i] !== hr.t) continue;
+      if(h.precipitation && h.precipitation[hr.i] != null) precip.push(h.precipitation[hr.i]);
+      if(h.temperature_2m && h.temperature_2m[hr.i] != null) temp.push(h.temperature_2m[hr.i]);
+      if(h.precipitation_probability && h.precipitation_probability[hr.i] != null) pop.push(h.precipitation_probability[hr.i]);
+      if(h.weather_code && h.weather_code[hr.i] != null) code.push(h.weather_code[hr.i]);
+    }
+    out.push({
+      hour: hr.hour,
+      time: hr.t,
+      precip: precip.length ? precip.reduce((a,b)=>a+b,0)/precip.length : 0,
+      temp: temp.length ? temp.reduce((a,b)=>a+b,0)/temp.length : null,
+      pop: pop.length ? pop.reduce((a,b)=>a+b,0)/pop.length : 0,
+      code: code.length ? code[0] : null
+    });
+  }
+  return out;
+}
+
+function buildDailyConsensus(forecasts, dailyMeta){
+  // dailyMeta = {time:[], sunrise:[], sunset:[], uv_index_max:[], ...} from Open-Meteo daily field
   if(!forecasts || !forecasts.length) return [];
 
   // Use the first model that has the longest valid time series as reference
@@ -2919,7 +3030,13 @@ function buildDailyConsensus(forecasts){
       models:      forecasts.map(f => f.model),
       modelCount:  forecasts.length,
       confidence:  Math.max(0, Math.min(100, 100 - tempSpread * 10)),
-      blocks:      blocks
+      blocks:      blocks,
+      // From daily meta (Open-Meteo)
+      sunrise:     (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunrise ? dailyMeta.sunrise[i] : null; })(),
+      sunset:      (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunset ? dailyMeta.sunset[i] : null; })(),
+      uvMax:       (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.uv_index_max ? dailyMeta.uv_index_max[i] : null; })(),
+      // For "Best day" scoring later
+      _hourly:     hourlyTimeline(forecasts, info)
     });
   }
 
@@ -2927,10 +3044,21 @@ function buildDailyConsensus(forecasts){
 }
 
 // WMO weather code to icon SVG + description
-function decodeWmoCode(code){
-  if(code === 0) return {icon:'sun',          desc:'Clear sky',      sev:0};
-  if(code === 1) return {icon:'sun-cloud',    desc:'Mainly clear',   sev:0};
-  if(code === 2) return {icon:'cloud-sun',    desc:'Partly cloudy',  sev:0};
+// Determine if a given timestamp is daylight (between sunrise and sunset)
+function isDaylight(timeStr, sunriseStr, sunsetStr){
+  if(!timeStr || !sunriseStr || !sunsetStr) return true;
+  // Time strings are ISO-like local times
+  const t = new Date(timeStr).getTime();
+  const sr = new Date(sunriseStr).getTime();
+  const ss = new Date(sunsetStr).getTime();
+  if(!t || !sr || !ss) return true;
+  return t >= sr && t <= ss;
+}
+
+function decodeWmoCode(code, isNight){
+  if(code === 0) return {icon: isNight?'moon':'sun',        desc:'Clear sky',      sev:0};
+  if(code === 1) return {icon: isNight?'moon-cloud':'sun-cloud', desc:'Mainly clear',   sev:0};
+  if(code === 2) return {icon: isNight?'cloud-moon':'cloud-sun', desc:'Partly cloudy',  sev:0};
   if(code === 3) return {icon:'cloud',        desc:'Overcast',       sev:1};
   if(code === 45 || code === 48) return {icon:'fog', desc:'Fog',     sev:1};
   if(code >= 51 && code <= 57) return {icon:'drizzle', desc:'Drizzle', sev:1};
@@ -2951,6 +3079,44 @@ function buildWxIconSvg(iconKey, size=64){
   const s = size;
   const c = s/2;
   switch(iconKey){
+    case 'moon':
+      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+        <defs>
+          <radialGradient id="moonGrad${s}" cx="40%" cy="40%">
+            <stop offset="0%" stop-color="#e2e8f0"/>
+            <stop offset="100%" stop-color="#94a3b8"/>
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="16" fill="url(#moonGrad${s})"/>
+        <circle cx="38" cy="28" r="13" fill="#0a1525"/>
+        <circle cx="42" cy="36" r="1.5" fill="#475569" opacity=".6"/>
+        <circle cx="26" cy="40" r="1" fill="#475569" opacity=".5"/>
+        <circle cx="30" cy="33" r="0.8" fill="#475569" opacity=".4"/>
+        <g style="animation:starTwinkle 2s ease-in-out infinite;">
+          <circle cx="14" cy="14" r="0.8" fill="#cce4ff"/>
+          <circle cx="52" cy="20" r="0.6" fill="#cce4ff"/>
+          <circle cx="48" cy="52" r="0.7" fill="#cce4ff"/>
+          <circle cx="10" cy="46" r="0.5" fill="#cce4ff"/>
+        </g>
+      </svg>`;
+    case 'moon-cloud':
+      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+        <circle cx="22" cy="22" r="9" fill="#cbd5e1"/>
+        <circle cx="26" cy="19" r="7" fill="#0a1525"/>
+        <g style="animation:cloudFloat 4s ease-in-out infinite;">
+          <ellipse cx="40" cy="38" rx="16" ry="9" fill="#64748b" opacity="0.9"/>
+          <ellipse cx="32" cy="34" rx="9" ry="7" fill="#94a3b8" opacity="0.9"/>
+        </g>
+      </svg>`;
+    case 'cloud-moon':
+      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+        <circle cx="18" cy="22" r="7" fill="#cbd5e1"/>
+        <circle cx="21" cy="20" r="5.5" fill="#0a1525"/>
+        <g style="animation:cloudFloat 4s ease-in-out infinite;">
+          <ellipse cx="36" cy="38" rx="18" ry="10" fill="#475569" opacity="0.9"/>
+          <ellipse cx="26" cy="34" rx="10" ry="8" fill="#64748b" opacity="0.9"/>
+        </g>
+      </svg>`;
     case 'sun':
       return `<svg class="wx-sun" viewBox="0 0 64 64" width="${s}" height="${s}">
         <g class="rays" style="transform-origin:32px 32px;animation:sunSpin 18s linear infinite;">
@@ -3032,31 +3198,47 @@ function buildWxIconSvg(iconKey, size=64){
   return `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><circle cx="32" cy="32" r="12" fill="#64748b"/></svg>`;
 }
 
-// Render rich 3-day forecast with time-of-day breakdown
+// Render rich 4-day forecast with time-of-day breakdown + per-day detail view
+// Render the forecast — 4 detailed day cards with all new features
 function renderForecast(dailies){
   const grid = byId('fcGrid');
   if(!dailies || !dailies.length){
-    grid.innerHTML = '<div class="fc-loading"><div style="color:var(--ylw);font-size:32px;">⚠</div><div class="fc-loading-txt">No forecast data</div></div>';
+    grid.innerHTML = '<div class="fc-loading"><div class="fc-loading-txt" style="color:var(--ylw);">⚠ Forecast data unavailable</div></div>';
     return;
   }
 
-  const days = dailies.slice(0,3);  // Only 3 days, richly detailed
-  const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const days = dailies.slice(0, 4);  // 4-day forecast
 
-  // Header summary: models used + confidence
+  // Model badges
   let modelBadges = '';
   if(days[0] && days[0].models){
     modelBadges = days[0].models.map(m =>
-      `<span class="fc-model-badge" style="border-color:${m.color}88;color:${m.color};" title="${m.org}">${m.name}</span>`
+      `<span class="fc-model-badge" style="border-color:${m.color}88;color:${m.color};">${m.name}</span>`
     ).join('');
   }
 
   const avgConf = avgConfidence(days);
   const confCol = avgConf >= 80 ? '#2ec97a' : avgConf >= 60 ? '#f59e0b' : '#ff8a3d';
 
+  // Compute "Best day" — lowest precip risk + reasonable wind
+  // Only badge if the winner is actually decent (score > 60) AND meaningfully better than the others
+  let bestDayIdx = -1, bestScore = -Infinity, secondBestScore = -Infinity;
+  const scores = days.map((d, idx) => {
+    const popPenalty = (d.pop || 0) * 1.0;
+    const precipPenalty = (d.precipTotal || 0) * 5;
+    const windPenalty = Math.max(0, (d.wind||0) - 20) * 2;
+    return 100 - popPenalty - precipPenalty - windPenalty;
+  });
+  scores.forEach((s, idx) => {
+    if(s > bestScore){ secondBestScore = bestScore; bestScore = s; bestDayIdx = idx; }
+    else if(s > secondBestScore){ secondBestScore = s; }
+  });
+  // Suppress the badge unless the best day is genuinely good AND notably better than the runner-up
+  if(bestScore < 60 || (bestScore - secondBestScore) < 5) bestDayIdx = -1;
+
   let html = `<div class="fc-summary">
     <div class="fc-summary-l">
-      <div class="fc-summary-t">3-Day Consensus · ${days[0].modelCount} models active</div>
+      <div class="fc-summary-t">4-Day Consensus · ${days[0].modelCount} models active</div>
       <div class="fc-models">${modelBadges}</div>
     </div>
     <div class="fc-summary-r">
@@ -3065,11 +3247,16 @@ function renderForecast(dailies){
     </div>
   </div>`;
 
+  const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+
   html += days.map((d, idx) => {
     const dt = new Date(d.date);
     const dow = idx === 0 ? 'TODAY' : idx === 1 ? 'TOMORROW' : dt.toLocaleDateString('en', {weekday:'long'}).toUpperCase();
     const dateStr = dt.toLocaleDateString('en', {weekday:'short', day:'numeric', month:'long'});
-    const wx = decodeWmoCode(d.code);
+
+    // Determine if "now" is daytime for this day; for non-today, default to day-icon
+    const isNightNow = idx === 0 ? !isDaylight(new Date().toISOString(), d.sunrise, d.sunset) : false;
+    const wx = decodeWmoCode(d.code, isNightNow);
 
     const tempCol = d.tempHigh >= 32 ? '#ff3c3c'
                   : d.tempHigh >= 28 ? '#ff8a3d'
@@ -3077,17 +3264,48 @@ function renderForecast(dailies){
                   : d.tempHigh >= 18 ? '#2ec97a' : '#4db8ff';
 
     const severityCls = wx.sev >= 3 ? 'sev-crit' : wx.sev >= 2 ? 'sev-wrn' : '';
-
-    const popDisplay = d.pop != null ? Math.round(d.pop) : Math.min(100, Math.round((d.precip || 0) * 18));
+    const popDisplay = d.pop != null ? Math.round(d.pop) : Math.min(100, Math.round((d.precipTotal || 0) * 18));
     const windDirText = d.windDir != null ? COMPASS[Math.round(d.windDir/22.5)%16] : '—';
     const dayConfCol = d.confidence >= 80 ? 'var(--grn)' : d.confidence >= 60 ? 'var(--ylw)' : 'var(--red)';
 
-    // Build time-of-day block grid
+    // Format sunrise/sunset
+    const sunFmt = (iso) => {
+      if(!iso) return '—';
+      const t = new Date(iso);
+      return t.toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit', hour12:false});
+    };
+    const sunriseTxt = sunFmt(d.sunrise);
+    const sunsetTxt = sunFmt(d.sunset);
+
+    // UV index colour
+    const uv = d.uvMax || 0;
+    const uvCol = uv >= 11 ? '#a78bfa'  // extreme purple
+                : uv >= 8  ? '#ff4f4f'  // very high red
+                : uv >= 6  ? '#ff8a3d'  // high orange
+                : uv >= 3  ? '#f59e0b'  // moderate yellow
+                : '#2ec97a';            // low green
+    const uvLabel = uv >= 11 ? 'EXTREME' : uv >= 8 ? 'VERY HIGH' : uv >= 6 ? 'HIGH' : uv >= 3 ? 'MOD' : 'LOW';
+
+    // Best-day badge
+    const bestBadge = idx === bestDayIdx
+      ? `<span class="fc-best-badge" title="Best conditions among next 4 days">★ BEST</span>`
+      : '';
+
+    // Hourly precip timeline SVG
+    const hourly = d._hourly || [];
+    const precipBars = hourly.length ? buildPrecipTimeline(hourly) : '';
+
+    // Time-of-day blocks with night-awareness
     let blocksHtml = '';
     if(d.blocks && d.blocks.length){
       blocksHtml = `<div class="fc-blocks">${d.blocks.map(b => {
         if(!b || b.temp == null) return '';
-        const bwx = decodeWmoCode(b.code);
+        // Determine if this block is at night
+        // Block hours: morning(6-12), afternoon(12-18), evening(18-22), night(22-6)
+        const blockIsNight = b.key === 'night' ||
+                             (b.key === 'evening' && d.sunset && new Date(d.sunset).getHours() < 20) ||
+                             (b.key === 'morning' && d.sunrise && new Date(d.sunrise).getHours() >= 7);
+        const bwx = decodeWmoCode(b.code, blockIsNight);
         const bCol = b.tempMax >= 32 ? '#ff3c3c'
                    : b.tempMax >= 28 ? '#ff8a3d'
                    : b.tempMax >= 24 ? '#f59e0b'
@@ -3101,7 +3319,7 @@ function renderForecast(dailies){
             <span class="fc-block-icon">${b.icon}</span>
             <span class="fc-block-lbl">${b.label}</span>
           </div>
-          <div class="fc-block-wx">${buildWxIconSvg(bwx.icon, 42)}</div>
+          <div class="fc-block-wx">${buildWxIconSvg(bwx.icon, 44)}</div>
           <div class="fc-block-temp" style="color:${bCol};">${Math.round(b.temp)}°</div>
           <div class="fc-block-feels">Feels ${Math.round(b.feels || b.temp)}°</div>
           <div class="fc-block-stats">
@@ -3113,15 +3331,19 @@ function renderForecast(dailies){
       }).join('')}</div>`;
     }
 
-    return `<div class="fc-day-card ${severityCls}">
+    return `<div class="fc-day-card ${severityCls}" data-day-idx="${idx}">
       <!-- Day header -->
       <div class="fc-day-head">
         <div class="fc-day-titles">
-          <div class="fc-day-name-big">${dow}</div>
+          <div class="fc-day-name-big">${dow} ${bestBadge}</div>
           <div class="fc-day-date-big">${dateStr}</div>
+          <div class="fc-sun-times">
+            <span title="Sunrise">🌅 ${sunriseTxt}</span>
+            <span title="Sunset">🌇 ${sunsetTxt}</span>
+          </div>
         </div>
         <div class="fc-day-summary">
-          <div class="fc-summary-icon">${buildWxIconSvg(wx.icon, 64)}</div>
+          <div class="fc-summary-icon">${buildWxIconSvg(wx.icon, 72)}</div>
           <div class="fc-summary-text">
             <div class="fc-summary-desc">${wx.desc}</div>
             <div class="fc-summary-tempo">
@@ -3142,35 +3364,213 @@ function renderForecast(dailies){
           <div class="fc-meta-row">
             <span class="fc-meta-l">Wind</span>
             <span class="fc-meta-v">
-              <svg viewBox="0 0 24 24" width="11" height="11" style="transform:rotate(${(d.windDir||0)+180}deg);transition:transform .5s;color:var(--acc);"><path d="M12 2 L8 10 L11 10 L11 22 L13 22 L13 10 L16 10 Z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" width="12" height="12" style="transform:rotate(${(d.windDir||0)+180}deg);transition:transform .5s;color:var(--acc);"><path d="M12 2 L8 10 L11 10 L11 22 L13 22 L13 10 L16 10 Z" fill="currentColor"/></svg>
               ${Math.round(d.wind||0)}kt ${windDirText}${d.windGust > d.wind + 5 ? ' · G'+Math.round(d.windGust) : ''}
+            </span>
+          </div>
+          <div class="fc-meta-row">
+            <span class="fc-meta-l">UV Index</span>
+            <span class="fc-meta-v" style="color:${uvCol};font-weight:800;" title="Max UV exposure">
+              ${Math.round(uv*10)/10} · ${uvLabel}
             </span>
           </div>
           <div class="fc-meta-row">
             <span class="fc-meta-l">Humidity</span>
             <span class="fc-meta-v">${Math.round(d.rh||0)}%</span>
           </div>
-          <div class="fc-meta-row">
-            <span class="fc-meta-l">Clouds</span>
-            <span class="fc-meta-v">${Math.round(d.cloud||0)}%</span>
-          </div>
-          <div class="fc-meta-row">
+          <div class="fc-meta-row" title="Model agreement — temperature spread between models: ${(d.tempSpread||0).toFixed(1)}°C">
             <span class="fc-meta-l">Agreement</span>
             <span class="fc-meta-v" style="color:${dayConfCol};">
               <span class="fc-conf-dot" style="background:${dayConfCol};"></span>
-              ${Math.round(d.confidence)}%
+              ${Math.round(d.confidence)}% <small style="color:var(--muted);font-weight:400;">±${(d.tempSpread||0).toFixed(1)}°</small>
             </span>
           </div>
         </div>
       </div>
 
+      <!-- Hourly precipitation timeline -->
+      ${precipBars}
+
       <!-- Time-of-day blocks -->
       ${blocksHtml}
+
+      <!-- More details button -->
+      <button class="fc-detail-btn" data-day-idx="${idx}" title="View full details for this day · Click to open">
+        <span>More details · 24h breakdown · per-model comparison</span>
+        <span class="fc-detail-arr">→</span>
+      </button>
     </div>`;
   }).join('');
 
   grid.innerHTML = html;
   byId('fcStatus').textContent = `${days[0].modelCount} models · updated ${new Date().toLocaleTimeString()}`;
+}
+
+// Event delegation for the "More details" button — works regardless of IIFE scope
+document.addEventListener('click', (e) => {
+  // Open the detail view when a day's "More details" button is clicked
+  const detailBtn = e.target.closest('.fc-detail-btn[data-day-idx]');
+  if(detailBtn){
+    const idx = parseInt(detailBtn.dataset.dayIdx, 10);
+    if(!isNaN(idx)) openForecastDetail(idx);
+    return;
+  }
+  // Close the overlay when the X is clicked
+  const closeBtn = e.target.closest('[data-fc-close]');
+  if(closeBtn){
+    const overlay = closeBtn.closest('.fc-detail-overlay');
+    if(overlay){
+      // Use the cleanup function attached to the overlay so focus + scroll lock are reset
+      if(typeof overlay.__close === 'function') overlay.__close();
+      else overlay.remove();
+    }
+  }
+});
+
+// Build a 24-hour precipitation timeline as inline SVG
+function buildPrecipTimeline(hourly){
+  if(!hourly || !hourly.length) return '';
+  const W = 100, H = 22;
+  const max = Math.max(0.5, ...hourly.map(h => h.precip || 0));
+  const barW = W / hourly.length;
+  const bars = hourly.map((h, i) => {
+    const bh = (h.precip / max) * H;
+    const x = i * barW;
+    const y = H - bh;
+    const col = h.precip > 5 ? '#7bc4f5' : h.precip > 1 ? '#4db8ff' : h.precip > 0.1 ? '#4db8ff88' : '#1e293b';
+    return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${(barW-0.4).toFixed(2)}" height="${bh.toFixed(2)}" fill="${col}" rx="0.5"/>`;
+  }).join('');
+  // Hour labels (every 6 hours)
+  const labels = [];
+  hourly.forEach((h, i) => {
+    if(h.hour % 6 === 0){
+      const x = (i + 0.5) * barW;
+      labels.push(`<text x="${x.toFixed(2)}" y="${H+5}" font-size="3" fill="#6a8aaa" text-anchor="middle">${String(h.hour).padStart(2,'0')}</text>`);
+    }
+  });
+  return `<div class="fc-precip-tl">
+    <div class="fc-precip-tl-lbl">Hourly rain · ${max.toFixed(1)}mm peak</div>
+    <svg viewBox="0 -2 ${W} ${H+10}" preserveAspectRatio="none" class="fc-precip-svg">
+      ${bars}
+      ${labels.join('')}
+    </svg>
+  </div>`;
+}
+
+// Open the full-detail view for one day
+function openForecastDetail(dayIdx){
+  if(!__lastForecastData || !__lastForecastData.dailies){
+    console.warn('Forecast detail: no cached data yet — try again in a moment');
+    return;
+  }
+  const d = __lastForecastData.dailies[dayIdx];
+  if(!d) return;
+
+  // Remove any existing overlay first (defensive — prevents stacking)
+  document.querySelectorAll('.fc-detail-overlay').forEach(el => el.remove());
+
+  // Remember focus origin so we can restore it on close
+  const previouslyFocused = document.activeElement;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'fc-detail-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'fcDetailTitle');
+  overlay.onclick = (e) => { if(e.target === overlay) closeOverlay(); };
+
+  const dt = new Date(d.date);
+  const dow = dayIdx === 0 ? 'TODAY' : dayIdx === 1 ? 'TOMORROW' : dt.toLocaleDateString('en', {weekday:'long'}).toUpperCase();
+  const dateStr = dt.toLocaleDateString('en', {weekday:'short', day:'numeric', month:'long', year:'numeric'});
+  const sunFmt = (iso) => iso ? new Date(iso).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
+
+  // Per-hour breakdown table (every 3h)
+  let hourlyHtml = '<table class="fc-detail-hourly"><thead><tr><th>Time</th><th>Wx</th><th>Temp</th><th>Rain</th><th>PoP</th></tr></thead><tbody>';
+  if(d._hourly){
+    d._hourly.forEach(h => {
+      if(h.hour % 3 !== 0) return;  // every 3h
+      const blockNight = d.sunrise && d.sunset ? !isDaylight(h.time, d.sunrise, d.sunset) : false;
+      const wxh = decodeWmoCode(h.code, blockNight);
+      hourlyHtml += `<tr><td>${String(h.hour).padStart(2,'0')}:00</td>
+        <td>${buildWxIconSvg(wxh.icon, 26)}</td>
+        <td>${h.temp != null ? Math.round(h.temp)+'°' : '—'}</td>
+        <td>${h.precip > 0.05 ? h.precip.toFixed(1)+'mm' : '—'}</td>
+        <td>${Math.round(h.pop||0)}%</td>
+      </tr>`;
+    });
+  }
+  hourlyHtml += '</tbody></table>';
+
+  // Per-model comparison
+  let modelTable = '<table class="fc-detail-models"><thead><tr><th>Model</th><th>Origin</th><th>Used</th></tr></thead><tbody>';
+  if(d.models){
+    d.models.forEach(m => {
+      modelTable += `<tr>
+        <td><span class="fc-model-badge" style="border-color:${m.color}88;color:${m.color};">${m.name}</span></td>
+        <td>${m.org}</td>
+        <td style="color:var(--grn);">✓</td>
+      </tr>`;
+    });
+  }
+  modelTable += '</tbody></table>';
+
+  overlay.innerHTML = `<div class="fc-detail-card">
+    <button class="fc-detail-close" data-fc-close type="button" aria-label="Close detail view">✕</button>
+    <div class="fc-detail-hd">
+      <div class="fc-day-name-big" id="fcDetailTitle">${dow}</div>
+      <div class="fc-day-date-big">${dateStr}</div>
+      <div class="fc-sun-times">
+        <span>🌅 ${sunFmt(d.sunrise)}</span>
+        <span>🌇 ${sunFmt(d.sunset)}</span>
+      </div>
+    </div>
+    <div class="fc-detail-grid">
+      <div>
+        <h4>Hourly forecast (every 3 hours)</h4>
+        ${hourlyHtml}
+      </div>
+      <div>
+        <h4>Models used in consensus</h4>
+        ${modelTable}
+        <h4 style="margin-top:14px;">Statistics</h4>
+        <div class="fc-detail-stats">
+          <div><span>Temperature range</span><b>${Math.round(d.tempLow)}° – ${Math.round(d.tempHigh)}°C</b></div>
+          <div><span>Model spread</span><b>±${(d.tempSpread||0).toFixed(1)}°C</b></div>
+          <div><span>Confidence</span><b>${Math.round(d.confidence)}%</b></div>
+          <div><span>Total precip</span><b>${d.precipTotal.toFixed(1)}mm</b></div>
+          <div><span>UV index max</span><b>${(d.uvMax||0).toFixed(1)}</b></div>
+          <div><span>Cloud cover</span><b>${Math.round(d.cloud||0)}%</b></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Lock body scroll
+  document.body.style.overflow = 'hidden';
+
+  // Move focus to the close button for keyboard users
+  const closeBtn = overlay.querySelector('[data-fc-close]');
+  if(closeBtn) closeBtn.focus();
+
+  // Cleanup function — restores focus, scroll, removes overlay + listener
+  function closeOverlay(){
+    overlay.remove();
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', escHandler);
+    // Restore focus to the element that opened the modal
+    if(previouslyFocused && typeof previouslyFocused.focus === 'function'){
+      previouslyFocused.focus();
+    }
+  }
+
+  // Escape closes the overlay
+  const escHandler = (e) => { if(e.key === 'Escape'){ e.stopPropagation(); closeOverlay(); } };
+  document.addEventListener('keydown', escHandler);
+
+  // Expose for inline / delegated handlers
+  overlay.__close = closeOverlay;
 }
 
 function avgConfidence(days){
@@ -3179,6 +3579,8 @@ function avgConfidence(days){
 }
 
 // Master forecast update with friendly loading state
+let __lastForecastData = null;  // cached for detail-tab access
+
 async function updateForecast(){
   const grid = byId('fcGrid');
   byId('fcStatus').textContent = 'Querying weather models…';
@@ -3189,13 +3591,16 @@ async function updateForecast(){
   </div>`;
 
   try {
-    const forecasts = await fetchMultiModelForecast();
-    if(!forecasts || !forecasts.length){
+    const result = await fetchMultiModelForecast();
+    const forecasts = result.forecasts || [];
+    const dailyMeta = result.daily;
+    if(!forecasts.length){
       grid.innerHTML = '<div class="fc-loading"><div style="color:var(--ylw);font-size:32px;">⚠</div><div class="fc-loading-txt">No models reachable</div><div class="fc-loading-sub">Check your network connection</div></div>';
       byId('fcStatus').textContent = '0 models · retry in 5min';
       return;
     }
-    const dailies = buildDailyConsensus(forecasts);
+    const dailies = buildDailyConsensus(forecasts, dailyMeta);
+    __lastForecastData = {dailies, forecasts, dailyMeta};
     renderForecast(dailies);
   } catch(e){
     console.error('Forecast error:', e);
@@ -3210,9 +3615,11 @@ let forecastTabOpened = false;
 window.__fcDebug = async function(){
   console.group('🌦 Forecast diagnostics');
   const t0 = performance.now();
-  const forecasts = await fetchMultiModelForecast();
+  const result = await fetchMultiModelForecast();
+  const forecasts = result.forecasts || [];
   const dt = (performance.now()-t0).toFixed(0);
   console.log(`Fetched ${forecasts.length}/${FORECAST_MODELS.length} models in ${dt}ms`);
+  if(result.daily) console.log('Daily astro/UV:', result.daily);
   forecasts.forEach(fc => {
     const h = fc.data.hourly;
     console.log(`  ✓ ${fc.model.name.padEnd(8)} — ${h.time.length}h time series, t2m sample: ${h.temperature_2m && h.temperature_2m[0]}°C`);
@@ -3223,7 +3630,7 @@ window.__fcDebug = async function(){
     missing.forEach(m => console.log(`  ✗ ${m.name} (${m.key})`));
   }
   if(forecasts.length){
-    const dailies = buildDailyConsensus(forecasts);
+    const dailies = buildDailyConsensus(forecasts, result.daily);
     console.log(`Consensus: ${dailies.length} days, first day:`, dailies[0]);
   }
   console.groupEnd();
@@ -3565,6 +3972,11 @@ document.querySelectorAll('.atcplayer').forEach(card=>{
 buildMetarGrid();
 buildTAFTable();
 buildSynopGrid();
+
+// Pause CSS animations when tab is in background (saves CPU/battery)
+document.addEventListener('visibilitychange', () => {
+  document.body.classList.toggle('tab-hidden', document.hidden);
+});
 
 (async function init(){
   // Staggered init for perceived speed — Stations/Weather lazy-load on first tab open

@@ -1022,6 +1022,52 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .gfx-empty{padding:18px;text-align:center;font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;}
 .gfx-note{font-family:var(--cond);font-size:10px;color:var(--muted);letter-spacing:.3px;margin-top:2px;opacity:.8;}
 
+
+/* ─── Weather "Current conditions" card style (Google-weather look, IMG_6880) ─── */
+.wx-cc{display:flex;flex-direction:column;gap:9px;padding:2px;}
+.wx-cc-title{font-family:var(--cond);font-size:15px;font-weight:700;color:#dce9f7;letter-spacing:.4px;margin:2px 0 2px 2px;}
+.wx-cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.wx-cc-tile{position:relative;border-radius:16px;padding:14px 15px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.004)),rgba(8,18,38,0.92);border:1px solid var(--bdr);min-height:120px;display:flex;flex-direction:column;overflow:hidden;transition:border-color .2s,box-shadow .2s,transform .2s;}
+.wx-cc-tile:hover{border-color:var(--bdrb);box-shadow:0 5px 18px rgba(77,184,255,0.08);transform:translateY(-1px);}
+.wx-cc-tile.full{grid-column:1 / -1;min-height:auto;}
+.wx-cc-lbl{font-family:var(--cond);font-size:14px;font-weight:600;color:#cfe2f5;letter-spacing:.3px;}
+.wx-cc-body{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:1;margin-top:8px;}
+.wx-cc-l{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.wx-cc-big{font-family:var(--cond);font-size:30px;font-weight:800;color:#fff;line-height:0.95;letter-spacing:-0.5px;display:flex;align-items:baseline;gap:4px;}
+.wx-cc-big small{font-size:13px;font-weight:600;color:var(--muted);}
+.wx-cc-sub{font-family:var(--cond);font-size:12px;color:var(--muted);letter-spacing:.3px;line-height:1.25;}
+.wx-cc-r{flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+/* wind compass blob */
+.wx-windblob{width:78px;height:78px;}
+/* humidity vertical capsule */
+.wx-hum-cap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.wx-hum-scale{font-family:var(--cond);font-size:10px;color:var(--muted);}
+.wx-cap{width:26px;height:58px;border-radius:14px;background:rgba(255,255,255,0.07);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.1);}
+.wx-cap-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#ffd23f,#f5a623);border-radius:0 0 13px 13px;transition:height .7s cubic-bezier(.22,.61,.36,1);}
+.wx-cap-tick{position:absolute;left:-7px;width:5px;height:1.5px;background:var(--muted);}
+/* uv polygon gauge */
+.wx-uvwrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.wx-uv-scale{font-family:var(--cond);font-size:10px;color:var(--muted);}
+.wx-uvpoly{width:74px;height:74px;}
+/* pressure arc */
+.wx-presarc{width:96px;height:62px;}
+.wx-presarc-lbls{display:flex;justify-content:space-between;width:96px;font-family:var(--cond);font-size:11px;color:var(--muted);margin-top:1px;}
+/* sun arc */
+.wx-sun-body{display:flex;align-items:stretch;justify-content:space-between;gap:16px;margin-top:10px;}
+.wx-sun-times{display:flex;flex-direction:column;justify-content:space-between;gap:14px;flex-shrink:0;}
+.wx-sun-row .wx-sun-k{font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:.3px;}
+.wx-sun-row .wx-sun-v{font-family:var(--cond);font-size:24px;font-weight:800;color:#fff;line-height:1;}
+.wx-sun-row .wx-sun-v small{font-size:13px;font-weight:600;color:var(--muted);}
+.wx-sun-chart{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0;}
+.wx-sun-svg{width:100%;height:96px;display:block;}
+.wx-sun-foot{display:flex;justify-content:space-between;font-family:var(--cond);font-size:11px;color:var(--muted);margin-top:2px;}
+.wx-sun-foot b{display:block;color:#cfe2f5;font-weight:700;font-size:12px;}
+.wx-cc-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.wx-cc-flag{font-size:17px;}
+.wx-cc-name{font-family:var(--cond);font-size:16px;font-weight:800;color:var(--acc);letter-spacing:1px;}
+.wx-cc-meta{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.wx-cc-loading{padding:24px;text-align:center;font-family:var(--cond);font-size:12px;color:var(--muted);letter-spacing:1px;}
+
 </style>
 </head>
 <body>
@@ -1577,10 +1623,10 @@ function wxIcon(tok){
   if(/^SH/.test(c) || /^RA/.test(c) || /DZ/.test(c)){
     const dropColor = /^RA/.test(c)?'#4db8ff':'#7bc4f5';
     return `<span class="wxic wxic-rain"><svg viewBox="0 0 16 16">
-      <path d="M3 6 Q3 3 6 3 Q7 1 10 2 Q13 2 13 5 Q14 5 14 7 L2 7 Q2 5 3 6 Z" fill="${dropColor}" opacity="0.7"/>
-      <circle cx="5" cy="10" r="1" fill="${dropColor}"/>
-      <circle cx="8" cy="10" r="1" fill="${dropColor}"/>
-      <circle cx="11" cy="10" r="1" fill="${dropColor}"/>
+      <path d="M8 1.5 C6.5 1.5 5.2 2.4 4.8 3.6 C3.4 3.7 2.2 4.7 2.2 6.2 C2.2 7.7 3.4 8.8 4.8 8.8 L11.4 8.8 C12.8 8.8 13.8 7.8 13.8 6.5 C13.8 5.2 12.8 4.3 11.6 4.2 C11.4 2.7 10 1.5 8 1.5 Z" fill="${dropColor}" opacity="0.8"/>
+      <circle cx="5" cy="11.5" r="0.9" fill="${dropColor}" style="animation:wxDrop 0.9s linear infinite;opacity:0;"/>
+      <circle cx="8" cy="11.5" r="0.9" fill="${dropColor}" style="animation:wxDrop 0.9s linear infinite 0.3s;opacity:0;"/>
+      <circle cx="11" cy="11.5" r="0.9" fill="${dropColor}" style="animation:wxDrop 0.9s linear infinite 0.6s;opacity:0;"/>
     </svg></span>`;
   }
   if(/^(FG|BR|HZ|FU|DU|SA|PY|VA)/.test(c)) return `<span class="wxic wxic-fog"><svg viewBox="0 0 16 16" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round">
@@ -2052,11 +2098,9 @@ function wxIconMed(p){
 
   if(thunder){
     return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">
-      <ellipse cx="18" cy="12" rx="13" ry="6.5" fill="#334155"/>
-      <ellipse cx="11" cy="11" rx="7" ry="5.5" fill="#475569"/>
-      <ellipse cx="25" cy="11" rx="7" ry="5.5" fill="#475569"/>
+      ${_cloudG(18,14,0.52,'dark','cloudBob 3s ease-in-out infinite')}
       <path d="M17 18 L13 26 L17 26 L14.5 33 L24 22 L20 22 L22.5 18 Z" fill="#fde047" style="animation:wxBolt 1.4s ease-in-out infinite;filter:drop-shadow(0 0 3px #fbbf24);"/>
-      <line x1="9"  y1="22" x2="8.5" y2="28" stroke="#4db8ff" stroke-width="1.4" style="animation:wxDrop 0.9s linear infinite;opacity:0;"/>
+      <line x1="9" y1="22" x2="8.5" y2="28" stroke="#4db8ff" stroke-width="1.4" style="animation:wxDrop 0.9s linear infinite;opacity:0;"/>
       <line x1="27" y1="22" x2="26.5" y2="28" stroke="#4db8ff" stroke-width="1.4" style="animation:wxDrop 0.9s linear infinite 0.4s;opacity:0;"/>
     </svg>`;
   }
@@ -2079,67 +2123,24 @@ function wxIconMed(p){
     </svg>`;
   }
   if(heavyRn || rain){
-    const cnt = heavyRn ? 5 : 3;
-    const lines = Array.from({length:cnt},(_,i)=>{
-      const x = 8+i*(20/cnt);
-      return `<line x1="${x.toFixed(1)}" y1="22" x2="${(x-1.2).toFixed(1)}" y2="29" stroke="#4db8ff" stroke-width="1.8" stroke-linecap="round" style="animation:wxDrop 0.85s linear infinite ${(i*0.17).toFixed(2)}s;opacity:0;"/>`;
-    }).join('');
-    return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">
-      <g style="animation:cloudBob 4s ease-in-out infinite;">
-        <ellipse cx="18" cy="13" rx="13" ry="6.5" fill="#64748b"/>
-        <ellipse cx="10" cy="12" rx="7"  ry="5.5" fill="#94a3b8"/>
-        <ellipse cx="26" cy="12" rx="7"  ry="5.5" fill="#94a3b8"/>
-      </g>
-      ${lines}
-    </svg>`;
+    const rlines = Array.from({length:heavyRn?5:3},(_,i)=>{const x=8+i*(20/(heavyRn?5:3));return `<line x1="${x.toFixed(1)}" y1="22" x2="${(x-1.2).toFixed(1)}" y2="29" stroke="#4db8ff" stroke-width="1.8" stroke-linecap="round" style="animation:wxDrop 0.85s linear infinite ${(i*0.17).toFixed(2)}s;opacity:0;"/>`;}).join('');
+    return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">${_cloudG(18,14,0.52,'dark','cloudBob 4s ease-in-out infinite')}${rlines}</svg>`;
   }
   if(bkn){
-    const c1 = isNight?'#334155':'#94a3b8', c2 = isNight?'#475569':'#cbd5e1';
-    return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">
-      <g style="animation:cloudShift 5s ease-in-out infinite;">
-        <ellipse cx="10" cy="24" rx="8" ry="5" fill="${c1}" opacity="0.65"/>
-        <ellipse cx="26" cy="25" rx="7" ry="4" fill="${c1}" opacity="0.65"/>
-      </g>
-      <g style="animation:cloudBob 4s ease-in-out infinite;">
-        <ellipse cx="18" cy="17" rx="14" ry="7" fill="${c2}"/>
-        <ellipse cx="10" cy="15" rx="7" ry="5.5" fill="${isNight?'#475569':'#e2e8f0'}"/>
-        <ellipse cx="26" cy="15" rx="7" ry="5.5" fill="${isNight?'#475569':'#e2e8f0'}"/>
-      </g>
-    </svg>`;
+    const bv = isNight?'dark':'mid';
+    return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">${_cloudG(18,20,0.52,bv,'cloudBob 4s ease-in-out infinite')}</svg>`;
   }
   if(sct || few){
     if(isNight){
       return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">
-        <g style="animation:moonGlow 4s ease-in-out infinite;">
-          <circle cx="11" cy="11" r="8" fill="#e2e8f0"/>
-          <circle cx="14" cy="8"  r="6.5" fill="#0a1525"/>
-        </g>
-        <g style="animation:starTwinkle 2.2s ease-in-out infinite;">
-          <circle cx="28" cy="6" r="0.8" fill="#cce4ff"/>
-          <circle cx="32" cy="14" r="0.6" fill="#cce4ff"/>
-        </g>
-        <g style="animation:cloudBob 4.5s ease-in-out infinite;">
-          <ellipse cx="24" cy="24" rx="10" ry="5.5" fill="#64748b" opacity="0.9"/>
-          <ellipse cx="19" cy="22" rx="6"  ry="4.5" fill="#94a3b8" opacity="0.9"/>
-          <ellipse cx="29" cy="22" rx="6"  ry="4.5" fill="#94a3b8" opacity="0.9"/>
-        </g>
+        <g style="animation:moonGlow 4s ease-in-out infinite;"><circle cx="11" cy="11" r="8" fill="#e2e8f0"/><circle cx="14" cy="8" r="6.5" fill="#0a1525"/></g>
+        <g style="animation:starTwinkle 2.2s ease-in-out infinite;"><circle cx="28" cy="6" r="0.8" fill="#cce4ff"/><circle cx="32" cy="14" r="0.6" fill="#cce4ff"/></g>
+        ${_cloudG(23,24,0.44,'mid','cloudBob 4.5s ease-in-out infinite')}
       </svg>`;
     }
     return `<svg class="wx-anim" viewBox="0 0 36 36" width="${s}" height="${s}">
-      <g transform="translate(11 11)">
-        <g style="animation:sunSpin 11s linear infinite;transform-origin:center;">
-          ${[0,45,90,135,180,225,270,315].map(a=>{
-            const r=a*Math.PI/180;
-            return `<line x1="${(Math.sin(r)*7).toFixed(1)}" y1="${(-Math.cos(r)*7).toFixed(1)}" x2="${(Math.sin(r)*10).toFixed(1)}" y2="${(-Math.cos(r)*10).toFixed(1)}" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/>`;
-          }).join('')}
-        </g>
-        <circle r="6" fill="#fbbf24" style="filter:drop-shadow(0 0 3px rgba(251,191,36,0.6));"/>
-      </g>
-      <g style="animation:cloudBob 4s ease-in-out infinite;">
-        <ellipse cx="24" cy="24" rx="11" ry="6" fill="#cbd5e1"/>
-        <ellipse cx="18" cy="22" rx="6.5" ry="5" fill="#f1f5f9"/>
-        <ellipse cx="30" cy="22" rx="6.5" ry="5" fill="#f1f5f9"/>
-      </g>
+      <g transform="translate(10 11)"><g style="animation:sunSpin 11s linear infinite;transform-origin:center;">${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*7).toFixed(1)}" y1="${(-Math.cos(r)*7).toFixed(1)}" x2="${(Math.sin(r)*10).toFixed(1)}" y2="${(-Math.cos(r)*10).toFixed(1)}" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/>`;}).join('')}</g><circle r="5.5" fill="#fbbf24" style="filter:drop-shadow(0 0 3px rgba(251,191,36,0.5));"/></g>
+      ${_cloudG(22,24,0.44,'light','cloudBob 4s ease-in-out infinite')}
     </svg>`;
   }
   if(isNight){
@@ -2358,10 +2359,13 @@ function decodeSynopText(rawText){
     const rest = toks.slice(1);
     const r    = {stn, raw:rs, P:{}};
     let idx = 0;
-    // FIX #3: iRiXhVV group's iR is 1-4 or '/' (never 0). A leading 0 is an Nddff
-    // group (N=0, clear sky) — accepting 0 here would consume the wind group.
+    // iRiXhVV group (always first after station ID per WMO FM-12):
+    //   iR = precipitation indicator 0-4, iX = station-operation/wx-format code 1-7.
+    // The reliable discriminator vs the Nddff wind group is iX in 1..7 AND iR in 0..4.
+    // (An earlier build wrongly rejected iR=0, which made a valid 0xxxx iRiXhVV group
+    //  be misread as Nddff — e.g. 02575 -> ff=75kt. iR=0 is valid: data IS included.)
     const g0 = rest[idx] || '';
-    const looksLikeIRIX = g0.length===5 && /^[1234\/]/.test(g0);
+    const looksLikeIRIX = g0.length===5 && /^[0-4\/][1-7]/.test(g0);
     if(looksLikeIRIX){
       const h  = g0[2];
       const vv = g0.slice(3,5);
@@ -2370,6 +2374,7 @@ function decodeSynopText(rawText){
       idx++;
     }
     const g1 = rest[idx] || '';
+    // Nddff wind group: N=oktas(0-9 or /), dd=dir in tens of degrees, ff=speed.
     if(/^[\d\/]{5}$/.test(g1) && g1 !== '/////'){
       const N  = g1[0]==='/' ? null : parseInt(g1[0],10);
       const dd = /\//.test(g1.slice(1,3)) ? null : parseInt(g1.slice(1,3),10);
@@ -2381,27 +2386,36 @@ function decodeSynopText(rawText){
       if(dd !== null){
         if(dd===0)       { r.P.wind_dir='Calm'; r.P.wind_dir_deg=0; }
         else if(dd===99) { r.P.wind_dir='Variable'; }
-        else {
+        else if(dd>=1 && dd<=36){
           const raw_deg = dd * 10;
           const dir_deg = raw_deg % 360 || 360;
           const COMP    = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
           r.P.wind_dir     = `${dir_deg}\u00b0 ${COMP[Math.round(dir_deg/22.5)%16]}`;
           r.P.wind_dir_deg = dir_deg;
         }
+        /* dd 37..98 is invalid for tens-of-degrees -> leave wind_dir unset */
       }
-      if(ff!==null && ff!==99){
+      // ff is 00..99 in the unit given by iw. 99 = ">=99 units", real value in the
+      // following 00fff group, so do NOT record 99 as a literal speed here.
+      if(ff!==null && ff!==99 && (dd===null || dd===0 || dd===99 || (dd>=1 && dd<=36))){
         r.P.wind_speed_kn = knotsMode ? ff : Math.round(ff*1.944);
         r.P.wind_speed_ms = knotsMode ? Math.round(ff/1.944) : ff;
       }
       idx++;
     } else if(g1==='/////') idx++;
+    // 00fff extension: only valid immediately after an Nddff group whose ff was 99.
     if((rest[idx]||'').match(/^00\d{3}$/)){
       const ff2 = parseInt(rest[idx].slice(2),10);
       r.P.wind_speed_kn = knotsMode ? ff2 : Math.round(ff2*1.944);
       r.P.wind_speed_ms = knotsMode ? Math.round(ff2/1.944) : ff2;
       idx++;
     }
-    rest.slice(idx).forEach(g=>{
+    // Section 1 only: stop before section 2 (222), 3 (333) or 5 (555),
+    // otherwise the section-3 max-temp group 1snTTT overwrites the real air temp.
+    const _s1 = rest.slice(idx);
+    const _s1end = _s1.findIndex(g => g==='333' || g==='222' || g==='555');
+    const _sec1 = _s1end === -1 ? _s1 : _s1.slice(0, _s1end);
+    _sec1.forEach(g=>{
       if(g.length!==5) return;
       const id=g[0], slash=/\//.test(g);
       if(id==='1'&&!slash){
@@ -2832,10 +2846,31 @@ try{if(localStorage.getItem('rwc-night')==='1'){document.documentElement.classLi
 
 /* ═══ WEATHER TAB ═══ */
 const WX_STNS = {
-  aruba:   {synopId:'78762', alt:'78990', icao:'TNCA', name:'Aruba'},
-  curacao: {synopId:'78988', alt:'78761', icao:'TNCC', name:'Cura\u00e7ao'},
-  bonaire: {synopId:'78990', alt:'78988', icao:'TNCB', name:'Bonaire'}
+  aruba:   {synopId:'78762', alt:'78990', icao:'TNCA', name:'Aruba',    flag:'\u{1F1E6}\u{1F1FC}', full:'Queen Beatrix', lat:12.50, lon:-70.01},
+  curacao: {synopId:'78988', alt:'78761', icao:'TNCC', name:'Cura\u00e7ao', flag:'\u{1F1E8}\u{1F1FC}', full:'Hato',          lat:12.19, lon:-68.96},
+  bonaire: {synopId:'78990', alt:'78988', icao:'TNCB', name:'Bonaire',  flag:'\u{1F1E7}\u{1F1F6}', full:'Flamingo',      lat:12.13, lon:-68.27}
 };
+/* UV index + sunrise/sunset per island (Open-Meteo); read by renderWxCard */
+const WX_EXTRA = {aruba:{}, curacao:{}, bonaire:{}};
+async function fetchWxExtra(key){
+  const s = WX_STNS[key]; if(!s) return;
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}`+
+      `&current=uv_index&daily=sunrise,sunset,uv_index_max&timezone=auto&forecast_days=1`;
+    const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), 3500);
+    const res = await fetch(url, {signal:ctrl.signal, cache:'default'});
+    clearTimeout(t);
+    if(!res.ok) return;
+    const j = await res.json();
+    const uv = (j.current && j.current.uv_index != null) ? j.current.uv_index
+             : (j.daily && j.daily.uv_index_max ? j.daily.uv_index_max[0] : null);
+    WX_EXTRA[key] = {
+      uv,
+      sunrise: j.daily && j.daily.sunrise ? j.daily.sunrise[0] : null,
+      sunset:  j.daily && j.daily.sunset  ? j.daily.sunset[0]  : null
+    };
+  } catch(e){ /* leave WX_EXTRA[key] as-is */ }
+}
 const WX_HISTORY = {aruba:[], curacao:[], bonaire:[]};
 const WX_HIST_MAX = 4;
 function wxPushHistory(key, obs){
@@ -2869,11 +2904,7 @@ function wxHeroIcon(P){
   const partlyCloudy = P.cloud_oktas !== undefined && P.cloud_oktas >= 2 && P.cloud_oktas < 5;
   if(thunder){
     return `<svg class="wx-anim" viewBox="0 0 64 64">
-      <g style="animation:cloudBob 3s ease-in-out infinite;">
-        <ellipse cx="32" cy="22" rx="22" ry="12" fill="#334155"/>
-        <ellipse cx="20" cy="20" rx="12" ry="10" fill="#334155"/>
-        <ellipse cx="44" cy="20" rx="12" ry="10" fill="#334155"/>
-      </g>
+      ${_cloudG(32,24,0.88,'dark','cloudBob 3s ease-in-out infinite')}
       <path d="M30 30 L23 44 L30 44 L25 58 L41 40 L33 40 L37 30 Z" fill="#fde047" stroke="#0a1525" stroke-width="0.8" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(253,224,71,0.9));animation:lightningStrike 1.4s ease-in-out infinite;"/>
       <line x1="14" y1="46" x2="13" y2="56" stroke="#4db8ff" stroke-width="1.8" stroke-linecap="round" opacity="0.7" style="animation:rainFall 1s linear infinite;"/>
       <line x1="48" y1="46" x2="47" y2="56" stroke="#4db8ff" stroke-width="1.8" stroke-linecap="round" opacity="0.7" style="animation:rainFall 1s linear infinite 0.4s;"/>
@@ -2886,13 +2917,7 @@ function wxHeroIcon(P){
       const x = 10 + i * (44 / dropCount);
       drops += `<line x1="${x.toFixed(1)}" y1="38" x2="${(x-1.5).toFixed(1)}" y2="${42 + (i%2)*2}" stroke="#4db8ff" stroke-width="2" stroke-linecap="round" opacity="0.85" style="animation:rainStreak 0.9s linear infinite ${(i*0.18).toFixed(2)}s;"/>`;
     }
-    return `<svg class="wx-anim" viewBox="0 0 64 64">
-      <g style="animation:cloudBob 4s ease-in-out infinite;">
-        <ellipse cx="32" cy="22" rx="22" ry="11" fill="#64748b"/>
-        <ellipse cx="20" cy="19" rx="12" ry="9" fill="#94a3b8"/>
-        <ellipse cx="44" cy="19" rx="12" ry="9" fill="#94a3b8"/>
-      </g>${drops}
-    </svg>`;
+    return `<svg class="wx-anim" viewBox="0 0 64 64">${_cloudG(32,24,0.9,'dark','cloudBob 4s ease-in-out infinite')}${drops}</svg>`;
   }
   if(fog){
     return `<svg class="wx-anim" viewBox="0 0 64 64" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round">
@@ -2982,108 +3007,215 @@ function renderWxCard(key, P){
   const body = card.querySelector('[data-field="body"]');
   const timeEl = card.querySelector('[data-field="time"]');
   if(!P || P.empty){
-    body.innerHTML = `<div class="werror">\u26a0 No data available</div>`;
+    body.innerHTML = `<div class="wx-cc-loading">\u26a0 No data available \u2014 source offline</div>`;
     return;
   }
   wxPushHistory(key, P);
-  const hist = WX_HISTORY[key];
-  if(P.time) timeEl.textContent = P.time;
+  if(P.time && timeEl) timeEl.textContent = P.time;
   let sev = '';
   if((P.ww !== undefined && P.ww >= 95) || (P.precip_mm > 10) || (P.vis_m !== undefined && P.vis_m < 1000)) sev = 'crit';
   else if(P.precip_mm > 0 || (P.vis_m !== undefined && P.vis_m < 5000) || (P.ww !== undefined && P.ww >= 50)) sev = 'wrn';
   card.className = 'wcard' + (sev ? ' '+sev : '');
-  const feels = calcFeelsLike(P.temp_c, P.rh, P.wind_kt);
-  const feelsDelta = (feels != null && P.temp_c != null) ? (feels - P.temp_c) : 0;
-  const feelsTxt = feels != null ? feels.toFixed(1)+'\u00b0C' : '\u2014';
-  const feelsLabel = Math.abs(feelsDelta) < 0.5 ? '' :
-                      feelsDelta > 3 ? ' \u00b7 feels much hotter' :
-                      feelsDelta > 0.5 ? ' \u00b7 feels warmer' :
-                      feelsDelta < -3 ? ' \u00b7 feels much cooler' :
-                      ' \u00b7 feels cooler';
-  const tempTr = wxTrend(hist, 'temp_c');
-  const visTr  = wxTrend(hist, 'vis_m');
-  const presTr = wxTrend(hist, 'slp');
-  const rhTr   = wxTrend(hist, 'rh');
-  const tempColour = P.temp_c==null ? '#fff' :
-                     P.temp_c >= 35 ? '#ff3c3c' :
-                     P.temp_c >= 30 ? '#ff8a3d' :
-                     P.temp_c >= 25 ? '#f59e0b' :
-                     P.temp_c >= 20 ? '#2ec97a' :
-                     P.temp_c >= 10 ? '#4db8ff' : '#a78bfa';
-  const visFmt = fmtVis(P.vis_m);
-  const hasDust = (P.ww !== undefined && ((P.ww >= 6 && P.ww <= 9) || (P.ww >= 30 && P.ww <= 35))) ||
-                  /dust|haze|sand/i.test(P.wx_desc||'');
-  const rainNow = P.precip_mm > 0 || (P.ww !== undefined && ((P.ww >= 50 && P.ww < 100) && P.ww !== 80));
-  let html = '';
-  html += `<div class="whero">
-    <div class="whero-icon">${wxHeroIcon(P)}</div>
-    <div class="whero-temp">
-      <div class="whero-val" style="color:${tempColour};">${P.temp_c != null ? P.temp_c.toFixed(1)+'\u00b0' : '\u2014'}</div>
-      <div class="whero-feels">Feels like <b>${feelsTxt}</b>${feelsLabel}</div>
-    </div>
-    <div class="whero-trend">
-      <span class="arr ${tempTr.cls}">${tempTr.arr}</span>
-      <span class="delta ${tempTr.cls}">${tempTr.delta||'\u00b7'}</span>
-    </div>
-  </div>`;
-  html += `<div class="wrow">
-    <div class="wchip ${visFmt.cls}">
-      <span class="wchip-l">Visibility <span class="wtrend ${visTr.cls}">${visTr.arr}</span></span>
-      <span class="wchip-v">${visFmt.val}</span>
-      <span class="wchip-s">${visFmt.sub}</span>
-    </div>
-    <div class="wchip">
-      <span class="wchip-l">Humidity <span class="wtrend ${rhTr.cls}">${rhTr.arr}</span></span>
-      <span class="wchip-v">${P.rh != null ? P.rh : '\u2014'}<small>%</small></span>
-      <span class="wchip-s">${P.dew_c != null ? 'Dew '+P.dew_c.toFixed(1)+'\u00b0C' : ''}</span>
-    </div>
-  </div>`;
-  const windDir = P.wind_dir != null ? P.wind_dir + '\u00b0' : (P.wind_dir_text || '');
-  html += `<div class="wrow">
-    <div class="wchip">
-      <span class="wchip-l">Wind</span>
-      <span class="wchip-v">${P.wind_kt != null ? P.wind_kt : '\u2014'}<small>kt</small></span>
-      <span class="wchip-s">${windDir}</span>
-    </div>
-    <div class="wchip">
-      <span class="wchip-l">Pressure <span class="wtrend ${presTr.cls}">${presTr.arr}</span></span>
-      <span class="wchip-v">${P.slp != null ? P.slp.toFixed(1) : '\u2014'}<small>hPa</small></span>
-      <span class="wchip-s">${P.tend_type || ''}</span>
-    </div>
-  </div>`;
-  html += `<div class="wrow">
-    <div class="wchip ${rainNow ? 'rain-active' : ''}">
-      <span class="wchip-l">Rain</span>
-      <span class="wchip-v">${P.precip_mm != null && P.precip_mm > 0 ? P.precip_mm.toFixed(1)+' <small>mm</small>' : (rainNow ? 'Yes' : 'Dry')}</span>
-      <span class="wchip-s">${P.precip_period || (rainNow ? 'reported' : 'no rain')}</span>
-    </div>
-    <div class="wchip ${hasDust ? 'dust-active' : ''}">
-      <span class="wchip-l">Dust / Haze</span>
-      <span class="wchip-v">${hasDust ? 'Active' : 'None'}</span>
-      <span class="wchip-s">${hasDust ? (P.wx_desc||'haze/dust') : 'clean air'}</span>
-    </div>
-  </div>`;
-  if(P.cloud_oktas !== undefined || P.wx_desc){
-    const okt = P.cloud_oktas !== undefined ? P.cloud_oktas : null;
-    const oktaCover = okt === null ? '\u2014' :
-                      okt <= 0 ? 'Clear' :
-                      okt <= 2 ? 'Few' :
-                      okt <= 4 ? 'Scattered' :
-                      okt <= 6 ? 'Broken' : 'Overcast';
-    html += `<div class="wrow">
-      <div class="wchip">
-        <span class="wchip-l">Sky</span>
-        <span class="wchip-v" style="font-size:13px;">${oktaCover}</span>
-        <span class="wchip-s">${okt !== null ? okt+'/8 oktas' : ''}</span>
+
+  const extra = (typeof WX_EXTRA === 'object' && WX_EXTRA[key]) ? WX_EXTRA[key] : {};
+  const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+
+  // ── Wind tile ──
+  const windKt = P.wind_kt != null ? P.wind_kt : null;
+  const windMph = windKt != null ? Math.round(windKt * 1.15078) : null;
+  const windDir = (typeof P.wind_dir === 'number') ? P.wind_dir : null;
+  const dirName = windDir != null ? COMPASS[Math.round(windDir/22.5)%16] : (P.wind_dir_text || '\u2014');
+  const dirFull = {N:'north',NNE:'north-northeast',NE:'northeast',ENE:'east-northeast',E:'east',ESE:'east-southeast',SE:'southeast',SSE:'south-southeast',S:'south',SSW:'south-southwest',SW:'southwest',WSW:'west-southwest',W:'west',WNW:'west-northwest',NW:'northwest',NNW:'north-northwest'}[dirName] || dirName;
+  const bft = windKt==null ? '' : windKt<1?'Calm':windKt<4?'Light':windKt<7?'Light':windKt<11?'Gentle':windKt<17?'Moderate':windKt<22?'Fresh':windKt<28?'Strong':windKt<34?'Near gale':'Gale';
+  const windBlob = wxWindBlob(windDir, dirName);
+
+  // ── Humidity tile ──
+  const rh = P.rh != null ? P.rh : null;
+  const dew = P.dew_c != null ? P.dew_c : null;
+  const dewF = dew != null ? Math.round(dew*9/5+32) : null;
+  const capFill = rh != null ? Math.max(2, Math.min(100, rh)) : 0;
+
+  // ── UV tile ──
+  const uv = extra.uv != null ? extra.uv : null;
+  const uvLbl = uv==null?'\u2014':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very high':'Extreme';
+
+  // ── Pressure tile ──
+  const slp = P.slp != null ? P.slp : null;
+  const inHg = slp != null ? (slp*0.0295300).toFixed(2) : null;
+  const inHgWhole = inHg != null ? String(inHg).split('.')[0] : '\u2014';
+  const inHgFrac  = inHg != null ? '.'+String(inHg).split('.')[1] : '';
+  // map 980..1040 hPa -> 0..1 for the arc
+  const presPct = slp != null ? Math.max(0, Math.min(1, (slp-980)/60)) : 0.5;
+  const presArc = wxPresArc(presPct);
+
+  // ── Sunrise/sunset tile ──
+  const sunArc = wxSunArc(extra.sunrise, extra.sunset);
+
+  body.innerHTML = `
+  <div class="wx-cc">
+    <div class="wx-cc-title">Current conditions</div>
+    <div class="wx-cc-grid">
+      <div class="wx-cc-tile">
+        <div class="wx-cc-lbl">Wind</div>
+        <div class="wx-cc-body">
+          <div class="wx-cc-l">
+            <div class="wx-cc-big">${windMph!=null?windMph:'\u2014'} <small>mph</small></div>
+            <div class="wx-cc-sub">${bft}${dirFull!=='\u2014'?' \u00b7 From '+dirFull:''}</div>
+          </div>
+          <div class="wx-cc-r"><div class="wx-windblob">${windBlob}</div></div>
+        </div>
       </div>
-      <div class="wchip">
-        <span class="wchip-l">Wx</span>
-        <span class="wchip-v" style="font-size:12px;">${P.wx_desc || 'Clear'}</span>
-        <span class="wchip-s">${P.ww !== undefined ? 'ww='+P.ww : ''}</span>
+
+      <div class="wx-cc-tile">
+        <div class="wx-cc-lbl">Humidity</div>
+        <div class="wx-cc-body">
+          <div class="wx-cc-l">
+            <div class="wx-cc-big">${rh!=null?rh:'\u2014'}<small>%</small></div>
+            <div class="wx-cc-sub">${dew!=null?'Dew point '+Math.round(dew)+'\u00b0':''}</div>
+          </div>
+          <div class="wx-cc-r">
+            <div class="wx-hum-cap">
+              <span class="wx-hum-scale">100</span>
+              <div class="wx-cap"><div class="wx-cap-fill" style="height:${capFill}%;"></div></div>
+              <span class="wx-hum-scale">0</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>`;
+
+      <div class="wx-cc-tile">
+        <div class="wx-cc-lbl">UV Index</div>
+        <div class="wx-cc-body">
+          <div class="wx-cc-l">
+            <div class="wx-cc-big">${uv!=null?Math.round(uv):'\u2014'}</div>
+            <div class="wx-cc-sub">${uvLbl}</div>
+          </div>
+          <div class="wx-cc-r">
+            <div class="wx-uvwrap">
+              <span class="wx-uv-scale">11+</span>
+              ${wxUvPoly(uv)}
+              <span class="wx-uv-scale">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wx-cc-tile">
+        <div class="wx-cc-lbl">Pressure</div>
+        <div class="wx-cc-body">
+          <div class="wx-cc-l">
+            <div class="wx-cc-big">${inHgWhole}<small>${inHgFrac}</small></div>
+            <div class="wx-cc-sub">inHg${P.tend_type?' \u00b7 '+P.tend_type:''}</div>
+          </div>
+          <div class="wx-cc-r">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              ${presArc}
+              <div class="wx-presarc-lbls"><span>Low</span><span>High</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wx-cc-tile full">
+        <div class="wx-cc-lbl">Sunrise &amp; sunset</div>
+        ${sunArc}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── Weather-card SVG helpers ── */
+function wxWindBlob(dir, dirName){
+  // soft rounded "blob" pointer like Google weather; arrow points FROM source (aviation)
+  const has = typeof dir === 'number' && isFinite(dir);
+  const rot = has ? dir % 360 : 0;
+  return `<svg viewBox="0 0 80 80" style="width:100%;height:100%;">
+    <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(140,190,235,0.25)" stroke-width="1.2" stroke-dasharray="2 4"/>
+    <text x="40" y="13" text-anchor="middle" font-family="Barlow,sans-serif" font-size="9" font-weight="700" fill="#bcd6ef">${has?dirName:'\u2014'}</text>
+    ${has?`<g transform="translate(40,42) rotate(${rot})">
+      <path d="M0 -20 C 10 -16 13 -4 6 6 C 3 11 -3 11 -6 6 C -13 -4 -10 -16 0 -20 Z" fill="#bfe0f7" stroke="#dceefb" stroke-width="0.8"/>
+      <circle cx="0" cy="0" r="2.4" fill="#7fb3dd"/>
+    </g>`:`<text x="40" y="46" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="11" fill="#8fb6d6">VRB</text>`}
+  </svg>`;
+}
+function wxPresArc(pct){
+  // semicircle arc Low->High with a pointer; pct 0..1
+  const cx=48, cy=50, r=34;
+  const a0=Math.PI, a1=0; // 180deg sweep (left to right, top half)
+  const ang = a0 + (a1-a0)*pct;
+  const sx=cx+r*Math.cos(a0), sy=cy+r*Math.sin(a0)*-1;
+  const ex=cx+r*Math.cos(a1), ey=cy+r*Math.sin(a1)*-1;
+  const px=cx+r*Math.cos(ang), py=cy - r*Math.sin(ang);
+  // value arc from start to pointer
+  const lg = pct>0.5?0:0;
+  return `<svg class="wx-presarc" viewBox="0 0 96 62">
+    <path d="M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${r} ${r} 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="rgba(120,170,220,0.22)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${r} ${r} 0 0 1 ${px.toFixed(1)} ${py.toFixed(1)}" fill="none" stroke="#5aa6e8" stroke-width="7" stroke-linecap="round" style="filter:drop-shadow(0 0 3px rgba(90,166,232,0.5));"/>
+    <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="5" fill="#bfe0f7" stroke="#5aa6e8" stroke-width="1.5"/>
+    <polygon points="${px.toFixed(1)},${(py-1).toFixed(1)} ${(px-4).toFixed(1)},${(py+5).toFixed(1)} ${(px+4).toFixed(1)},${(py+5).toFixed(1)}" fill="#dceefb" opacity="0.0"/>
+  </svg>`;
+}
+function wxUvPoly(uv){
+  // rounded polygon (sun-ish) that fills color by UV band
+  const lvl = uv!=null?Math.max(0,Math.min(12,uv)):0;
+  const col = uv==null?'rgba(140,190,235,0.25)':uv<3?'#9bd99b':uv<6?'#ffd23f':uv<8?'#ff8a3d':uv<11?'#ff5a5a':'#c084fc';
+  const cx=37, cy=37, R=26, spikes=12;
+  let pts=[];
+  for(let i=0;i<spikes*2;i++){
+    const ang=(i/(spikes*2))*Math.PI*2 - Math.PI/2;
+    const rr= i%2===0 ? R : R-5;
+    pts.push((cx+rr*Math.cos(ang)).toFixed(1)+','+(cy+rr*Math.sin(ang)).toFixed(1));
   }
-  body.innerHTML = html;
+  return `<svg class="wx-uvpoly" viewBox="0 0 74 74">
+    <polygon points="${pts.join(' ')}" fill="${uv!=null?col:'none'}" stroke="${uv!=null?col:'rgba(140,190,235,0.3)'}" stroke-width="1.5" stroke-linejoin="round" opacity="${uv!=null?0.85:1}" style="${uv!=null?'filter:drop-shadow(0 0 4px '+col+'88);':''}"/>
+  </svg>`;
+}
+function wxSunArc(sunriseISO, sunsetISO){
+  // day-arc curve with sun dot at current position; dawn/dusk labels
+  let srTxt='\u2014', ssTxt='\u2014', srAP='', ssAP='', frac=0.5, isDay=true;
+  let dawnTxt='', duskTxt='';
+  function fmt(iso){ if(!iso) return ['\u2014','']; const d=new Date(iso); let h=d.getHours(),m=d.getMinutes(); const ap=h<12?'AM':'PM'; let hh=h%12; if(hh===0)hh=12; return [hh+':'+(m<10?'0':'')+m, ap]; }
+  if(sunriseISO && sunsetISO){
+    const sr=new Date(sunriseISO), ss=new Date(sunsetISO), now=new Date();
+    [srTxt,srAP]=fmt(sunriseISO); [ssTxt,ssAP]=fmt(sunsetISO);
+    const dawn=new Date(sr.getTime()-27*60000), dusk=new Date(ss.getTime()+26*60000);
+    [dawnTxt]=fmt(dawn.toISOString()); [duskTxt]=fmt(dusk.toISOString());
+    const total=ss-sr;
+    frac = total>0 ? (now-sr)/total : 0.5;
+    isDay = frac>=0 && frac<=1;
+    frac = Math.max(0, Math.min(1, frac));
+  }
+  // arc geometry across width 300, baseline y=58, peak y=14
+  const W=300, H=78, baseY=58, peakY=14, L=40, Rx=W-30;
+  function arcY(t){ return baseY - Math.sin(t*Math.PI)*(baseY-peakY); }
+  function arcX(t){ return L + t*(Rx-L); }
+  let path='M '+L+' '+baseY+' ';
+  for(let i=0;i<=40;i++){ const t=i/40; path+='L '+arcX(t).toFixed(1)+' '+arcY(t).toFixed(1)+' '; }
+  // filled area under the day portion up to sun
+  const sunX=arcX(frac), sunY=arcY(frac);
+  let fill='M '+L+' '+baseY+' ';
+  for(let i=0;i<=40;i++){ const t=i/40; if(t>frac) break; fill+='L '+arcX(t).toFixed(1)+' '+arcY(t).toFixed(1)+' '; }
+  fill+='L '+sunX.toFixed(1)+' '+baseY+' Z';
+  return `
+  <div class="wx-sun-body">
+    <div class="wx-sun-times">
+      <div class="wx-sun-row"><div class="wx-sun-k">Sunrise</div><div class="wx-sun-v">${srTxt} <small>${srAP}</small></div></div>
+      <div class="wx-sun-row"><div class="wx-sun-k">Sunset</div><div class="wx-sun-v">${ssTxt} <small>${ssAP}</small></div></div>
+    </div>
+    <div class="wx-sun-chart">
+      <svg class="wx-sun-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <line x1="${L}" y1="${baseY}" x2="${Rx}" y2="${baseY}" stroke="rgba(120,160,200,0.25)" stroke-width="1"/>
+        <rect x="${L}" y="${baseY}" width="${(sunX-L).toFixed(1)}" height="${H-baseY}" fill="rgba(40,90,150,0.4)"/>
+        <path d="${fill}" fill="rgba(150,195,235,0.25)"/>
+        <path d="${path}" fill="none" stroke="#cfe2f5" stroke-width="1.6"/>
+        <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="7" fill="#ffd23f" stroke="#fff3c0" stroke-width="1.5" style="filter:drop-shadow(0 0 5px rgba(255,210,63,0.8));"/>
+      </svg>
+      <div class="wx-sun-foot">
+        <span>Dawn<b>${dawnTxt||'\u2014'}</b></span>
+        <span style="text-align:right;">Dusk<b>${duskTxt||'\u2014'}</b></span>
+      </div>
+    </div>
+  </div>`;
 }
 
 function extractWxFromSynop(rawText, stationId){
@@ -3153,6 +3285,13 @@ async function fetchWeatherBonaire(){
 }
 async function updateWeatherTab(){
   byId('wx-ts').textContent = 'Refreshing\u2026';
+  // Kick off UV/sun extras; when each lands, re-render that card so UV + sun arc fill in.
+  ['aruba','curacao','bonaire'].forEach(k=>{
+    fetchWxExtra(k).then(()=>{
+      const last = WX_HISTORY[k] && WX_HISTORY[k].length ? WX_HISTORY[k][WX_HISTORY[k].length-1] : null;
+      if(last) renderWxCard(k, last);
+    });
+  });
   await Promise.allSettled([ fetchWeatherAruba(), fetchWeatherCuracao(), fetchWeatherBonaire() ]);
   byId('wx-ts').textContent = 'Last fetched: ' + new Date().toLocaleString();
 }
@@ -4147,6 +4286,46 @@ function renderGraphicsView(data){
 }
 
 
+/* ── Reusable 3-D cloud path helper ──────────────────────────────────────────
+   Returns an SVG <g> element string with a modern, volumetric cloud shape.
+   cx,cy = center, scale = 1.0 base (64px space).
+   variant: 'light' (white/light), 'dark' (storm), 'mid' (partly)
+   Returns the <g>...</g> string without surrounding <svg> so it can be composed. */
+function _cloudG(cx, cy, sc, variant, extra){
+  sc = sc||1;
+  const v = variant||'light';
+  // colours per variant
+  const top = v==='dark'?'#475569': v==='mid'?'#94a3b8': '#e8f2ff';
+  const mid = v==='dark'?'#334155': v==='mid'?'#64748b': '#c9dff5';
+  const bot = v==='dark'?'#1e293b': v==='mid'?'#475569': '#a8c8e8';
+  const shd = v==='dark'?'rgba(0,0,0,0.35)':'rgba(100,140,180,0.22)';
+  // cloud shape: two main puffs + large centre body
+  // all coordinates in 64×64 space, scaled and translated
+  const s=sc, x=cx||32, y=cy||36;
+  const tx=(n)=>(x-32+n*s).toFixed(1), ty=(n)=>(y-36+n*s).toFixed(1);
+  const anim = extra||'cloudBob 4s ease-in-out infinite';
+  return `<g style="animation:${anim};transform-origin:${x}px ${y}px;">
+    <!-- shadow -->
+    <ellipse cx="${tx(32)}" cy="${ty(52)}" rx="${(18*s).toFixed(1)}" ry="${(3.5*s).toFixed(1)}" fill="${shd}"/>
+    <!-- back puff left -->
+    <circle cx="${tx(18)}" cy="${ty(33)}" r="${(10*s).toFixed(1)}" fill="${mid}"/>
+    <!-- back puff right -->
+    <circle cx="${tx(46)}" cy="${ty(31)}" r="${(11.5*s).toFixed(1)}" fill="${mid}"/>
+    <!-- main body -->
+    <ellipse cx="${tx(32)}" cy="${ty(40)}" rx="${(20*s).toFixed(1)}" ry="${(12*s).toFixed(1)}" fill="${mid}"/>
+    <!-- top centre highlight puff -->
+    <circle cx="${tx(32)}" cy="${ty(28)}" r="${(13.5*s).toFixed(1)}" fill="${top}"/>
+    <!-- top left highlight -->
+    <circle cx="${tx(21)}" cy="${ty(31)}" r="${(9*s).toFixed(1)}" fill="${top}"/>
+    <!-- top right highlight -->
+    <circle cx="${tx(43)}" cy="${ty(30)}" r="${(10*s).toFixed(1)}" fill="${top}"/>
+    <!-- bottom fill -->
+    <ellipse cx="${tx(32)}" cy="${ty(42)}" rx="${(19*s).toFixed(1)}" ry="${(9*s).toFixed(1)}" fill="${bot}"/>
+    <!-- inner highlight sheen -->
+    <ellipse cx="${tx(28)}" cy="${ty(27)}" rx="${(5*s).toFixed(1)}" ry="${(3*s).toFixed(1)}" fill="rgba(255,255,255,0.3)" style="filter:blur(${(1.5*s).toFixed(1)}px);"/>
+  </g>`;
+}
+
 /* ═══ MULTI-MODEL FORECAST ═══ */
 const FORECAST_MODELS = [
   {key:'gfs_seamless',         name:'GFS',     org:'NOAA \u00b7 USA',          color:'#4db8ff'},
@@ -4351,17 +4530,29 @@ function buildWxIconSvg(iconKey, size=64){
     case 'moon':
       return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><defs><radialGradient id="moonGrad${s}" cx="40%" cy="40%"><stop offset="0%" stop-color="#f1f5f9"/><stop offset="100%" stop-color="#94a3b8"/></radialGradient></defs><g style="animation:moonGlow 4s ease-in-out infinite;"><circle cx="32" cy="32" r="17" fill="url(#moonGrad${s})"/><circle cx="38" cy="28" r="14" fill="#0a1525"/></g><g style="animation:starTwinkle 2.2s ease-in-out infinite;"><circle cx="12" cy="14" r="0.9" fill="#cce4ff"/><circle cx="52" cy="12" r="0.7" fill="#cce4ff"/><circle cx="50" cy="54" r="0.8" fill="#cce4ff"/></g></svg>`;
     case 'moon-cloud':
-      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><circle cx="22" cy="22" r="9" fill="#cbd5e1"/><circle cx="26" cy="19" r="7" fill="#0a1525"/><g style="animation:cloudFloat 4s ease-in-out infinite;"><ellipse cx="40" cy="38" rx="16" ry="9" fill="#64748b" opacity="0.9"/><ellipse cx="32" cy="34" rx="9" ry="7" fill="#94a3b8" opacity="0.9"/></g></svg>`;
+      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+        <g style="animation:moonGlow 4s ease-in-out infinite;"><circle cx="20" cy="18" r="9" fill="#e2e8f0"/><circle cx="24" cy="15" r="7" fill="#0a1525"/></g>
+        ${_cloudG(38,38,0.78,'mid','cloudBob 4.5s ease-in-out infinite')}
+      </svg>`;
     case 'cloud-moon':
-      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><circle cx="18" cy="22" r="7" fill="#cbd5e1"/><circle cx="21" cy="20" r="5.5" fill="#0a1525"/><g style="animation:cloudFloat 4s ease-in-out infinite;"><ellipse cx="36" cy="38" rx="18" ry="10" fill="#475569" opacity="0.9"/><ellipse cx="26" cy="34" rx="10" ry="8" fill="#64748b" opacity="0.9"/></g></svg>`;
+      return `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+        <g style="animation:moonGlow 4s ease-in-out infinite;"><circle cx="16" cy="22" r="7" fill="#e2e8f0"/><circle cx="19" cy="19" r="5.5" fill="#0a1525"/></g>
+        ${_cloudG(34,40,0.88,'dark','cloudBob 4s ease-in-out infinite')}
+      </svg>`;
     case 'sun':
       return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><defs><radialGradient id="sunBody${s}" cx="50%" cy="50%"><stop offset="0" stop-color="#fef3c7"/><stop offset="60%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/></radialGradient></defs><g transform="translate(32 32)"><circle r="22" fill="#fbbf24" opacity="0.12" style="animation:sunPulse 3s ease-in-out infinite;transform-origin:center;"/></g><g transform="translate(32 32)"><g style="animation:sunSpin 9s linear infinite;transform-origin:center;">${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*15).toFixed(1)}" y1="${(-Math.cos(r)*15).toFixed(1)}" x2="${(Math.sin(r)*22).toFixed(1)}" y2="${(-Math.cos(r)*22).toFixed(1)}" stroke="#fbbf24" stroke-width="2.6" stroke-linecap="round"/>`;}).join('')}</g></g><circle cx="32" cy="32" r="11" fill="url(#sunBody${s})" style="filter:drop-shadow(0 0 6px rgba(251,191,36,0.7));"/></svg>`;
     case 'sun-cloud':
-      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><g transform="translate(22 22)"><g style="animation:sunSpin 11s linear infinite;transform-origin:center;">${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*11).toFixed(1)}" y1="${(-Math.cos(r)*11).toFixed(1)}" x2="${(Math.sin(r)*15).toFixed(1)}" y2="${(-Math.cos(r)*15).toFixed(1)}" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>`;}).join('')}</g><circle r="8" fill="#fbbf24"/></g><g style="animation:cloudBob 4s ease-in-out infinite;"><ellipse cx="42" cy="40" rx="17" ry="9" fill="#cbd5e1"/><ellipse cx="34" cy="36" rx="10" ry="7" fill="#f1f5f9"/><ellipse cx="50" cy="36" rx="10" ry="7" fill="#f1f5f9"/></g></svg>`;
+      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}">
+        <g transform="translate(18 20)"><g style="animation:sunSpin 11s linear infinite;transform-origin:center;">${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*10).toFixed(1)}" y1="${(-Math.cos(r)*10).toFixed(1)}" x2="${(Math.sin(r)*14).toFixed(1)}" y2="${(-Math.cos(r)*14).toFixed(1)}" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/>`;}).join('')}</g><circle r="7.5" fill="#fbbf24" style="filter:drop-shadow(0 0 3px rgba(251,191,36,0.6));"/></g>
+        ${_cloudG(38,38,0.78,'light','cloudBob 4s ease-in-out infinite')}
+      </svg>`;
     case 'cloud-sun':
-      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><g transform="translate(18 22)"><g style="animation:sunSpin 11s linear infinite;transform-origin:center;">${[0,60,120,180,240,300].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*8).toFixed(1)}" y1="${(-Math.cos(r)*8).toFixed(1)}" x2="${(Math.sin(r)*12).toFixed(1)}" y2="${(-Math.cos(r)*12).toFixed(1)}" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>`;}).join('')}</g><circle r="6" fill="#fbbf24"/></g><g style="animation:cloudBob 4s ease-in-out infinite;"><ellipse cx="36" cy="40" rx="19" ry="11" fill="#94a3b8"/><ellipse cx="26" cy="36" rx="11" ry="9" fill="#cbd5e1"/><ellipse cx="46" cy="36" rx="11" ry="9" fill="#cbd5e1"/></g></svg>`;
+      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}">
+        <g transform="translate(16 22)"><g style="animation:sunSpin 11s linear infinite;transform-origin:center;">${[0,60,120,180,240,300].map(a=>{const r=a*Math.PI/180;return `<line x1="${(Math.sin(r)*8).toFixed(1)}" y1="${(-Math.cos(r)*8).toFixed(1)}" x2="${(Math.sin(r)*12).toFixed(1)}" y2="${(-Math.cos(r)*12).toFixed(1)}" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/>`;}).join('')}</g><circle r="6" fill="#fbbf24"/></g>
+        ${_cloudG(34,40,0.88,'mid','cloudBob 4s ease-in-out infinite')}
+      </svg>`;
     case 'cloud':
-      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><defs><linearGradient id="cloudG${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cbd5e1"/><stop offset="1" stop-color="#94a3b8"/></linearGradient></defs><g style="animation:cloudShift 6s ease-in-out infinite;"><ellipse cx="22" cy="42" rx="14" ry="8" fill="#94a3b8" opacity="0.65"/><ellipse cx="44" cy="44" rx="13" ry="7" fill="#94a3b8" opacity="0.65"/></g><g style="animation:cloudBob 4s ease-in-out infinite;"><ellipse cx="32" cy="30" rx="22" ry="11" fill="url(#cloudG${s})"/><ellipse cx="20" cy="26" rx="12" ry="9" fill="#e2e8f0"/><ellipse cx="44" cy="26" rx="12" ry="9" fill="#e2e8f0"/></g></svg>`;
+      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}">${_cloudG(32,34,0.96,'light','cloudBob 4s ease-in-out infinite')}</svg>`;
     case 'fog':
       return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"><path d="M8 22 Q20 16 32 22 T56 22" style="stroke-dasharray:14;animation:fogDrift 3s linear infinite;"/><path d="M6 34 Q22 28 32 34 T58 34" style="stroke-dasharray:14;animation:fogDrift 3.5s linear infinite reverse;"/><path d="M10 46 Q22 40 32 46 T54 46" style="stroke-dasharray:14;animation:fogDrift 4s linear infinite;"/></svg>`;
     case 'drizzle': case 'rain': case 'showers': {
@@ -4372,10 +4563,13 @@ function buildWxIconSvg(iconKey, size=64){
         const x = 10 + i * (44 / drops);
         streaks.push(`<line x1="${x.toFixed(1)}" y1="36" x2="${(x-1.5).toFixed(1)}" y2="${42 + (i%2)*2}" stroke="#4db8ff" stroke-width="2" stroke-linecap="round" opacity="0.85" style="animation:rainStreak 0.9s linear infinite ${(i*0.18).toFixed(2)}s;"/>`);
       }
-      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><g style="animation:cloudBob 4s ease-in-out infinite;"><ellipse cx="32" cy="22" rx="22" ry="11" fill="#64748b"/><ellipse cx="20" cy="19" rx="12" ry="9" fill="#94a3b8"/><ellipse cx="44" cy="19" rx="12" ry="9" fill="#94a3b8"/></g>${streaks.join('')}</svg>`;
+      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}">${_cloudG(32,24,0.9,'dark','cloudBob 4s ease-in-out infinite')}${streaks.join('')}</svg>`;
     }
     case 'thunder':
-      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><defs><linearGradient id="thCloud${s}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#1e293b"/></linearGradient></defs><g style="animation:cloudBob 3s ease-in-out infinite;"><ellipse cx="32" cy="22" rx="22" ry="12" fill="url(#thCloud${s})"/><ellipse cx="20" cy="20" rx="12" ry="10" fill="#334155"/><ellipse cx="44" cy="20" rx="12" ry="10" fill="#334155"/></g><path d="M30 30 L23 44 L30 44 L25 58 L41 40 L33 40 L37 30 Z" fill="#fde047" stroke="#0a1525" stroke-width="0.8" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(253,224,71,0.9));animation:lightningStrike 1.4s ease-in-out infinite;"/></svg>`;
+      return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}">
+        ${_cloudG(32,26,0.88,'dark','cloudBob 3s ease-in-out infinite')}
+        <path d="M30 30 L23 44 L30 44 L25 58 L41 40 L33 40 L37 30 Z" fill="#fde047" stroke="#0a1525" stroke-width="0.8" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(253,224,71,0.9));animation:lightningStrike 1.4s ease-in-out infinite;"/>
+      </svg>`;
     case 'snow':
       return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><ellipse cx="32" cy="22" rx="20" ry="10" fill="#cbd5e1" opacity="0.9"/><ellipse cx="22" cy="20" rx="11" ry="8" fill="#e2e8f0" opacity="0.95"/><ellipse cx="42" cy="20" rx="11" ry="8" fill="#e2e8f0" opacity="0.95"/><circle cx="18" cy="42" r="1.8" fill="#fff" style="animation:rainFall 1.4s ease-in infinite;"/><circle cx="32" cy="42" r="2.0" fill="#fff" style="animation:rainFall 1.4s ease-in infinite;animation-delay:0.4s;"/><circle cx="46" cy="42" r="1.6" fill="#fff" style="animation:rainFall 1.4s ease-in infinite;animation-delay:0.7s;"/></svg>`;
   }
@@ -4699,36 +4893,63 @@ function addMapMarkers(filter){
 function renderStations(){
   const list = byId('stn-list');
   if(!stationData.length){
-    list.innerHTML = `<div style="padding:16px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;font-size:11px;">No station data available. The Curaçao API may be offline.</div>`;
-    byId('totalCnt').textContent = '0';
-    byId('alertCnt').textContent = '0';
-    byId('staleCnt').textContent = '0';
+    list.innerHTML = `<div style="padding:16px;color:var(--muted);font-family:var(--cond);letter-spacing:1px;font-size:11px;">No station data available.</div>`;
+    byId('totalCnt').textContent = '0'; byId('alertCnt').textContent = '0'; byId('staleCnt').textContent = '0';
     return;
   }
-  let alerts = 0, stale = 0;
-  list.innerHTML = stationData.map(st => {
+  const COMPASS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  let alerts=0, stale=0;
+  list.innerHTML = stationData.map(st=>{
     if(st.stale) stale++;
-    if(st.crit || st.warn) alerts++;
-    const sevCls = st.stale ? 'stale' : st.crit ? 'crit' : st.warn ? 'wrn' : '';
+    if(st.crit||st.warn) alerts++;
+    const sevCls = st.stale?'stale':st.crit?'crit':st.warn?'wrn':'';
     const rose = miniRose(typeof st.windDir==='number'?st.windDir:null, typeof st.wind==='number'?st.wind:null);
+    const dirTxt = st.windDir!=null ? COMPASS[Math.round(st.windDir/22.5)%16] : '';
+    const wmo = st.wmo!=null ? decodeWmoCode(st.wmo, false) : null;
+    const wxTxt = wmo ? wmo.desc : '';
+    const cloudPct = st.cloud!=null ? st.cloud : null;
+    const cloudLbl = cloudPct==null?'':cloudPct<=5?'Clear':cloudPct<=25?'Few':cloudPct<=50?'Scattered':cloudPct<=87?'Broken':'Overcast';
+    const inHg = st.pres!=null ? (st.pres*0.0295300).toFixed(2) : null;
     return `
       <div class="srow ${sevCls}">
         <div class="srow-hd">
-          <div class="sname"><span class="sflag">\u{1F1E8}\u{1F1FC}</span>${st.name}</div>
-          <div class="srow-time-box"><span class="stime-s">${st.time||'\u2014'}</span><span class="stime-lbl">obs</span></div>
+          <div class="sname"><span class="sflag">${st.flag||'\u{1F1E8}\u{1F1FC}'}</span>${st.name}<span style="font-size:11px;color:var(--muted);margin-left:6px;font-weight:400;">${st.key}</span></div>
+          <div class="srow-time-box"><span class="stime-s">${st.time||'\u2014'}</span><span class="stime-lbl">live</span></div>
         </div>
         <div class="srow-body">
           <div class="srow-row" style="align-items:center;">
             <div style="flex:none;">${rose}</div>
             <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
               <div class="srow-row">
-                <div class="chip"><span class="chip-l">Temp</span><span class="chip-v">${st.temp!=null?st.temp+'\u00b0C':'\u2014'}</span></div>
-                <div class="chip"><span class="chip-l">Wind</span><span class="chip-v">${st.wind!=null?st.wind+' kt':'\u2014'}</span>${st.gust!=null?`<span class="chip-s">G${st.gust}</span>`:''}</div>
+                <div class="chip ${st.temp!=null?(st.temp>=33?'cred':st.temp>=28?'cwrn':''): ''}">
+                  <span class="chip-l">Temp</span>
+                  <span class="chip-v">${st.temp!=null?st.temp.toFixed(1)+'\u00b0C':'\u2014'}</span>
+                  ${st.dew!=null?`<span class="chip-s">Dew ${st.dew.toFixed(1)}\u00b0</span>`:''}
+                </div>
+                <div class="chip ${(st.wind||0)>=25?'cred':(st.wind||0)>=17?'cwrn':''}">
+                  <span class="chip-l">Wind</span>
+                  <span class="chip-v">${st.wind!=null?Math.round(st.wind)+' kt':'\u2014'}</span>
+                  <span class="chip-s">${dirTxt}${st.gust!=null?' G'+Math.round(st.gust):''}</span>
+                </div>
               </div>
               <div class="srow-row">
-                <div class="chip"><span class="chip-l">Rain</span><span class="chip-v">${st.rain!=null?st.rain+' mm':'\u2014'}</span></div>
-                <div class="chip"><span class="chip-l">Humidity</span><span class="chip-v">${st.rh!=null?st.rh+'%':'\u2014'}</span></div>
+                <div class="chip">
+                  <span class="chip-l">Humidity</span>
+                  <span class="chip-v">${st.rh!=null?st.rh+'%':'\u2014'}</span>
+                </div>
+                <div class="chip ${st.pres!=null?(st.pres<1005?'cinf':st.pres>1020?'cok':''):'' }">
+                  <span class="chip-l">Pressure</span>
+                  <span class="chip-v">${inHg!=null?inHg+' <small>inHg</small>':'\u2014'}</span>
+                </div>
               </div>
+              ${wxTxt||cloudLbl?`<div class="srow-row">
+                <div class="chip" style="flex:1;">
+                  <span class="chip-l">Conditions</span>
+                  <span class="chip-v" style="font-size:13px;">${wxTxt||cloudLbl}</span>
+                  ${cloudPct!=null?`<span class="chip-s">${cloudPct}% cloud cover</span>`:''}
+                </div>
+                ${st.rain!=null&&st.rain>0?`<div class="chip cwrn"><span class="chip-l">Rain</span><span class="chip-v">${st.rain.toFixed(1)} <small>mm</small></span></div>`:''}
+              </div>`:''}
             </div>
           </div>
         </div>
@@ -4737,13 +4958,19 @@ function renderStations(){
   byId('totalCnt').textContent = stationData.length;
   byId('alertCnt').textContent = alerts;
   byId('staleCnt').textContent = stale;
-  byId('recentTs').textContent = nowStamp().split(' ')[1] || '\u2014';
-  if(leafMap) addMapMarkers(byId('mapSearch') ? byId('mapSearch').value : '');
+  byId('recentTs').textContent = nowStamp().split(' ')[1]||'\u2014';
+  if(leafMap) addMapMarkers(byId('mapSearch')?byId('mapSearch').value:'');
 }
 
 async function fetchStationsData(){
   const list = byId('stn-list');
-  try {
+  list.innerHTML = `<div style="padding:12px;color:var(--muted);font-family:var(--cond);font-size:11px;letter-spacing:1px;animation:loadPulse 1.4s infinite;">Loading live station data\u2026</div>`;
+
+  /* ── Primary source: Cura\u00e7ao Weather Worker ────────────────────────────────
+     The worker at API_BASE returns a JSON array of station objects.
+     It was working before — the Claude sandbox blocked it (allowlist),
+     but a real browser opening this file will reach it fine.           */
+  async function tryWorker(){
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 8000);
     const res = await fetch(API_BASE, {cache:'no-store', signal:ctrl.signal});
@@ -4751,7 +4978,8 @@ async function fetchStationsData(){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const json = await res.json();
     const arr = Array.isArray(json) ? json : (json.stations || json.data || []);
-    stationData = arr.map(s => {
+    if(!arr.length) throw new Error('empty response');
+    return arr.map(s=>{
       const temp = s.temperature ?? s.temp ?? s.airTemp ?? null;
       const wind = s.windSpeed ?? s.wind ?? s.wind_kt ?? null;
       const windDir = s.windDirection ?? s.windDir ?? s.wind_dir ?? null;
@@ -4762,29 +4990,100 @@ async function fetchStationsData(){
       const time = s.time ?? s.timestamp ?? s.observed ?? null;
       let ageMin = Infinity;
       if(time){ const tt = new Date(time).getTime(); if(!isNaN(tt)) ageMin = (Date.now()-tt)/60000; }
-      const wkt = wind != null ? (typeof wind === 'number' ? Math.round(wind) : parseFloat(wind)) : null;
+      const wkt = wind != null ? (typeof wind==='number' ? Math.round(wind) : parseFloat(wind)) : null;
+      // Try to pick up extra fields if the worker exposes them
+      const pres  = s.pressure ?? s.qnh ?? s.slp ?? null;
+      const dew   = s.dewPoint ?? s.dew ?? s.dewpoint ?? null;
+      const cloud = s.cloudCover ?? s.cloud ?? null;
+      const wmo   = s.weatherCode ?? s.wmo ?? null;
+      const flag  = s.flag ?? ({CW:'\u{1F1E8}\u{1F1FC}',AW:'\u{1F1E6}\u{1F1FC}',BW:'\u{1F1E7}\u{1F1F6}'}[String(name).slice(0,2)] ?? '\u{1F1E8}\u{1F1FC}');
       return {
-        name, temp: temp!=null?Math.round(temp*10)/10:null,
-        wind: wkt, windDir: windDir!=null?Math.round(windDir):null,
-        gust: gust!=null?Math.round(gust):null, rain: rain!=null?Math.round(rain*10)/10:null,
-        rh: rh!=null?Math.round(rh):null, time: time?new Date(time).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):null,
-        stale: ageMin > 120, warn: (wkt!=null && wkt>=22) || (rain!=null && rain>10),
-        crit: (wkt!=null && wkt>=34) || (rain!=null && rain>25)
+        key: s.icao ?? s.key ?? name.slice(0,4).toUpperCase(),
+        name, flag,
+        temp: temp!=null ? Math.round(temp*10)/10 : null,
+        rh:   rh!=null   ? Math.round(rh)        : null,
+        wind: wkt, windDir: windDir!=null ? Math.round(windDir) : null,
+        gust: gust!=null ? Math.round(gust) : null,
+        rain: rain!=null ? Math.round(rain*10)/10 : null,
+        pres, dew, cloud, wmo,
+        time: time ? new Date(time).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : null,
+        stale: ageMin > 120,
+        warn:  (wkt!=null && wkt>=22) || (rain!=null && rain>10),
+        crit:  (wkt!=null && wkt>=34) || (rain!=null && rain>25) || (wmo!=null && wmo>=95)
       };
     });
-    renderStations();
-    byId('stn-ts').textContent = 'Last fetched: ' + nowStamp();
-  } catch(e){
-    console.warn('Stations API failed:', e.message);
-    stationData = [];
-    list.innerHTML = `<div style="padding:18px;color:var(--ylw);font-family:var(--cond);letter-spacing:.5px;font-size:12px;border:1px dashed rgba(245,158,11,0.3);border-radius:9px;text-align:center;">
-      \u26a0 Curaçao stations API offline<br><span style="font-size:10px;color:var(--muted);">${API_BASE}</span><br><span style="font-size:10px;color:var(--muted);">Will retry on next refresh cycle.</span>
-    </div>`;
-    byId('totalCnt').textContent = '0';
-    byId('alertCnt').textContent = '0';
-    byId('staleCnt').textContent = '0';
-    byId('stn-ts').textContent = 'Fetch failed: ' + nowStamp();
   }
+
+  /* ── Fallback A: Open-Meteo multi-location current conditions ───────────── */
+  async function tryOpenMeteo(){
+    const SL = [
+      {key:'TNCC',name:'Cura\u00e7ao \u2013 Hato',    flag:'\u{1F1E8}\u{1F1FC}',lat:12.19,lon:-68.96},
+      {key:'TNCA',name:'Aruba \u2013 Q.Beatrix',       flag:'\u{1F1E6}\u{1F1FC}',lat:12.50,lon:-70.01},
+      {key:'TNCB',name:'Bonaire \u2013 Flamingo',      flag:'\u{1F1E7}\u{1F1F6}',lat:12.13,lon:-68.27},
+      {key:'TNCM',name:'St Maarten',                   flag:'\u{1F1F8}\u{1F1FD}',lat:18.04,lon:-63.11},
+      {key:'SVMI',name:'Caracas',                      flag:'\u{1F1FB}\u{1F1EA}',lat:10.60,lon:-66.99},
+      {key:'SVVA',name:'Valencia',                     flag:'\u{1F1FB}\u{1F1EA}',lat:10.15,lon:-68.00}
+    ];
+    const vars='temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation,weather_code,cloud_cover,pressure_msl,dew_point_2m';
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SL.map(s=>s.lat).join(',')}&longitude=${SL.map(s=>s.lon).join(',')}&current=${vars}&timezone=auto&forecast_days=1&wind_speed_unit=kn`;
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),9000);
+    const res=await fetch(url,{signal:ctrl.signal,cache:'default'}); clearTimeout(t);
+    if(!res.ok) throw new Error('OM HTTP '+res.status);
+    const json=await res.json();
+    const responses=Array.isArray(json)?json:[json];
+    return responses.map((r,i)=>{
+      const s=SL[i]||SL[0]; const c=r.current||{};
+      const obsTime=c.time?new Date(c.time).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      const wind=c.wind_speed_10m??null;
+      return{key:s.key,name:s.name,flag:s.flag,
+        temp:c.temperature_2m??null, rh:c.relative_humidity_2m??null,
+        wind, windDir:c.wind_direction_10m??null, gust:c.wind_gusts_10m??null,
+        rain:c.precipitation??null, pres:c.pressure_msl??null,
+        dew:c.dew_point_2m??null, cloud:c.cloud_cover??null, wmo:c.weather_code??null,
+        time:obsTime, stale:false,
+        warn:(wind!=null&&wind>=22)||((c.precipitation??0)>10),
+        crit:(wind!=null&&wind>=34)||((c.precipitation??0)>25)||((c.weather_code??0)>=95)};
+    });
+  }
+
+  /* ── Fallback B: METAR state already in memory ──────────────────────────── */
+  function tryMetar(){
+    const FM={TNCC:{name:'Cura\u00e7ao \u2013 Hato',flag:'\u{1F1E8}\u{1F1FC}'},TNCA:{name:'Aruba \u2013 Q.Beatrix',flag:'\u{1F1E6}\u{1F1FC}'},TNCB:{name:'Bonaire \u2013 Flamingo',flag:'\u{1F1E7}\u{1F1F6}'},TNCM:{name:'St Maarten',flag:'\u{1F1F8}\u{1F1FD}'},SVMI:{name:'Caracas',flag:'\u{1F1FB}\u{1F1EA}'},SVVA:{name:'Valencia',flag:'\u{1F1FB}\u{1F1EA}'}};
+    const out=[];
+    for(const[icao,info]of Object.entries(FM)){
+      const raw=(mState&&mState[icao])?mState[icao].lastRaw:null; if(!raw) continue;
+      try{const mp=parseMetar(raw);out.push({key:icao,name:info.name,flag:info.flag,temp:mp.tempC,rh:null,wind:mp.windSpd,windDir:mp.windDir,gust:mp.windGust||null,rain:null,pres:mp.qhPa,dew:mp.dewC,cloud:null,wmo:null,time:mp.time?(mp.time.slice(2,4)+':'+mp.time.slice(4,6)):'--:--',stale:mp.ageMins>120,warn:(mp.windSpd||0)>=22,crit:(mp.windSpd||0)>=34});}catch(e){}
+    }
+    return out;
+  }
+
+  let source = '';
+  try {
+    stationData = await tryWorker();
+    source = 'Worker live';
+  } catch(e){
+    console.warn('Worker failed ('+e.message+'), trying Open-Meteo\u2026');
+    try {
+      stationData = await tryOpenMeteo();
+      source = 'Open-Meteo';
+    } catch(e2){
+      console.warn('Open-Meteo failed ('+e2.message+'), using METAR cache\u2026');
+      stationData = tryMetar();
+      source = stationData.length ? 'METAR cache' : '';
+    }
+  }
+
+  if(!stationData.length){
+    list.innerHTML = `<div style="padding:18px;color:var(--ylw);font-family:var(--cond);font-size:12px;border:1px dashed rgba(245,158,11,0.3);border-radius:9px;text-align:center;">
+      \u26a0 All station sources offline<br>
+      <span style="font-size:10px;color:var(--muted);">Worker \u00b7 Open-Meteo \u00b7 METAR \u2014 retrying on next cycle</span>
+    </div>`;
+    byId('totalCnt').textContent='0'; byId('alertCnt').textContent='0'; byId('staleCnt').textContent='0';
+    byId('stn-ts').textContent = 'All sources failed \u00b7 ' + nowStamp();
+    return;
+  }
+  renderStations();
+  byId('stn-ts').textContent = source + ' \u00b7 ' + nowStamp();
 }
 
 byId('toggleMap').addEventListener('click', () => {

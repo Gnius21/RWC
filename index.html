@@ -1744,7 +1744,7 @@ function miniRose(dir, spd){
   // AVIATION CONVENTION: arrowhead at the FROM bearing, shaft points inward to hub.
   // The arrow graphic below is drawn pointing UP (toward 0°/N) with the head at top.
   // Rotating by `dir` places the head at the FROM bearing on the rose rim.
-  const rot = dir % 360;
+  const rot = (dir + 180) % 360;  // point downwind (toward where wind blows TO)
 
   return `<svg width="92" height="92" viewBox="0 0 100 100" class="wrose-svg">
     <defs>
@@ -1786,15 +1786,14 @@ function miniRose(dir, spd){
     <text x="50" y="96" fill="rgba(77,184,255,0.5)" font-size="7" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700">S</text>
     <text x="7" y="53" fill="rgba(77,184,255,0.5)" font-size="7" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700">W</text>
 
-    <!-- Aviation arrow: head at the FROM bearing (rim), shaft pointing inward to hub -->
+    <!-- Wind-from arrow: points OUTWARD toward the bearing the wind blows FROM -->
     <g transform="translate(50,50) rotate(${rot})" filter="url(#${gid}sh)" style="transition:transform .8s cubic-bezier(0.22,0.61,0.36,1);">
       <!-- Shaft from hub outward toward the FROM bearing -->
       <line x1="0" y1="-4" x2="0" y2="${-len + 4}"
             stroke="url(#${gid}arr)" stroke-width="3.5" stroke-linecap="round"/>
-      <!-- Arrowhead at the rim, pointing inward (toward the hub) -->
-      <polygon points="0,${-len - 4} -6,${-len + 4} 0,${-len} 6,${-len + 4}"
-               fill="${col}" stroke="${col}" stroke-width="0.5" stroke-linejoin="round"
-               transform="rotate(180 0 ${-len})"/>
+      <!-- Arrowhead at the rim, pointing OUTWARD (toward the source bearing) -->
+      <polygon points="0,${-len - 5} -6,${-len + 5} 0,${-len + 1} 6,${-len + 5}"
+               fill="${col}" stroke="${col}" stroke-width="0.5" stroke-linejoin="round"/>
       <circle cx="0" cy="0" r="4.5" fill="${col}" opacity="0.25"/>
       <circle cx="0" cy="0" r="2.5" fill="${col}"/>
     </g>
@@ -3128,7 +3127,7 @@ function renderWxCard(key, P){
 function wxWindBlob(dir, dirName){
   // soft rounded "blob" pointer like Google weather; arrow points FROM source (aviation)
   const has = typeof dir === 'number' && isFinite(dir);
-  const rot = has ? dir % 360 : 0;
+  const rot = has ? (dir + 180) % 360 : 0;  // point downwind
   return `<svg viewBox="0 0 80 80" style="width:100%;height:100%;">
     <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(140,190,235,0.25)" stroke-width="1.2" stroke-dasharray="2 4"/>
     <text x="40" y="13" text-anchor="middle" font-family="Barlow,sans-serif" font-size="9" font-weight="700" fill="#bcd6ef">${has?dirName:'\u2014'}</text>
@@ -3332,7 +3331,7 @@ function monitorWindCompass(dir, spd){
   // AVIATION CONVENTION: the triangle's apex marks the FROM bearing.
   // The triangle below is drawn apex-up (toward N); rotate by `dir` so the apex
   // points at the bearing the wind comes FROM.
-  const rot = dir % 360;
+  const rot = (dir + 180) % 360;  // point downwind (toward where wind blows TO)
   const gid = 'mwc' + Math.random().toString(36).slice(2,7);
   return `<svg viewBox="0 0 160 160" class="wrose-mon">
     <defs>
@@ -3924,7 +3923,7 @@ function _gauCompass(dir, spd, size=190){
   const dirTxt = dir!=null?_MON_COMPASS16[Math.round(dir/22.5)%16]:'VRB';
   let needle='';
   if(dir!=null){
-    const rot=dir%360;
+    const rot=(dir+180)%360;  // point downwind
     needle=`<g transform="translate(${cx},${cy}) rotate(${rot})" style="transition:transform .8s cubic-bezier(.22,.61,.36,1);">
       <polygon points="0,${(-r+8).toFixed(0)} -7,-6 0,0 7,-6" fill="#2dd4bf" stroke="#2dd4bf" stroke-width="0.5"/>
       <polygon points="0,${(r-14).toFixed(0)} -5,4 0,0 5,4" fill="rgba(255,255,255,0.35)"/>
@@ -4904,32 +4903,35 @@ function renderStations(){
     if(st.crit||st.warn) alerts++;
     const sevCls = st.stale?'stale':st.crit?'crit':st.warn?'wrn':'';
     const rose = miniRose(typeof st.windDir==='number'?st.windDir:null, typeof st.wind==='number'?st.wind:null);
-    const dirTxt = st.windDir!=null ? COMPASS[Math.round(st.windDir/22.5)%16] : '';
+    const rawDirTxt = (st.windDirTxt && !/[()°]/.test(st.windDirTxt) && !/knots/i.test(st.windDirTxt)) ? st.windDirTxt : '';
+    const dirTxt = rawDirTxt || (st.windDir!=null ? COMPASS[Math.round(st.windDir/22.5)%16] : '');
+    const dirDeg = st.windDir!=null ? st.windDir+'\u00b0' : '';
     const wmo = st.wmo!=null ? decodeWmoCode(st.wmo, false) : null;
     const wxTxt = wmo ? wmo.desc : '';
     const cloudPct = st.cloud!=null ? st.cloud : null;
     const cloudLbl = cloudPct==null?'':cloudPct<=5?'Clear':cloudPct<=25?'Few':cloudPct<=50?'Scattered':cloudPct<=87?'Broken':'Overcast';
     const inHg = st.pres!=null ? (st.pres*0.0295300).toFixed(2) : null;
+    const hasExtra = (wxTxt||cloudLbl) || (st.rain!=null && st.rain>0) || inHg!=null;
     return `
       <div class="srow ${sevCls}">
         <div class="srow-hd">
-          <div class="sname"><span class="sflag">${st.flag||'\u{1F1E8}\u{1F1FC}'}</span>${st.name}<span style="font-size:11px;color:var(--muted);margin-left:6px;font-weight:400;">${st.key}</span></div>
-          <div class="srow-time-box"><span class="stime-s">${st.time||'\u2014'}</span><span class="stime-lbl">live</span></div>
+          <div class="sname"><span class="sflag">${st.flag||'\u{1F1E8}\u{1F1FC}'}</span>${st.name}</div>
+          <div class="srow-time-box"><span class="stime-s">${st.time||'\u2014'}</span><span class="stime-lbl">${st.stale?'\u26a0 old':'live'}</span></div>
         </div>
         <div class="srow-body">
           <div class="srow-row" style="align-items:center;">
             <div style="flex:none;">${rose}</div>
             <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
               <div class="srow-row">
-                <div class="chip ${st.temp!=null?(st.temp>=33?'cred':st.temp>=28?'cwrn':''): ''}">
+                <div class="chip ${st.temp!=null?(st.temp>=33?'cred':st.temp>=30?'cwrn':''): ''}">
                   <span class="chip-l">Temp</span>
                   <span class="chip-v">${st.temp!=null?st.temp.toFixed(1)+'\u00b0C':'\u2014'}</span>
-                  ${st.dew!=null?`<span class="chip-s">Dew ${st.dew.toFixed(1)}\u00b0</span>`:''}
+                  ${st.heat!=null&&Math.abs(st.heat-(st.temp||0))>=1?`<span class="chip-s">Feels ${st.heat.toFixed(0)}\u00b0</span>`:(st.dew!=null?`<span class="chip-s">Dew ${st.dew.toFixed(1)}\u00b0</span>`:'')}
                 </div>
                 <div class="chip ${(st.wind||0)>=25?'cred':(st.wind||0)>=17?'cwrn':''}">
                   <span class="chip-l">Wind</span>
                   <span class="chip-v">${st.wind!=null?Math.round(st.wind)+' kt':'\u2014'}</span>
-                  <span class="chip-s">${dirTxt}${st.gust!=null?' G'+Math.round(st.gust):''}</span>
+                  <span class="chip-s">${dirTxt}${dirDeg?' '+dirDeg:''}${st.gust!=null?' G'+Math.round(st.gust):''}</span>
                 </div>
               </div>
               <div class="srow-row">
@@ -4937,18 +4939,18 @@ function renderStations(){
                   <span class="chip-l">Humidity</span>
                   <span class="chip-v">${st.rh!=null?st.rh+'%':'\u2014'}</span>
                 </div>
-                <div class="chip ${st.pres!=null?(st.pres<1005?'cinf':st.pres>1020?'cok':''):'' }">
-                  <span class="chip-l">Pressure</span>
-                  <span class="chip-v">${inHg!=null?inHg+' <small>inHg</small>':'\u2014'}</span>
+                <div class="chip ${st.rain!=null&&st.rain>0?'cinf':''}">
+                  <span class="chip-l">Rain today</span>
+                  <span class="chip-v">${st.rain!=null?st.rain.toFixed(1)+' <small>mm</small>':'0.0 <small>mm</small>'}</span>
                 </div>
               </div>
-              ${wxTxt||cloudLbl?`<div class="srow-row">
-                <div class="chip" style="flex:1;">
+              ${(wxTxt||cloudLbl||inHg)?`<div class="srow-row">
+                ${(wxTxt||cloudLbl)?`<div class="chip" style="flex:1;">
                   <span class="chip-l">Conditions</span>
                   <span class="chip-v" style="font-size:13px;">${wxTxt||cloudLbl}</span>
-                  ${cloudPct!=null?`<span class="chip-s">${cloudPct}% cloud cover</span>`:''}
-                </div>
-                ${st.rain!=null&&st.rain>0?`<div class="chip cwrn"><span class="chip-l">Rain</span><span class="chip-v">${st.rain.toFixed(1)} <small>mm</small></span></div>`:''}
+                  ${cloudPct!=null?`<span class="chip-s">${cloudPct}% cloud</span>`:''}
+                </div>`:''}
+                ${inHg!=null?`<div class="chip"><span class="chip-l">Pressure</span><span class="chip-v">${inHg} <small>inHg</small></span></div>`:''}
               </div>`:''}
             </div>
           </div>
@@ -4977,36 +4979,83 @@ async function fetchStationsData(){
     clearTimeout(t);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const json = await res.json();
-    const arr = Array.isArray(json) ? json : (json.stations || json.data || []);
-    if(!arr.length) throw new Error('empty response');
-    return arr.map(s=>{
-      const temp = s.temperature ?? s.temp ?? s.airTemp ?? null;
-      const wind = s.windSpeed ?? s.wind ?? s.wind_kt ?? null;
-      const windDir = s.windDirection ?? s.windDir ?? s.wind_dir ?? null;
-      const gust = s.windGust ?? s.gust ?? null;
-      const rain = s.rain ?? s.precipitation ?? s.rainfall ?? null;
-      const rh = s.humidity ?? s.rh ?? s.relativeHumidity ?? null;
-      const name = s.name ?? s.station ?? s.location ?? 'Unknown';
-      const time = s.time ?? s.timestamp ?? s.observed ?? null;
+    // expose raw response for debugging: window.__rwcStations
+    try { window.__rwcStations = json; } catch(e){}
+    console.log('[RWC] Worker raw response:', json);
+
+    // Find the array of stations no matter how it's nested
+    let arr = null;
+    if(Array.isArray(json)) arr = json;
+    else if(json && typeof json === 'object'){
+      // common wrappers
+      for(const k of ['stations','data','results','list','observations','features','items']){
+        if(Array.isArray(json[k])) { arr = json[k]; break; }
+      }
+      // object-of-stations { "Seru Mahuma": {...}, ... }
+      if(!arr){
+        const vals = Object.values(json);
+        if(vals.length && vals.every(v => v && typeof v === 'object' && !Array.isArray(v))){
+          arr = Object.entries(json).map(([k,v]) => ({ _name:k, ...v }));
+        }
+      }
+      // single station object
+      if(!arr && (json.temperature!=null || json.temp!=null || json.name)) arr = [json];
+    }
+    if(!arr || !arr.length) throw new Error('no station array found in response');
+
+    // Case-insensitive deep field getter
+    const lc = o => { const m={}; for(const k in o){ m[k.toLowerCase().replace(/[_\s-]/g,'')] = o[k]; } return m; };
+    const pick = (m, names) => {
+      for(const n of names){ const key = n.toLowerCase().replace(/[_\s-]/g,''); if(m[key]!=null && m[key]!=='') return m[key]; }
+      return null;
+    };
+    const num = v => { if(v==null) return null; const n = typeof v==='number'?v:parseFloat(String(v).replace(/[^\d.\-]/g,'')); return isNaN(n)?null:n; };
+
+    return arr.map(raw=>{
+      const m = lc(raw);
+      const name = pick(m,['station','name','stationname','location','site','title']) || raw._name || 'Station';
+      // The Cura\u00e7ao worker uses explicit unit-suffixed keys; map those first,
+      // then fall back to generic aliases for any other feed.
+      const temp = num(pick(m,['temperaturec','temperature','temp','airtemp','tempc','t']));
+      const wind = num(pick(m,['windspeedknots','windspeedkt','windspeed','windkt','windkts','wind','wspd']));
+      const windDir = num(pick(m,['winddirectiondeg','winddirection','winddir','direction','wdir','bearing','dir']));
+      const windDirTxt = pick(m,['winddirectiontext','winddirtext','dirtext']);
+      const gust = num(pick(m,['windgustknots','windgust','gust','gustspeed','gusts','wgust']));
+      const rain = num(pick(m,['raintodaymm','raintoday','rainmm','rain','precipitation','rainfall','precip','rain1h']));
+      const rh   = num(pick(m,['humiditypercent','humidity','rh','relativehumidity','hum']));
+      const pres = num(pick(m,['pressurehpa','pressure','qnh','slp','barometer','baro','presshpa','sealevelpressure']));
+      const dew  = num(pick(m,['dewpointc','dewpoint','dew','td']));
+      const heat = num(pick(m,['heatindexc','heatindex','feelslike','apparenttemperature']));
+      const cloud= num(pick(m,['cloudcover','cloud','clouds']));
+      const wmo  = num(pick(m,['weathercode','wmo','wxcode']));
+      const time = pick(m,['lastupdatediso','lastupdated','time','timestamp','observed','obstime','datetime','date','updated','lastseen']);
+
       let ageMin = Infinity;
       if(time){ const tt = new Date(time).getTime(); if(!isNaN(tt)) ageMin = (Date.now()-tt)/60000; }
-      const wkt = wind != null ? (typeof wind==='number' ? Math.round(wind) : parseFloat(wind)) : null;
-      // Try to pick up extra fields if the worker exposes them
-      const pres  = s.pressure ?? s.qnh ?? s.slp ?? null;
-      const dew   = s.dewPoint ?? s.dew ?? s.dewpoint ?? null;
-      const cloud = s.cloudCover ?? s.cloud ?? null;
-      const wmo   = s.weatherCode ?? s.wmo ?? null;
-      const flag  = s.flag ?? ({CW:'\u{1F1E8}\u{1F1FC}',AW:'\u{1F1E6}\u{1F1FC}',BW:'\u{1F1E7}\u{1F1F6}'}[String(name).slice(0,2)] ?? '\u{1F1E8}\u{1F1FC}');
+
+      const wkt = wind!=null ? Math.round(wind) : null;
+
+      const flag = pick(m,['flag']) ||
+        (/aruba|tnca|beatrix/i.test(name) ? '\u{1F1E6}\u{1F1FC}' :
+         /bonaire|tncb|flamingo/i.test(name) ? '\u{1F1E7}\u{1F1F6}' :
+         /maarten|tncm|julian/i.test(name) ? '\u{1F1F8}\u{1F1FD}' :
+         /caracas|valencia|svmi|svva|venez/i.test(name) ? '\u{1F1FB}\u{1F1EA}' :
+         '\u{1F1E8}\u{1F1FC}');
+
       return {
-        key: s.icao ?? s.key ?? name.slice(0,4).toUpperCase(),
+        key: pick(m,['icao','id','key','code']) || String(name),
         name, flag,
         temp: temp!=null ? Math.round(temp*10)/10 : null,
         rh:   rh!=null   ? Math.round(rh)        : null,
         wind: wkt, windDir: windDir!=null ? Math.round(windDir) : null,
+        windDirTxt: windDirTxt || null,
         gust: gust!=null ? Math.round(gust) : null,
         rain: rain!=null ? Math.round(rain*10)/10 : null,
-        pres, dew, cloud, wmo,
-        time: time ? new Date(time).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : null,
+        pres: pres!=null ? Math.round(pres*10)/10 : null,
+        dew:  dew!=null  ? Math.round(dew*10)/10  : null,
+        heat: heat!=null ? Math.round(heat*10)/10 : null,
+        cloud, wmo,
+        time: time ? (function(){ const d=new Date(time); return isNaN(d)? String(time).slice(0,5) : d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); })() : null,
         stale: ageMin > 120,
         warn:  (wkt!=null && wkt>=22) || (rain!=null && rain>10),
         crit:  (wkt!=null && wkt>=34) || (rain!=null && rain>25) || (wmo!=null && wmo>=95)
@@ -5161,7 +5210,8 @@ async function init(){
 
 /* Background refresh intervals (NO 60s vis interval — removed per FIX #4) */
 setInterval(() => { if(!testMode && !hidden()) refreshAllMetars(); }, 30000);
-setInterval(() => { if(!testMode && !hidden()){ loadAllTAFs(); loadAllSynops(); if(stationsTabOpened) fetchStationsData(); } }, 300000);
+setInterval(() => { if(!testMode && !hidden()){ loadAllTAFs(); loadAllSynops(); } }, 300000);
+setInterval(() => { if(!testMode && !hidden() && stationsTabOpened) fetchStationsData(); }, 60000);
 setInterval(() => { if(!testMode && !hidden() && forecastTabOpened) updateForecast(); }, 600000);
 setInterval(() => { if(!testMode && !hidden() && weatherTabOpened) updateWeatherTab(); }, 60000);
 

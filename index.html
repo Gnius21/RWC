@@ -1077,25 +1077,27 @@ body.tab-hidden *{animation-play-state:paused !important;}
 
 
 /* ═══ MAPPING TAB ═══ */
-.map-tab-wrap{display:flex;flex-direction:column;gap:10px;height:100%;}
+#tab-mapping{overflow-y:auto;}
+.map-tab-wrap{display:flex;flex-direction:column;gap:10px;}
 .map-tab-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-shrink:0;}
 .map-tab-title{font-family:var(--cond);font-size:16px;font-weight:800;color:#dce9f7;letter-spacing:.3px;}
 .map-tab-sub{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;}
-.map-tab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:1;}
-@media(max-width:900px){.map-tab-grid{grid-template-columns:repeat(2,1fr);}}
+.map-tab-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex:1;}
+@media(max-width:700px){.map-tab-grid{grid-template-columns:1fr;}}
 @media(max-width:560px){.map-tab-grid{grid-template-columns:1fr;}}
-.map-cell{display:flex;flex-direction:column;gap:0;border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--bdr);transition:border-color .2s,box-shadow .2s;min-height:220px;}
+.map-cell{display:flex;flex-direction:column;gap:0;border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--bdr);transition:border-color .2s,box-shadow .2s;min-height:360px;}
 .map-cell:hover{border-color:var(--bdrb);box-shadow:0 4px 18px rgba(77,184,255,0.1);}
 .map-cell-label{display:flex;align-items:center;gap:7px;padding:7px 10px 6px;background:rgba(255,255,255,0.025);border-bottom:1px solid var(--bdr);font-family:var(--cond);font-size:12px;font-weight:700;color:#cfe2f5;letter-spacing:.8px;text-transform:uppercase;position:relative;}
 .map-cell-ic{font-size:14px;}
 .map-cell-ext{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);text-decoration:none;line-height:1;transition:color .15s;}
 .map-cell-ext:hover{color:var(--acc);}
-.map-cell-frame{flex:1;position:relative;min-height:0;}
-.windy-frame{width:100%;height:100%;border:none;display:block;}
+.map-cell-frame{flex:1;position:relative;min-height:0;height:100%;}
+.windy-frame{width:100%;height:100%;min-height:320px;border:none;display:block;}
 /* Shield: transparent overlay that captures scroll, click activates iframe */
-.map-cell-shield{position:absolute;inset:0;z-index:2;cursor:crosshair;transition:opacity .2s;}
+.map-cell-shield{position:absolute;inset:0;z-index:2;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.01);transition:background .2s;}
+.map-cell-shield::after{content:'\1F512  Click to interact';font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.5px;color:rgba(200,225,255,0.0);background:rgba(8,18,40,0.0);padding:5px 10px;border-radius:20px;transition:all .2s;pointer-events:none;}
+.map-cell-shield:hover::after{color:rgba(200,225,255,0.85);background:rgba(8,18,40,0.65);}
 .map-cell-shield.active{display:none;}
-.map-cell-frame:hover .map-cell-shield{opacity:0;pointer-events:none;}
 
 
 /* ═══ Weather Dashboard (IMG_6875 reference) ═══ */
@@ -1167,6 +1169,108 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .wdb-rain-scale{display:flex;justify-content:space-between;font-family:var(--cond);font-size:9px;color:var(--muted);margin-top:4px;opacity:.6;}
 .wdb-loading{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;padding:12px 0;}
 
+
+/* ═══ THEME SYSTEM ═══ */
+/* Glass theme (IMG_6908) */
+:root.glass{
+  --bg:#1a0a3c;--card:rgba(255,255,255,0.07);
+  --bdr:rgba(180,140,255,0.18);--bdrb:rgba(200,170,255,0.35);
+  --txt:#f0eaff;--muted:#9b85cc;
+  --acc:#c084fc;--acc2:#7c3aed;--accd:rgba(192,132,252,0.12);
+  --red:#ff6b9d;--redd:rgba(255,107,157,0.12);
+  --grn:#34d399;--grnd:rgba(52,211,153,0.1);
+  --ylw:#fbbf24;--ylwd:rgba(251,191,36,0.1);
+  --pur:#e879f9;--purd:rgba(232,121,249,0.1);
+}
+:root.glass body{
+  background:linear-gradient(135deg,#1a0a3c 0%,#0d1a4a 50%,#0a2040 100%);
+}
+:root.glass body::before{
+  background:radial-gradient(ellipse 800px 600px at 20% 10%,rgba(124,58,237,0.2) 0%,transparent 60%),
+             radial-gradient(ellipse 600px 500px at 80% 80%,rgba(59,130,246,0.15) 0%,transparent 55%);
+}
+:root.glass .page > *{
+  backdrop-filter:blur(12px) saturate(1.4);
+  -webkit-backdrop-filter:blur(12px) saturate(1.4);
+}
+:root.glass .mon-tile,.glass .mcard,.glass .tcard,.glass .wcard,.glass .srow,
+:root.glass .gfx-card,.glass .gfx-tile,.glass .map-cell,.glass .wdb-metric,
+:root.glass .wdb-hero,.glass .wdb-chart-wrap,.glass .wdb-sunrise,.glass .wdb-aq-wrap,.glass .wdb-rain-wrap{
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(200,170,255,0.18);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+:root.glass .tab.active{
+  background:linear-gradient(180deg,rgba(124,58,237,0.85),rgba(79,30,180,0.9));
+  box-shadow:0 5px 16px rgba(124,58,237,0.4),inset 0 1px 0 rgba(220,200,255,0.18);
+  border-color:rgba(180,140,255,0.5);
+}
+:root.glass .topbar,.glass nav{
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(16px);
+}
+
+/* Neon Purple theme (IMG_6906) */
+:root.neon{
+  --bg:#0d0620;--card:rgba(30,10,60,0.95);
+  --bdr:rgba(100,60,200,0.22);--bdrb:rgba(130,80,255,0.4);
+  --txt:#e8e0ff;--muted:#7060a8;
+  --acc:#00e5ff;--acc2:#7c3aed;--accd:rgba(0,229,255,0.1);
+  --red:#ff4488;--redd:rgba(255,68,136,0.12);
+  --grn:#00e676;--grnd:rgba(0,230,118,0.1);
+  --ylw:#ffea00;--ylwd:rgba(255,234,0,0.1);
+  --pur:#d500f9;--purd:rgba(213,0,249,0.1);
+}
+:root.neon body{background:var(--bg);}
+:root.neon body::before{
+  background:radial-gradient(ellipse 900px 700px at 10% 0%,rgba(76,0,180,0.35) 0%,transparent 60%),
+             radial-gradient(ellipse 700px 500px at 90% 100%,rgba(0,150,255,0.15) 0%,transparent 55%);
+}
+:root.neon .mon-tile,.neon .mcard,.neon .tcard,.neon .wcard,.neon .srow,
+:root.neon .gfx-card,.neon .gfx-tile,.neon .map-cell,.neon .wdb-metric,
+:root.neon .wdb-hero,.neon .wdb-chart-wrap,.neon .wdb-sunrise,.neon .wdb-aq-wrap,.neon .wdb-rain-wrap{
+  background:linear-gradient(135deg,rgba(50,15,100,0.6),rgba(20,5,50,0.8));
+  border-color:rgba(100,60,200,0.25);
+}
+:root.neon .tab.active{
+  background:linear-gradient(180deg,rgba(76,0,180,0.9),rgba(50,0,130,0.95));
+  box-shadow:0 5px 16px rgba(76,0,180,0.5),0 0 20px rgba(0,229,255,0.15),inset 0 1px 0 rgba(180,130,255,0.2);
+  border-color:rgba(0,229,255,0.4);
+}
+:root.neon .hdr-ttl{
+  background:linear-gradient(90deg,#00e5ff,#d500f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:none;
+}
+:root.neon .chip{background:rgba(76,0,180,0.3);border-color:rgba(100,60,200,0.3);}
+:root.neon .wdb-rain-bar-fill{background:linear-gradient(90deg,#7c3aed,#00e5ff);}
+
+/* ── Theme & Icon settings panel ── */
+#settings-panel{position:fixed;top:54px;right:14px;z-index:9999;width:280px;
+  background:var(--card);border:1px solid var(--bdrb);border-radius:16px;
+  padding:16px;display:none;flex-direction:column;gap:14px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.5);backdrop-filter:blur(12px);}
+#settings-panel.open{display:flex;}
+.settings-section-ttl{font-family:var(--cond);font-size:11px;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.theme-swatches{display:flex;gap:8px;flex-wrap:wrap;}
+.theme-swatch{flex:1;min-width:72px;padding:8px 6px;border-radius:10px;border:2px solid transparent;
+  cursor:pointer;text-align:center;font-family:var(--cond);font-size:11px;font-weight:700;
+  letter-spacing:.4px;transition:all .2s;position:relative;overflow:hidden;}
+.theme-swatch[data-theme="navy"]{background:linear-gradient(135deg,#020c16,#051222);color:#4db8ff;border-color:rgba(77,184,255,0.2);}
+.theme-swatch[data-theme="glass"]{background:linear-gradient(135deg,#1a0a3c,#0d1a4a);color:#c084fc;border-color:rgba(192,132,252,0.2);}
+.theme-swatch[data-theme="neon"]{background:linear-gradient(135deg,#0d0620,#1a0040);color:#00e5ff;border-color:rgba(0,229,255,0.2);}
+.theme-swatch.active{border-color:var(--acc);box-shadow:0 0 12px var(--accd);}
+.icon-swatches{display:flex;gap:8px;}
+.icon-swatch{flex:1;padding:10px 6px;border-radius:10px;border:2px solid transparent;cursor:pointer;
+  text-align:center;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.3px;
+  background:rgba(255,255,255,0.04);color:var(--txt);transition:all .2s;display:flex;
+  flex-direction:column;align-items:center;gap:5px;}
+.icon-swatch.active{border-color:var(--acc);background:var(--accd);}
+.icon-swatch:hover:not(.active){background:rgba(255,255,255,0.07);}
+.icon-swatch-preview{width:32px;height:32px;}
+
 </style>
 </head>
 <body>
@@ -1193,6 +1297,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
       <button id="help-btn" class="bg" aria-label="Keyboard shortcuts" title="Show keyboard shortcuts">?</button>
       <button id="mute-btn" class="bg" aria-pressed="false" title="Mute alerts (M)">&#128266;</button>
       <button id="test-btn" class="bg" title="Test mode (T)">&#9879;</button>
+      <button id="settings-btn" class="bg" title="Theme &amp; Icons">⚙️</button>
       <button id="night-btn" class="bg" aria-pressed="false" title="Toggle night mode (N)">&#127769;</button>
     </div>
   </div>
@@ -1507,7 +1612,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="radar">
           <div class="map-cell-label"><span class="map-cell-ic">&#127928;</span>Radar</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C&radarRange=-1" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C&radarRange=-1" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield" title="Click to interact, scroll outside to pan page"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?radar,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -1515,7 +1620,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="satellite">
           <div class="map-cell-label"><span class="map-cell-ic">&#127760;</span>Satellite</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=satellite&product=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=satellite&product=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?satellite,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -1523,7 +1628,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="clouds">
           <div class="map-cell-label"><span class="map-cell-ic">&#9925;</span>Clouds</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=clouds&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=clouds&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?clouds,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -1531,7 +1636,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="dust">
           <div class="map-cell-label"><span class="map-cell-ic">&#127755;</span>Dust</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=dust&product=cams&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=7&level=surface&overlay=dustLoad&product=cams&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?dust,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -1539,7 +1644,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="waves">
           <div class="map-cell-label"><span class="map-cell-ic">&#127754;</span>Waves</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=waves&product=gfs&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=7&level=surface&overlay=waves&product=gfsWave&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?waves,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -1547,7 +1652,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
         <div class="map-cell" data-overlay="wind">
           <div class="map-cell-label"><span class="map-cell-ic">&#128168;</span>Wind</div>
           <div class="map-cell-frame">
-            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=wind&product=gfs&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=7&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
             <div class="map-cell-shield"></div>
           </div>
           <a class="map-cell-ext" href="https://www.windy.com/?wind,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
@@ -3311,7 +3416,7 @@ function renderWxCard(key, P){
       const dt  = new Date(d.date); dt.setHours(12);
       const day = i===0?'Today':DAYS[dt.getDay()];
       const t   = d.temp_max!=null ? d.temp_max.toFixed(1) : '\u2014';
-      const ico = buildWxIconSvg(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
+      const ico = wxIcon(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
       return `<div class="wdb-fstrip-card">
         <div class="wdb-fstrip-ico">${ico}</div>
         <div class="wdb-fstrip-day">${day}</div>
@@ -3418,7 +3523,7 @@ function renderWxCard(key, P){
   }
 
   // ── Hero card ────────────────────────────────────────────────────────────
-  const heroIco = buildWxIconSvg(P.ww!=null?wmoToIcon(P.ww):(P.cloud_oktas!=null?cloudOktasToIcon(P.cloud_oktas):'sun'), 64);
+  const heroIco = wxIcon(P.ww!=null?wmoToIcon(P.ww):(P.cloud_oktas!=null?cloudOktasToIcon(P.cloud_oktas):'sun'), 64);
   const stationLbl = s ? s.name : key;
   const lastUpd = `Last Updated, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
 
@@ -3686,13 +3791,9 @@ async function fetchWeatherBonaire(){
 }
 async function updateWeatherTab(){
   byId('wx-ts').textContent = 'Refreshing\u2026';
-  // Kick off UV/sun extras; when each lands, re-render that card so UV + sun arc fill in.
-  ['aruba','curacao','bonaire'].forEach(k=>{
-    fetchWxExtra(k).then(()=>{
-      const last = WX_HISTORY[k] && WX_HISTORY[k].length ? WX_HISTORY[k][WX_HISTORY[k].length-1] : null;
-      if(last) renderWxCard(k, last);
-    });
-  });
+  // Fetch extras (forecast + AQ + UV + sun) first so renderWxCard has data immediately
+  await Promise.allSettled(['aruba','curacao','bonaire'].map(k=>fetchWxExtra(k)));
+  // Now fetch SYNOP — renderWxCard will find WX_EXTRA populated
   await Promise.allSettled([ fetchWeatherAruba(), fetchWeatherCuracao(), fetchWeatherBonaire() ]);
   byId('wx-ts').textContent = 'Last fetched: ' + new Date().toLocaleString();
 }
@@ -4728,6 +4829,106 @@ function _cloudG(cx, cy, sc, variant, extra){
   </g>`;
 }
 
+/* ═══ ICON STYLE SYSTEM ═══ */
+/* Current style stored in localStorage key 'rwc-icon-style' */
+/* Values: 'default' | 'outline' | 'realistic' */
+let __iconStyle = localStorage.getItem('rwc-icon-style') || 'default';
+
+/* ── Outline gradient icons (IMG_6909 style) ─────────────────────────────
+   Blue→teal gradient stroke, clean geometric paths, no fill */
+function buildOutlineIcon(key, size){
+  const s = size || 36;
+  const grad = `<defs><linearGradient id="og${s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4db8ff"/><stop offset="1" stop-color="#00e5a0"/></linearGradient></defs>`;
+  const st = `stroke="url(#og${s})" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  const sunRays = (cx,cy,r,rr)=>[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return `<line x1="${(cx+r*Math.sin(rad)).toFixed(1)}" y1="${(cy-r*Math.cos(rad)).toFixed(1)}" x2="${(cx+rr*Math.sin(rad)).toFixed(1)}" y2="${(cy-rr*Math.cos(rad)).toFixed(1)}" ${st}/>`; }).join('');
+  const cloud = (x,y,sc)=>`<path d="M${x+4*sc} ${y+8*sc} Q${x+2*sc} ${y+8*sc} ${x+2*sc} ${y+6*sc} Q${x+2*sc} ${y+3*sc} ${x+5*sc} ${y+3*sc} Q${x+6*sc} ${y+1*sc} ${x+9*sc} ${y+1*sc} Q${x+13*sc} ${y+1*sc} ${x+13*sc} ${y+4*sc} Q${x+15*sc} ${y+4*sc} ${x+15*sc} ${y+6*sc} Q${x+15*sc} ${y+8*sc} ${x+13*sc} ${y+8*sc} Z" ${st}/>`;
+  const shapes = {
+    'sun':  `${sunRays(18,18,9,13)}<circle cx="18" cy="18" r="6" ${st}/>`,
+    'cloud': cloud(1,8,2),
+    'cloud-sun': `${sunRays(10,14,6,9)}<circle cx="10" cy="14" r="4.5" ${st}/>${cloud(6,15,1.6)}`,
+    'sun-cloud': `${sunRays(10,12,5,8)}<circle cx="10" cy="12" r="4" ${st}/>${cloud(8,14,1.6)}`,
+    'moon-cloud': `<path d="M10 8 Q6 10 6 14 Q6 18 10 20 Q7 20 5 18 Q2 15 3 11 Q4 7 8 6 Z" ${st}/>${cloud(9,16,1.5)}`,
+    'cloud-moon': `<path d="M8 7 Q5 9 5 12 Q5 16 8 17 Q6 17 4 15 Q2 13 2 10 Q3 7 6 6 Z" ${st}/>${cloud(7,14,1.6)}`,
+    'rain': `${cloud(1,4,2)}<line x1="7" y1="24" x2="5" y2="31" ${st}/><line x1="13" y1="24" x2="11" y2="31" ${st}/><line x1="19" y1="24" x2="17" y2="31" ${st}/>`,
+    'showers': `${cloud(1,4,2)}<line x1="8" y1="24" x2="7" y2="29" ${st}/><line x1="14" y1="24" x2="13" y2="29" ${st}/>`,
+    'thunder': `${cloud(1,4,2)}<path d="M14 22 L10 30 L14 30 L11 38 L20 28 L15 28 L18 22 Z" ${st}/>`,
+    'snow': `${cloud(1,4,2)}<circle cx="8" cy="28" r="1.5" ${st}/><circle cx="14" cy="32" r="1.5" ${st}/><circle cx="20" cy="28" r="1.5" ${st}/>`,
+    'fog': `${cloud(1,4,2)}<line x1="4" y1="26" x2="28" y2="26" ${st}/><line x1="6" y1="30" x2="26" y2="30" ${st}/>`,
+    'drizzle': `${cloud(1,4,2)}<line x1="8" y1="24" x2="7" y2="29" ${st}/><line x1="14" y1="24" x2="13" y2="29" ${st}/><line x1="20" y1="24" x2="19" y2="29" ${st}/>`,
+  };
+  const inner = shapes[key] || shapes['sun'];
+  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}">${grad}${inner}</svg>`;
+}
+
+/* ── Photorealistic icons (IMG_6907 style) ───────────────────────────────
+   Radial-gradient sun orb, wispy painted cloud paths, rain streaks */
+function buildRealisticIcon(key, size){
+  const s = size || 64;
+  // Glowing sun orb
+  const sunOrb = (cx,cy,r,animate)=>{
+    const gid='rs'+cx+cy;
+    return `<defs>
+      <radialGradient id="${gid}" cx="40%" cy="35%" r="60%">
+        <stop offset="0" stop-color="#fff7c0"/><stop offset="30%" stop-color="#ffd23f"/>
+        <stop offset="70%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#c27803"/>
+      </radialGradient>
+    </defs>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.6}" fill="#fbbf24" opacity="0.08"/>
+    <circle cx="${cx}" cy="${cy}" r="${r*1.25}" fill="#fbbf24" opacity="0.12"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${gid})" ${animate?'style="animation:sunGlow 3s ease-in-out infinite;"':''}/>`;
+  };
+  // Wispy cloud path (photorealistic style)
+  const cloudPath = (x,y,sc,dark)=>{
+    const c = dark ? '#6a7080' : '#b8c4d4';
+    const c2 = dark ? '#4a5060' : '#8a9ab0';
+    const c3 = dark ? '#2a2f3a' : '#6a7888';
+    return `<ellipse cx="${x+sc*10}" cy="${y+sc*7}" rx="${sc*9}" ry="${sc*4.5}" fill="${c}" opacity="0.9"/>
+    <ellipse cx="${x+sc*7}"  cy="${y+sc*5}" rx="${sc*6}" ry="${sc*4}" fill="${c}"/>
+    <ellipse cx="${x+sc*14}" cy="${y+sc*4}" rx="${sc*7}" ry="${sc*5}" fill="${c}"/>
+    <ellipse cx="${x+sc*10}" cy="${y+sc*9}" rx="${sc*9}" ry="${sc*3}" fill="${c2}" opacity="0.8"/>
+    <ellipse cx="${x+sc*10}" cy="${y+sc*10}" rx="${sc*8}" ry="${sc*2}" fill="${c3}" opacity="0.5"/>`;
+  };
+  const rainStreak = (x,y,len,op)=>`<line x1="${x}" y1="${y}" x2="${x-2}" y2="${y+len}" stroke="#a0c8e8" stroke-width="1.5" stroke-linecap="round" opacity="${op}" style="animation:rainFall ${0.6+Math.random()*0.4}s linear infinite ${Math.random()*0.5}s;"/>`;
+  const boltPath = `<path d="M0 -8 L-5 4 L0 3 L-3 12 L8 -2 L2 -2 L5 -8 Z" fill="#fde047" filter="url(#bolt)" style="animation:lightningStrike 1.4s ease-in-out infinite;"/>`;
+
+  const views = {
+    'sun': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(32,32,18,true)}</svg>`,
+    'cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,14,2.2)}</svg>`,
+    'cloud-sun': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(20,22,13,true)}${cloudPath(8,22,1.8,false)}</svg>`,
+    'sun-cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(18,20,12,true)}${cloudPath(10,24,1.7,false)}</svg>`,
+    'moon-cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><path d="M22 10 Q12 14 12 24 Q12 34 22 38 Q12 38 7 32 Q2 24 5 16 Q9 8 18 7 Z" fill="#dce8f8"/><circle cx="22" cy="24" r="8" fill="#c8d8f0" opacity="0.15"/>${cloudPath(10,28,1.6,true)}</svg>`,
+    'cloud-moon': `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><path d="M18 8 Q10 12 10 20 Q10 28 18 32 Q10 32 6 27 Q2 20 4 13 Q7 6 15 5 Z" fill="#dce8f8"/>${cloudPath(8,26,1.7,true)}</svg>`,
+    'rain': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,true)}${[8,14,20,26,32].map((x,i)=>rainStreak(x+3,32+i%2*4,14,0.8)).join('')}</svg>`,
+    'showers': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}${[8,16,24,32].map((x,i)=>rainStreak(x+3,32,12,0.7)).join('')}</svg>`,
+    'drizzle': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}${[10,18,26].map((x)=>rainStreak(x+3,32,10,0.6)).join('')}</svg>`,
+    'thunder': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+      <defs><filter id="bolt"><feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs>
+      ${cloudPath(6,8,2,true)}
+      <g transform="translate(32,38)">${boltPath}</g>
+      ${rainStreak(14,44,10,0.6)}${rainStreak(42,44,10,0.6)}
+    </svg>`,
+    'snow': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}
+      ${[10,20,30,15,25].map((x,i)=>`<text x="${x}" y="${36+i%2*8}" font-size="10" fill="#dce8f8" opacity="0.9" style="animation:snowflakeFall ${1+i*0.2}s ease-in-out infinite ${i*0.3}s;">\u2745</text>`).join('')}
+    </svg>`,
+    'fog': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
+      <ellipse cx="32" cy="22" rx="24" ry="10" fill="#8898aa" opacity="0.4"/>
+      <ellipse cx="32" cy="18" rx="22" ry="8" fill="#aab8c8" opacity="0.5"/>
+      <rect x="4" y="28" width="56" height="6" rx="3" fill="#8898aa" opacity="0.35"/>
+      <rect x="8" y="36" width="48" height="5" rx="2.5" fill="#8898aa" opacity="0.25"/>
+      <rect x="12" y="43" width="40" height="4" rx="2" fill="#8898aa" opacity="0.15"/>
+    </svg>`,
+  };
+  return views[key] || views['sun'];
+}
+
+/* ── Main icon dispatcher ─────────────────────────────────────────────── */
+const _origBuildWxIconSvg = buildWxIconSvg;
+function wxIcon(key, size){
+  if(__iconStyle === 'outline')   return buildOutlineIcon(key, size);
+  if(__iconStyle === 'realistic') return buildRealisticIcon(key, size);
+  return buildWxIconSvg(key, size);
+}
+
 /* ═══ MULTI-MODEL FORECAST ═══ */
 const FORECAST_MODELS = [
   {key:'gfs_seamless',         name:'GFS',     org:'NOAA \u00b7 USA',          color:'#4db8ff'},
@@ -5602,6 +5803,112 @@ window.__rwc = {
   switchTab, startTest, stopTest,
   state: () => ({mState, stationData, forecast: __lastForecastData})
 };
+
+/* ═══ THEME + ICON SETTINGS PANEL ═══ */
+let __currentTheme = localStorage.getItem('rwc-theme') || 'navy';
+
+function applyTheme(t){
+  __currentTheme = t;
+  localStorage.setItem('rwc-theme', t);
+  const root = document.documentElement;
+  root.classList.remove('night','glass','neon');
+  if(t === 'glass') root.classList.add('glass');
+  else if(t === 'neon') root.classList.add('neon');
+  // navy = default, no class needed
+  // Update swatch active state
+  document.querySelectorAll('.theme-swatch').forEach(s=>{
+    s.classList.toggle('active', s.dataset.theme === t);
+  });
+}
+
+function applyIconStyle(style){
+  __iconStyle = style;
+  localStorage.setItem('rwc-icon-style', style);
+  document.querySelectorAll('.icon-swatch').forEach(s=>{
+    s.classList.toggle('active', s.dataset.style === style);
+  });
+  // Re-render Monitor if open to refresh icons
+  if(__monLastData) renderMonitor(__monLastData);
+  // Re-render weather cards
+  ['aruba','curacao','bonaire'].forEach(k=>{
+    const last = WX_HISTORY[k] && WX_HISTORY[k].length ? WX_HISTORY[k][WX_HISTORY[k].length-1] : null;
+    if(last) renderWxCard(k, last);
+  });
+}
+
+function buildSettingsPanel(){
+  const existing = document.getElementById('settings-panel');
+  if(existing) return;
+
+  // Preview SVGs for icon swatches
+  const previewDefault  = buildWxIconSvg('cloud-sun', 32);
+  const previewOutline  = buildOutlineIcon('cloud-sun', 32);
+  const previewRealistic= buildRealisticIcon('sun', 32);
+
+  const panel = document.createElement('div');
+  panel.id = 'settings-panel';
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <span style="font-family:var(--cond);font-size:14px;font-weight:800;color:var(--txt);letter-spacing:.5px;">\u2699\uFE0F Settings</span>
+      <button onclick="document.getElementById('settings-panel').classList.remove('open')"
+        style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">\u00d7</button>
+    </div>
+    <div>
+      <div class="settings-section-ttl">Dashboard Theme</div>
+      <div class="theme-swatches">
+        <div class="theme-swatch ${__currentTheme==='navy'?'active':''}" data-theme="navy" onclick="applyTheme('navy')">
+          <div style="font-size:16px;margin-bottom:3px;">\u{1F30A}</div>Navy
+        </div>
+        <div class="theme-swatch ${__currentTheme==='glass'?'active':''}" data-theme="glass" onclick="applyTheme('glass')">
+          <div style="font-size:16px;margin-bottom:3px;">\u{1F52E}</div>Glass
+        </div>
+        <div class="theme-swatch ${__currentTheme==='neon'?'active':''}" data-theme="neon" onclick="applyTheme('neon')">
+          <div style="font-size:16px;margin-bottom:3px;">\u26A1</div>Neon
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-ttl">Weather Icon Style</div>
+      <div class="icon-swatches">
+        <div class="icon-swatch ${__iconStyle==='default'?'active':''}" data-style="default" onclick="applyIconStyle('default')">
+          <div class="icon-swatch-preview">${previewDefault}</div>
+          Animated
+        </div>
+        <div class="icon-swatch ${__iconStyle==='outline'?'active':''}" data-style="outline" onclick="applyIconStyle('outline')">
+          <div class="icon-swatch-preview">${previewOutline}</div>
+          Outline
+        </div>
+        <div class="icon-swatch ${__iconStyle==='realistic'?'active':''}" data-style="realistic" onclick="applyIconStyle('realistic')">
+          <div class="icon-swatch-preview">${previewRealistic}</div>
+          Realistic
+        </div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);opacity:.6;text-align:center;padding-top:4px;">
+      RWC Caribbean \u00b7 v2.0 \u00b7 ABC Islands
+    </div>`;
+  document.body.appendChild(panel);
+
+  // Close on outside click
+  document.addEventListener('click', function(e){
+    const p = document.getElementById('settings-panel');
+    if(p && p.classList.contains('open') && !p.contains(e.target) && e.target.id !== 'settings-btn'){
+      p.classList.remove('open');
+    }
+  }, true);
+}
+
+// Apply saved theme on load
+applyTheme(__currentTheme);
+
+
+// Settings button toggle
+byId('settings-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  buildSettingsPanel();
+  const p = document.getElementById('settings-panel');
+  if(p) p.classList.toggle('open');
+});
 
 })();
 </script>

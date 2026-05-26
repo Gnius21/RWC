@@ -1075,6 +1075,98 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .mon-stavg .srow-hd{padding:0;border:none;background:none;}
 .mon-stavg .srow-body{padding:0;}
 
+
+/* ═══ MAPPING TAB ═══ */
+.map-tab-wrap{display:flex;flex-direction:column;gap:10px;height:100%;}
+.map-tab-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-shrink:0;}
+.map-tab-title{font-family:var(--cond);font-size:16px;font-weight:800;color:#dce9f7;letter-spacing:.3px;}
+.map-tab-sub{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.map-tab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:1;}
+@media(max-width:900px){.map-tab-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.map-tab-grid{grid-template-columns:1fr;}}
+.map-cell{display:flex;flex-direction:column;gap:0;border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--bdr);transition:border-color .2s,box-shadow .2s;min-height:220px;}
+.map-cell:hover{border-color:var(--bdrb);box-shadow:0 4px 18px rgba(77,184,255,0.1);}
+.map-cell-label{display:flex;align-items:center;gap:7px;padding:7px 10px 6px;background:rgba(255,255,255,0.025);border-bottom:1px solid var(--bdr);font-family:var(--cond);font-size:12px;font-weight:700;color:#cfe2f5;letter-spacing:.8px;text-transform:uppercase;position:relative;}
+.map-cell-ic{font-size:14px;}
+.map-cell-ext{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);text-decoration:none;line-height:1;transition:color .15s;}
+.map-cell-ext:hover{color:var(--acc);}
+.map-cell-frame{flex:1;position:relative;min-height:0;}
+.windy-frame{width:100%;height:100%;border:none;display:block;}
+/* Shield: transparent overlay that captures scroll, click activates iframe */
+.map-cell-shield{position:absolute;inset:0;z-index:2;cursor:crosshair;transition:opacity .2s;}
+.map-cell-shield.active{display:none;}
+.map-cell-frame:hover .map-cell-shield{opacity:0;pointer-events:none;}
+
+
+/* ═══ Weather Dashboard (IMG_6875 reference) ═══ */
+.wdb-wrap{display:flex;flex-direction:column;gap:10px;}
+/* TOP ROW: hero + forecast strip */
+.wdb-top{display:grid;grid-template-columns:300px 1fr;gap:10px;align-items:stretch;}
+@media(max-width:900px){.wdb-top{grid-template-columns:1fr;}}
+/* Hero card */
+.wdb-hero{background:linear-gradient(135deg,rgba(60,35,10,0.7),rgba(20,30,60,0.85));border:1px solid var(--bdr);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.wdb-hero-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.wdb-hero-loc{font-family:var(--cond);font-size:16px;font-weight:700;color:#dce9f7;display:flex;align-items:center;gap:5px;}
+.wdb-hero-upd{font-family:var(--cond);font-size:10px;color:var(--muted);letter-spacing:.4px;text-align:right;}
+.wdb-hero-body{display:flex;align-items:center;gap:14px;}
+.wdb-hero-ico{flex-shrink:0;}
+.wdb-hero-big{font-family:var(--cond);font-size:44px;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px;}
+.wdb-deg{font-size:24px;font-weight:700;color:rgba(255,255,255,0.7);}
+.wdb-hero-desc{font-family:var(--cond);font-size:15px;font-weight:600;color:#adc8e8;letter-spacing:.3px;}
+.wdb-hero-pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px;}
+.wdb-hero-pill{flex:1;min-width:70px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 8px;font-family:var(--cond);font-size:12px;font-weight:700;color:#adc8e8;cursor:pointer;text-align:center;transition:all .2s;}
+.wdb-hero-pill span{font-size:13px;font-weight:800;color:#fff;display:block;margin-top:2px;}
+.wdb-hero-pill.active{background:rgba(77,184,255,0.15);border-color:rgba(77,184,255,0.5);color:#4db8ff;}
+.wdb-hero-pill:hover:not(.active){background:rgba(255,255,255,0.1);}
+/* Forecast strip */
+.wdb-fstrip{display:flex;gap:7px;align-items:stretch;overflow-x:auto;padding:4px 2px;}
+.wdb-fstrip-card{flex:1;min-width:72px;background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .2s,background .2s;}
+.wdb-fstrip-card:hover{background:rgba(255,255,255,0.08);border-color:var(--bdrb);}
+.wdb-fstrip-ico{line-height:1;}
+.wdb-fstrip-day{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.wdb-fstrip-temp{font-family:var(--cond);font-size:13px;font-weight:800;color:#fff;}
+/* MID ROW: chart + sunrise */
+.wdb-mid{display:grid;grid-template-columns:1fr 160px;gap:10px;align-items:start;}
+@media(max-width:700px){.wdb-mid{grid-template-columns:1fr;}}
+.wdb-chart-wrap{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:14px;padding:14px 14px 8px;}
+.wdb-chart-svg{width:100%;height:120px;display:block;overflow:visible;}
+.wdb-sunrise{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:14px;padding:14px;}
+.wdb-sun-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.wdb-sun-row:last-child{border-bottom:none;}
+.wdb-sun-lbl{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.4px;}
+.wdb-sun-time{font-family:var(--cond);font-size:17px;font-weight:800;color:#fff;}
+.wdb-section-ttl{font-family:var(--cond);font-size:13px;font-weight:700;color:#cfe2f5;letter-spacing:.4px;margin-bottom:8px;}
+/* BOTTOM ROW */
+.wdb-bot{display:grid;grid-template-columns:220px 1fr 180px;gap:10px;align-items:start;}
+@media(max-width:900px){.wdb-bot{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.wdb-bot{grid-template-columns:1fr;}}
+/* Metrics 2×3 grid */
+.wdb-metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.wdb-metric{background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color .2s;}
+.wdb-metric:hover{border-color:var(--bdrb);}
+.wdb-metric-hd{display:flex;align-items:center;gap:5px;font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.4px;}
+.wdb-metric-val{font-family:var(--cond);font-size:20px;font-weight:800;color:#fff;line-height:1;}
+.wdb-metric-unit{font-size:12px;font-weight:600;color:var(--muted);}
+/* Air quality */
+.wdb-aq-wrap{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:14px;padding:14px;}
+.wdb-aq-body{display:flex;align-items:center;gap:12px;}
+.wdb-aq-gauge{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+.wdb-aq-msg{font-family:var(--cond);font-size:9px;color:var(--muted);text-align:center;max-width:110px;letter-spacing:.3px;}
+.wdb-aq-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;flex:1;}
+.wdb-aq-row{display:flex;align-items:center;gap:7px;}
+.wdb-aq-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.wdb-aq-val{font-family:var(--cond);font-size:18px;font-weight:800;color:#fff;min-width:32px;}
+.wdb-aq-lbl{font-family:var(--cond);font-size:10px;color:var(--muted);letter-spacing:.4px;}
+/* Rain probability bars */
+.wdb-rain-wrap{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:14px;padding:14px;}
+.wdb-rain-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.wdb-rain-day{font-family:var(--cond);font-size:11px;color:var(--muted);width:46px;flex-shrink:0;letter-spacing:.3px;}
+.wdb-rain-bar-bg{flex:1;height:7px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;}
+.wdb-rain-bar-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:4px;transition:width .6s cubic-bezier(.22,.61,.36,1);}
+.wdb-rain-pct{font-family:var(--mono);font-size:9px;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
+.wdb-rain-scale{display:flex;justify-content:space-between;font-family:var(--cond);font-size:9px;color:var(--muted);margin-top:4px;opacity:.6;}
+.wdb-loading{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;padding:12px 0;}
+
 </style>
 </head>
 <body>
@@ -1115,6 +1207,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="forecast"><span class="tab-i">&#127782;</span>Forecast</button>
+  <button class="tab" data-tab="mapping"><span class="tab-i">&#127752;</span>Mapping</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>Live ATC</button>
 </nav>
 
@@ -1404,6 +1497,65 @@ body.tab-hidden *{animation-play-state:paused !important;}
   </div>
 
   <!-- ATC -->
+  <div id="tab-mapping" class="tpanel hidden">
+    <div class="map-tab-wrap">
+      <div class="map-tab-hdr">
+        <span class="map-tab-title">&#127752; ABC Islands &mdash; Live Weather Maps</span>
+        <span class="map-tab-sub">Aruba &middot; Cura&ccedil;ao &middot; Bonaire &middot; zoom locked</span>
+      </div>
+      <div class="map-tab-grid" id="mapTabGrid">
+        <div class="map-cell" data-overlay="radar">
+          <div class="map-cell-label"><span class="map-cell-ic">&#127928;</span>Radar</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C&radarRange=-1" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield" title="Click to interact, scroll outside to pan page"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?radar,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+        <div class="map-cell" data-overlay="satellite">
+          <div class="map-cell-label"><span class="map-cell-ic">&#127760;</span>Satellite</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=satellite&product=satellite&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?satellite,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+        <div class="map-cell" data-overlay="clouds">
+          <div class="map-cell-label"><span class="map-cell-ic">&#9925;</span>Clouds</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=clouds&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?clouds,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+        <div class="map-cell" data-overlay="dust">
+          <div class="map-cell-label"><span class="map-cell-ic">&#127755;</span>Dust</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=dust&product=cams&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?dust,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+        <div class="map-cell" data-overlay="waves">
+          <div class="map-cell-label"><span class="map-cell-ic">&#127754;</span>Waves</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=waves&product=gfs&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?waves,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+        <div class="map-cell" data-overlay="wind">
+          <div class="map-cell-label"><span class="map-cell-ic">&#128168;</span>Wind</div>
+          <div class="map-cell-frame">
+            <iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=8&level=surface&overlay=wind&product=gfs&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" loading="lazy" frameborder="0" scrolling="no" referrerpolicy="no-referrer" allow="fullscreen"></iframe>
+            <div class="map-cell-shield"></div>
+          </div>
+          <a class="map-cell-ext" href="https://www.windy.com/?wind,12.3,-69.0,8" target="_blank" rel="noopener" title="Open in Windy">&#8599;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="tab-atc" class="tpanel hidden">
     <div class="atc-layout">
       <div class="adsbcard">
@@ -2788,7 +2940,7 @@ const panels = {
   monitor: byId('tab-monitor'),
   metar: byId('tab-metar'), taf: byId('tab-taf'),
   synop: byId('tab-synop'), stations: byId('tab-stations'),
-  weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc')
+  weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc'), mapping: byId('tab-mapping')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -2812,6 +2964,15 @@ function switchTab(name){
   if(name==='monitor'){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
     else { updateMonitor(); }
+  }
+  if(name==='mapping'){
+    // Lazy-load iframes on first open (src set to about:blank until then)
+    if(!window.__mappingLoaded){
+      window.__mappingLoaded = true;
+      document.querySelectorAll('#tab-mapping .windy-frame').forEach(function(f){
+        if(f.dataset.src) f.src = f.dataset.src;
+      });
+    }
   }
 }
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
@@ -2843,6 +3004,27 @@ byId('help-btn').addEventListener('click',()=>byId('help-modal').classList.remov
     if(e.key === 'Escape' && !modal.classList.contains('hidden')){ modal.classList.add('hidden'); }
   });
 })();
+
+/* ── Mapping tab: shield click-to-interact ── */
+(function(){
+  function initShields(){
+    document.querySelectorAll('.map-cell-shield').forEach(function(shield){
+      shield.addEventListener('click', function(){
+        shield.classList.add('active');
+        // auto-deactivate if mouse leaves the cell
+        var cell = shield.closest('.map-cell');
+        if(cell){
+          function onLeave(){ shield.classList.remove('active'); cell.removeEventListener('mouseleave',onLeave); }
+          cell.addEventListener('mouseleave', onLeave);
+        }
+      });
+    });
+  }
+  // Run after DOM ready
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initShields);
+  else initShields();
+})();
+
 
 byId('refresh-btn').addEventListener('click',async()=>{
   const b=byId('refresh-btn'); b.disabled=true;
@@ -2909,7 +3091,7 @@ async function fetchWxExtra(key){
   const s = WX_STNS[key]; if(!s) return;
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}`+
-      `&current=uv_index&daily=sunrise,sunset,uv_index_max&timezone=auto&forecast_days=1`;
+      `&current=uv_index&daily=sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto&forecast_days=7`;
     const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), 3500);
     const res = await fetch(url, {signal:ctrl.signal, cache:'default'});
     clearTimeout(t);
@@ -2917,11 +3099,38 @@ async function fetchWxExtra(key){
     const j = await res.json();
     const uv = (j.current && j.current.uv_index != null) ? j.current.uv_index
              : (j.daily && j.daily.uv_index_max ? j.daily.uv_index_max[0] : null);
+    // Build 7-day forecast array
+    const fc = [];
+    if(j.daily && j.daily.time){
+      j.daily.time.forEach((t,i)=>{
+        fc.push({
+          date:        t,
+          temp_max:    j.daily.temperature_2m_max    ? j.daily.temperature_2m_max[i]    : null,
+          temp_min:    j.daily.temperature_2m_min    ? j.daily.temperature_2m_min[i]    : null,
+          precip_prob: j.daily.precipitation_probability_max ? j.daily.precipitation_probability_max[i] : null,
+          wmo:         j.daily.weathercode           ? j.daily.weathercode[i]           : null,
+        });
+      });
+    }
     WX_EXTRA[key] = {
       uv,
       sunrise: j.daily && j.daily.sunrise ? j.daily.sunrise[0] : null,
-      sunset:  j.daily && j.daily.sunset  ? j.daily.sunset[0]  : null
+      sunset:  j.daily && j.daily.sunset  ? j.daily.sunset[0]  : null,
+      forecast: fc
     };
+    // Fetch air quality separately (Open-Meteo Air Quality API)
+    try {
+      const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${s.lat}&longitude=${s.lon}&current=pm10,pm2_5,ozone,sulphur_dioxide,carbon_monoxide,nitrogen_dioxide,european_aqi`;
+      const aqRes = await fetch(aqUrl, {cache:'default', signal:AbortSignal.timeout(4000)});
+      if(aqRes.ok){
+        const aq = await aqRes.json();
+        const c = aq.current || {};
+        WX_EXTRA[key].aq = {
+          pm10: c.pm10, pm25: c.pm2_5, o3: c.ozone, so2: c.sulphur_dioxide,
+          co: c.carbon_monoxide, no2: c.nitrogen_dioxide, aqi: c.european_aqi
+        };
+      }
+    } catch(e){}
   } catch(e){ /* leave WX_EXTRA[key] as-is */ }
 }
 const WX_HISTORY = {aruba:[], curacao:[], bonaire:[]};
@@ -3060,122 +3269,261 @@ function renderWxCard(key, P){
   const body = card.querySelector('[data-field="body"]');
   const timeEl = card.querySelector('[data-field="time"]');
   if(!P || P.empty){
-    body.innerHTML = `<div class="wx-cc-loading">\u26a0 No data available \u2014 source offline</div>`;
+    body.innerHTML = `<div style="padding:24px;text-align:center;font-family:var(--cond);color:var(--muted);font-size:12px;letter-spacing:1px;">\u26a0 No data \u2014 source offline</div>`;
     return;
   }
   wxPushHistory(key, P);
   if(P.time && timeEl) timeEl.textContent = P.time;
-  let sev = '';
-  if((P.ww !== undefined && P.ww >= 95) || (P.precip_mm > 10) || (P.vis_m !== undefined && P.vis_m < 1000)) sev = 'crit';
-  else if(P.precip_mm > 0 || (P.vis_m !== undefined && P.vis_m < 5000) || (P.ww !== undefined && P.ww >= 50)) sev = 'wrn';
-  card.className = 'wcard' + (sev ? ' '+sev : '');
 
-  const extra = (typeof WX_EXTRA === 'object' && WX_EXTRA[key]) ? WX_EXTRA[key] : {};
-  const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const extra  = WX_EXTRA[key] || {};
+  const fc     = extra.forecast || null;          // 7-day daily forecast array
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now    = new Date();
+  const COMPASS= ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 
-  // ── Wind tile ──
-  const windKt = P.wind_kt != null ? P.wind_kt : null;
-  const windMph = windKt != null ? Math.round(windKt * 1.15078) : null;
+  // ── Fields ──────────────────────────────────────────────────────────────
+  const temp    = P.temp_c   != null ? P.temp_c   : null;
+  const feels   = P.feels_c  != null ? P.feels_c  : (temp != null && P.rh != null ? calcFeelsMonitor(temp, P.rh) : null);
+  const rh      = P.rh       != null ? P.rh       : null;
+  const dew     = P.dew_c    != null ? P.dew_c    : null;
+  const windKt  = P.wind_kt  != null ? P.wind_kt  : null;
   const windDir = (typeof P.wind_dir === 'number') ? P.wind_dir : null;
+  const windKph = windKt != null ? (windKt * 1.852).toFixed(1) : null;
   const dirName = windDir != null ? COMPASS[Math.round(windDir/22.5)%16] : (P.wind_dir_text || '\u2014');
-  const dirFull = {N:'north',NNE:'north-northeast',NE:'northeast',ENE:'east-northeast',E:'east',ESE:'east-southeast',SE:'southeast',SSE:'south-southeast',S:'south',SSW:'south-southwest',SW:'southwest',WSW:'west-southwest',W:'west',WNW:'west-northwest',NW:'northwest',NNW:'north-northwest'}[dirName] || dirName;
-  const bft = windKt==null ? '' : windKt<1?'Calm':windKt<4?'Light':windKt<7?'Light':windKt<11?'Gentle':windKt<17?'Moderate':windKt<22?'Fresh':windKt<28?'Strong':windKt<34?'Near gale':'Gale';
-  const windBlob = wxWindBlob(windDir, dirName);
+  const slp     = P.slp      != null ? P.slp      : null;
+  const vis     = P.vis_m    != null ? (P.vis_m/1000).toFixed(1) : null;
+  const precip  = P.precip_mm!= null ? P.precip_mm : null;
+  const uv      = extra.uv   != null ? extra.uv   : null;
+  const uvLbl   = uv==null?'\u2014':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very high':'Extreme';
+  const wxDesc  = P.wx_desc  || (P.cloud_oktas!=null ? (['Clear','Clear','Few clouds','Few clouds','Scattered','Scattered','Broken','Broken','Overcast','Sky obscured'][P.cloud_oktas]||'Cloudy') : 'Loading\u2026');
+  const s = WX_STNS[key];
 
-  // ── Humidity tile ──
-  const rh = P.rh != null ? P.rh : null;
-  const dew = P.dew_c != null ? P.dew_c : null;
-  const dewF = dew != null ? Math.round(dew*9/5+32) : null;
-  const capFill = rh != null ? Math.max(2, Math.min(100, rh)) : 0;
+  // Sunrise/sunset
+  function fmtTime(iso){ if(!iso) return '\u2014'; const d=new Date(iso); let h=d.getHours(),m=d.getMinutes(); const ap=h<12?'AM':'PM'; let hh=h%12||12; return hh+':'+(m<10?'0':'')+m+' '+ap; }
+  const sunrise = fmtTime(extra.sunrise);
+  const sunset  = fmtTime(extra.sunset);
 
-  // ── UV tile ──
-  const uv = extra.uv != null ? extra.uv : null;
-  const uvLbl = uv==null?'\u2014':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very high':'Extreme';
+  // ── 7-day forecast strip ─────────────────────────────────────────────────
+  let forecastStrip = '';
+  if(fc && fc.length){
+    forecastStrip = fc.slice(0,7).map((d,i)=>{
+      const dt  = new Date(d.date); dt.setHours(12);
+      const day = i===0?'Today':DAYS[dt.getDay()];
+      const t   = d.temp_max!=null ? d.temp_max.toFixed(1) : '\u2014';
+      const ico = buildWxIconSvg(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
+      return `<div class="wdb-fstrip-card">
+        <div class="wdb-fstrip-ico">${ico}</div>
+        <div class="wdb-fstrip-day">${day}</div>
+        <div class="wdb-fstrip-temp">${t} \u00b0C</div>
+      </div>`;
+    }).join('');
+  }
 
-  // ── Pressure tile ──
-  const slp = P.slp != null ? P.slp : null;
-  const inHg = slp != null ? (slp*0.0295300).toFixed(2) : null;
-  const inHgWhole = inHg != null ? String(inHg).split('.')[0] : '\u2014';
-  const inHgFrac  = inHg != null ? '.'+String(inHg).split('.')[1] : '';
-  // map 980..1040 hPa -> 0..1 for the arc
-  const presPct = slp != null ? Math.max(0, Math.min(1, (slp-980)/60)) : 0.5;
-  const presArc = wxPresArc(presPct);
+  // ── Forecast line chart ──────────────────────────────────────────────────
+  let chartSvg = '';
+  if(fc && fc.length >= 2){
+    const W=480, H=120, padL=32, padR=20, padT=28, padB=28;
+    const vals = fc.slice(0,7).map(d=>d.temp_max!=null?d.temp_max:null).filter(v=>v!=null);
+    if(vals.length >= 2){
+      const mn = Math.min(...vals)-0.5, mx = Math.max(...vals)+0.5;
+      const pts = fc.slice(0,7).map((d,i,arr)=>{
+        const x = padL + (i/(arr.length-1))*(W-padL-padR);
+        const v = d.temp_max!=null?d.temp_max:null;
+        const y = v!=null ? padT + (1-(v-mn)/(mx-mn))*(H-padT-padB) : null;
+        const dt= new Date(d.date); dt.setHours(12);
+        return {x, y, v, day:i===0?'Today':DAYS[dt.getDay()]};
+      });
+      const linePts = pts.filter(p=>p.y!=null);
+      const path = 'M'+linePts.map(p=>p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' L');
+      // gradient fill area
+      const area = 'M'+linePts[0].x.toFixed(1)+' '+H+' L'+linePts.map(p=>p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' L')+' L'+linePts[linePts.length-1].x.toFixed(1)+' '+H+' Z';
+      const dots = pts.map(p=>p.y!=null?`
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="#1a3a6a" stroke="#4db8ff" stroke-width="2"/>
+        <rect x="${(p.x-22).toFixed(1)}" y="${(p.y-20).toFixed(1)}" width="44" height="16" rx="5" fill="#c8720a"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y-9).toFixed(1)}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="10" font-weight="700" fill="#fff">${p.v.toFixed(1)} \u00b0C</text>
+        <text x="${p.x.toFixed(1)}" y="${(H-6).toFixed(1)}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="10" fill="rgba(140,180,220,0.7)">${p.day}</text>
+      `:'').join('');
+      // y-axis labels
+      const yLabels = [mx, (mx+mn)/2, mn].map((v,i)=>{
+        const y = padT + (i/2)*(H-padT-padB);
+        return `<text x="${padL-4}" y="${(y+4).toFixed(1)}" text-anchor="end" font-family="Barlow Condensed,sans-serif" font-size="10" fill="rgba(140,180,220,0.5)">${v.toFixed(0)}</text>`;
+      }).join('');
+      chartSvg = `<svg viewBox="0 0 ${W} ${H}" class="wdb-chart-svg" preserveAspectRatio="none">
+        <defs><linearGradient id="fcg${key}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4db8ff" stop-opacity="0.25"/><stop offset="1" stop-color="#4db8ff" stop-opacity="0.01"/></linearGradient></defs>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(140,180,220,0.15)" stroke-width="1"/>
+        ${yLabels}
+        <path d="${area}" fill="url(#fcg${key})"/>
+        <path d="${path}" fill="none" stroke="#4db8ff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        ${dots}
+      </svg>`;
+    }
+  }
 
-  // ── Sunrise/sunset tile ──
-  const sunArc = wxSunArc(extra.sunrise, extra.sunset);
+  // ── Rain probability bars ────────────────────────────────────────────────
+  let rainBars = '';
+  if(fc && fc.length){
+    rainBars = fc.slice(0,7).map((d,i)=>{
+      const dt  = new Date(d.date); dt.setHours(12);
+      const day = i===0?'Today':DAYS[dt.getDay()];
+      const pct = d.precip_prob!=null ? Math.round(d.precip_prob) : 0;
+      return `<div class="wdb-rain-row">
+        <span class="wdb-rain-day">${day}</span>
+        <div class="wdb-rain-bar-bg"><div class="wdb-rain-bar-fill" style="width:${pct}%"></div></div>
+        <span class="wdb-rain-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
 
-  body.innerHTML = `
-  <div class="wx-cc">
-    <div class="wx-cc-title">Current conditions</div>
-    <div class="wx-cc-grid">
-      <div class="wx-cc-tile">
-        <div class="wx-cc-lbl">Wind</div>
-        <div class="wx-cc-body">
-          <div class="wx-cc-l">
-            <div class="wx-cc-big">${windMph!=null?windMph:'\u2014'} <small>mph</small></div>
-            <div class="wx-cc-sub">${bft}${dirFull!=='\u2014'?' \u00b7 From '+dirFull:''}</div>
-          </div>
-          <div class="wx-cc-r"><div class="wx-windblob">${windBlob}</div></div>
+  // ── Air quality (Open-Meteo air quality API, stored in extra.aq) ─────────
+  const aq = extra.aq || {};
+  function aqColor(v, thresholds){ // [green, yellow, orange, red]
+    const [g,y,o] = thresholds;
+    return v<=g?'#2ec97a':v<=y?'#fbbf24':v<=o?'#f59e0b':'#ef4444';
+  }
+  const pm10  = aq.pm10  != null ? Math.round(aq.pm10)  : null;
+  const pm25  = aq.pm25  != null ? Math.round(aq.pm25)  : null;
+  const o3    = aq.o3    != null ? Math.round(aq.o3)    : null;
+  const so2   = aq.so2   != null ? Math.round(aq.so2)   : null;
+  const co    = aq.co    != null ? Math.round(aq.co/10) : null; // ppb->rough
+  const no2   = aq.no2   != null ? Math.round(aq.no2)   : null;
+  const aqi   = aq.aqi   != null ? Math.round(aq.aqi)   : null;
+  const aqiLbl= aqi==null?'N/A':aqi<=50?'Good':aqi<=100?'Moderate':aqi<=150?'Unhealthy for sensitive':aqi<=200?'Unhealthy':'Very Unhealthy';
+  const aqiCol= aqi==null?'#4db8ff':aqi<=50?'#2ec97a':aqi<=100?'#fbbf24':aqi<=150?'#f59e0b':aqi<=200?'#ef4444':'#c084fc';
+  // AQI ring arc (0-200 mapped to 0-270 degrees)
+  function aqiArc(val, max, col){
+    const pct = Math.min(1, (val||0)/max);
+    const ang  = pct * 270 - 135; // -135 to +135
+    const r=44, cx=60, cy=60;
+    const a0=-135*Math.PI/180, a1=(ang)*Math.PI/180;
+    const x1=cx+r*Math.cos(a0), y1=cy+r*Math.sin(a0);
+    const x2=cx+r*Math.cos(a1), y2=cy+r*Math.sin(a1);
+    const large=pct>0.5?1:0;
+    return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  }
+  const aqSvg = `<svg viewBox="0 0 120 120" style="width:120px;height:120px;">
+    <circle cx="60" cy="60" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+    <path d="${aqiArc(aqi||0, 200, aqiCol)}" fill="none" stroke="${aqiCol}" stroke-width="10" stroke-linecap="round" style="filter:drop-shadow(0 0 6px ${aqiCol}88);"/>
+    <text x="60" y="53" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="11" font-weight="700" fill="${aqiCol}">${aqiLbl}</text>
+    <text x="60" y="73" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="26" font-weight="900" fill="#fff">${aqi!=null?aqi:'?'}</text>
+  </svg>`;
+  function aqRow(dot, val, lbl){ return `<div class="wdb-aq-row"><span class="wdb-aq-dot" style="background:${dot};"></span><span class="wdb-aq-val">${val!=null?val:'\u2014'}</span><span class="wdb-aq-lbl">${lbl}</span></div>`; }
+
+  // ── Metric tiles ─────────────────────────────────────────────────────────
+  function metricTile(ic, lbl, val, unit){
+    return `<div class="wdb-metric">
+      <div class="wdb-metric-hd">${ic} <span class="wdb-metric-lbl">${lbl}</span></div>
+      <div class="wdb-metric-val">${val!=null?val:'\u2014'} <span class="wdb-metric-unit">${unit}</span></div>
+    </div>`;
+  }
+
+  // ── Hero card ────────────────────────────────────────────────────────────
+  const heroIco = buildWxIconSvg(P.ww!=null?wmoToIcon(P.ww):(P.cloud_oktas!=null?cloudOktasToIcon(P.cloud_oktas):'sun'), 64);
+  const stationLbl = s ? s.name : key;
+  const lastUpd = `Last Updated, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+
+  body.innerHTML = `<div class="wdb-wrap">
+
+    <!-- Hero + 7-day strip -->
+    <div class="wdb-top">
+      <div class="wdb-hero">
+        <div class="wdb-hero-hd">
+          <div class="wdb-hero-loc">\u{1F4CD} ${stationLbl}</div>
+          <div class="wdb-hero-upd">${lastUpd}</div>
+        </div>
+        <div class="wdb-hero-body">
+          <div class="wdb-hero-ico">${heroIco}</div>
+          <div class="wdb-hero-big">${temp!=null?temp.toFixed(1):'\u2014'} <span class="wdb-deg">\u00b0C</span></div>
+        </div>
+        <div class="wdb-hero-desc">${wxDesc}</div>
+        <div class="wdb-hero-pills">
+          ${['aruba','curacao','bonaire'].map(k=>{
+            const ks=WX_STNS[k]; const kh=WX_HISTORY[k]; const kt=kh&&kh.length?kh[kh.length-1]:null;
+            return `<div class="wdb-hero-pill ${k===key?'active':''}" onclick="switchWxKey('${k}')">${ks?ks.name:k}<br><span>${kt&&kt.temp_c!=null?kt.temp_c.toFixed(1)+'\u00b0C':'\u2014'}</span></div>`;
+          }).join('')}
         </div>
       </div>
+      <div class="wdb-fstrip">${forecastStrip||'<div class="wdb-loading">Loading forecast\u2026</div>'}</div>
+    </div>
 
-      <div class="wx-cc-tile">
-        <div class="wx-cc-lbl">Humidity</div>
-        <div class="wx-cc-body">
-          <div class="wx-cc-l">
-            <div class="wx-cc-big">${rh!=null?rh:'\u2014'}<small>%</small></div>
-            <div class="wx-cc-sub">${dew!=null?'Dew point '+Math.round(dew)+'\u00b0':''}</div>
-          </div>
-          <div class="wx-cc-r">
-            <div class="wx-hum-cap">
-              <span class="wx-hum-scale">100</span>
-              <div class="wx-cap"><div class="wx-cap-fill" style="height:${capFill}%;"></div></div>
-              <span class="wx-hum-scale">0</span>
-            </div>
-          </div>
-        </div>
+    <!-- Forecast chart + Sunrise -->
+    <div class="wdb-mid">
+      <div class="wdb-chart-wrap">
+        <div class="wdb-section-ttl">Weather Forecast</div>
+        ${chartSvg||'<div class="wdb-loading">Loading chart\u2026</div>'}
       </div>
-
-      <div class="wx-cc-tile">
-        <div class="wx-cc-lbl">UV Index</div>
-        <div class="wx-cc-body">
-          <div class="wx-cc-l">
-            <div class="wx-cc-big">${uv!=null?Math.round(uv):'\u2014'}</div>
-            <div class="wx-cc-sub">${uvLbl}</div>
-          </div>
-          <div class="wx-cc-r">
-            <div class="wx-uvwrap">
-              <span class="wx-uv-scale">11+</span>
-              ${wxUvPoly(uv)}
-              <span class="wx-uv-scale">0</span>
-            </div>
-          </div>
+      <div class="wdb-sunrise">
+        <div class="wdb-section-ttl">Sunrise &amp; Sunset</div>
+        <div class="wdb-sun-row">
+          <svg viewBox="0 0 40 40" width="36" height="36"><circle cx="20" cy="20" r="8" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="2" stroke-linecap="round">${[0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180;return `<line x1="${(20+Math.sin(r)*11).toFixed(1)}" y1="${(20-Math.cos(r)*11).toFixed(1)}" x2="${(20+Math.sin(r)*15).toFixed(1)}" y2="${(20-Math.cos(r)*15).toFixed(1)}"/>`;}).join('')}</g></svg>
+          <div><div class="wdb-sun-lbl">Sunrise</div><div class="wdb-sun-time">${sunrise}</div></div>
         </div>
-      </div>
-
-      <div class="wx-cc-tile">
-        <div class="wx-cc-lbl">Pressure</div>
-        <div class="wx-cc-body">
-          <div class="wx-cc-l">
-            <div class="wx-cc-big">${inHgWhole}<small>${inHgFrac}</small></div>
-            <div class="wx-cc-sub">inHg${P.tend_type?' \u00b7 '+P.tend_type:''}</div>
-          </div>
-          <div class="wx-cc-r">
-            <div style="display:flex;flex-direction:column;align-items:center;">
-              ${presArc}
-              <div class="wx-presarc-lbls"><span>Low</span><span>High</span></div>
-            </div>
-          </div>
+        <div class="wdb-sun-row">
+          <svg viewBox="0 0 40 40" width="36" height="36"><path d="M8 28 A12 12 0 0 1 32 28" fill="#f59e0b" opacity="0.8"/><rect x="5" y="28" width="30" height="3" rx="1.5" fill="#1a3a6a"/><g stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" opacity="0.6">${[30,60,90,120,150].map(a=>{const r=a*Math.PI/180;return `<line x1="${(20+Math.sin(r)*14).toFixed(1)}" y1="${(28-Math.cos(r)*14).toFixed(1)}" x2="${(20+Math.sin(r)*18).toFixed(1)}" y2="${(28-Math.cos(r)*18).toFixed(1)}"/>`;}).join('')}</g></svg>
+          <div><div class="wdb-sun-lbl">Sunset</div><div class="wdb-sun-time">${sunset}</div></div>
         </div>
-      </div>
-
-      <div class="wx-cc-tile full">
-        <div class="wx-cc-lbl">Sunrise &amp; sunset</div>
-        ${sunArc}
       </div>
     </div>
+
+    <!-- Metrics + Air Quality + Rain -->
+    <div class="wdb-bot">
+      <div class="wdb-metrics-grid">
+        ${metricTile('\u{1F4A7}','Humidity',rh!=null?rh:'&mdash;','%')}
+        ${metricTile('\u{1F32C}','Wind Speed',windKph!=null?windKph:'&mdash;','Kph')}
+        ${metricTile('\u{1F441}','Visibility',vis!=null?vis:'&mdash;','Km')}
+        ${metricTile('\u{1F321}','Pressure',slp!=null?Math.round(slp):'&mdash;','mb')}
+        ${metricTile('\u2600','UV Index',uv!=null?uv.toFixed(0):'&mdash;',uvLbl)}
+        ${metricTile('\u{1F327}','Precipitation',precip!=null?precip.toFixed(2):'0.00','mm')}
+      </div>
+      <div class="wdb-aq-wrap">
+        <div class="wdb-section-ttl">Air Quality Overview</div>
+        <div class="wdb-aq-body">
+          <div class="wdb-aq-gauge">${aqSvg}<div class="wdb-aq-msg">${aqi!=null&&aqi<=50?'Air is clean and healthy':aqi!=null?'Check air conditions':'No AQ data'}</div></div>
+          <div class="wdb-aq-grid">
+            ${aqRow(aqColor(pm10||0,[54,154,254])  , pm10, 'PM10')}
+            ${aqRow(aqColor(o3  ||0,[100,160,200]) , o3,   'O3')}
+            ${aqRow(aqColor(so2 ||0,[20,80,250])   , so2,  'SO2')}
+            ${aqRow(aqColor(pm25||0,[12,35,55])    , pm25, 'PM2.5')}
+            ${aqRow(aqColor(co  ||0,[400,900,1200]), co,   'CO')}
+            ${aqRow(aqColor(no2 ||0,[40,100,200])  , no2,  'NO2')}
+          </div>
+        </div>
+      </div>
+      <div class="wdb-rain-wrap">
+        <div class="wdb-section-ttl">Chances of Rain</div>
+        ${rainBars||'<div class="wdb-loading">Loading\u2026</div>'}
+        <div class="wdb-rain-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+      </div>
+    </div>
+
   </div>`;
 }
+
+/* helper: WMO code → icon key */
+function wmoToIcon(wmo){
+  if(wmo==null) return 'sun';
+  if(wmo<=1)  return 'sun';
+  if(wmo<=3)  return 'cloud-sun';
+  if(wmo<=49) return 'fog';
+  if(wmo<=67) return 'rain';
+  if(wmo<=77) return 'snow';
+  if(wmo<=82) return 'showers';
+  if(wmo<=99) return 'thunder';
+  return 'sun';
+}
+function cloudOktasToIcon(n){
+  if(n<=1) return 'sun';
+  if(n<=3) return 'sun-cloud';
+  if(n<=5) return 'cloud-sun';
+  if(n<=7) return 'cloud';
+  return 'cloud';
+}
+/* city-switcher pill click */
+function switchWxKey(key){
+  const last = WX_HISTORY[key] && WX_HISTORY[key].length ? WX_HISTORY[key][WX_HISTORY[key].length-1] : null;
+  if(last) renderWxCard(key, last);
+}
+
 
 /* ── Weather-card SVG helpers ── */
 function wxWindBlob(dir, dirName){

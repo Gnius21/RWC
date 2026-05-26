@@ -1182,9 +1182,10 @@ body.tab-hidden *{animation-play-state:paused !important;}
   --ylw:#fbbf24;--ylwd:rgba(251,191,36,0.1);
   --pur:#e879f9;--purd:rgba(232,121,249,0.1);
 }
-:root.glass body{
-  background:linear-gradient(135deg,#1a0a3c 0%,#0d1a4a 50%,#0a2040 100%);
+:root.glass body,html:root.glass{
+  background:linear-gradient(135deg,#1a0a3c 0%,#0d1a4a 50%,#0a2040 100%) !important;
 }
+:root.glass{background:linear-gradient(135deg,#1a0a3c 0%,#0d1a4a 50%,#0a2040 100%);}
 :root.glass body::before{
   background:radial-gradient(ellipse 800px 600px at 20% 10%,rgba(124,58,237,0.2) 0%,transparent 60%),
              radial-gradient(ellipse 600px 500px at 80% 80%,rgba(59,130,246,0.15) 0%,transparent 55%);
@@ -1193,9 +1194,9 @@ body.tab-hidden *{animation-play-state:paused !important;}
   backdrop-filter:blur(12px) saturate(1.4);
   -webkit-backdrop-filter:blur(12px) saturate(1.4);
 }
-:root.glass .mon-tile,.glass .mcard,.glass .tcard,.glass .wcard,.glass .srow,
-:root.glass .gfx-card,.glass .gfx-tile,.glass .map-cell,.glass .wdb-metric,
-:root.glass .wdb-hero,.glass .wdb-chart-wrap,.glass .wdb-sunrise,.glass .wdb-aq-wrap,.glass .wdb-rain-wrap{
+:root.glass .mon-tile,:root.glass .mcard,:root.glass .tcard,:root.glass .wcard,:root.glass .srow,
+:root.glass .gfx-card,:root.glass .gfx-tile,:root.glass .map-cell,:root.glass .wdb-metric,
+:root.glass .wdb-hero,:root.glass .wdb-chart-wrap,:root.glass .wdb-sunrise,:root.glass .wdb-aq-wrap,:root.glass .wdb-rain-wrap{
   background:rgba(255,255,255,0.06);
   border-color:rgba(200,170,255,0.18);
   backdrop-filter:blur(8px);
@@ -1206,7 +1207,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
   box-shadow:0 5px 16px rgba(124,58,237,0.4),inset 0 1px 0 rgba(220,200,255,0.18);
   border-color:rgba(180,140,255,0.5);
 }
-:root.glass .topbar,.glass nav{
+:root.glass .topbar,:root.glass nav{
   background:rgba(255,255,255,0.04);
   backdrop-filter:blur(16px);
 }
@@ -1222,14 +1223,15 @@ body.tab-hidden *{animation-play-state:paused !important;}
   --ylw:#ffea00;--ylwd:rgba(255,234,0,0.1);
   --pur:#d500f9;--purd:rgba(213,0,249,0.1);
 }
-:root.neon body{background:var(--bg);}
+:root.neon body,html:root.neon{background:#0d0620 !important;}
+:root.neon{background:#0d0620;}
 :root.neon body::before{
   background:radial-gradient(ellipse 900px 700px at 10% 0%,rgba(76,0,180,0.35) 0%,transparent 60%),
              radial-gradient(ellipse 700px 500px at 90% 100%,rgba(0,150,255,0.15) 0%,transparent 55%);
 }
-:root.neon .mon-tile,.neon .mcard,.neon .tcard,.neon .wcard,.neon .srow,
-:root.neon .gfx-card,.neon .gfx-tile,.neon .map-cell,.neon .wdb-metric,
-:root.neon .wdb-hero,.neon .wdb-chart-wrap,.neon .wdb-sunrise,.neon .wdb-aq-wrap,.neon .wdb-rain-wrap{
+:root.neon .mon-tile,:root.neon .mcard,:root.neon .tcard,:root.neon .wcard,:root.neon .srow,
+:root.neon .gfx-card,:root.neon .gfx-tile,:root.neon .map-cell,:root.neon .wdb-metric,
+:root.neon .wdb-hero,:root.neon .wdb-chart-wrap,:root.neon .wdb-sunrise,:root.neon .wdb-aq-wrap,:root.neon .wdb-rain-wrap{
   background:linear-gradient(135deg,rgba(50,15,100,0.6),rgba(20,5,50,0.8));
   border-color:rgba(100,60,200,0.25);
 }
@@ -1244,6 +1246,8 @@ body.tab-hidden *{animation-play-state:paused !important;}
   animation:none;
 }
 :root.neon .chip{background:rgba(76,0,180,0.3);border-color:rgba(100,60,200,0.3);}
+:root.neon .chip.cwrn{background:rgba(120,60,0,0.4);}
+:root.neon .chip.cred{background:rgba(120,0,60,0.4);}
 :root.neon .wdb-rain-bar-fill{background:linear-gradient(90deg,#7c3aed,#00e5ff);}
 
 /* ── Theme & Icon settings panel ── */
@@ -3197,9 +3201,9 @@ async function fetchWxExtra(key){
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}`+
       `&current=uv_index&daily=sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto&forecast_days=7`;
-    const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), 3500);
+    const ctrl = new AbortController(); const wxTimer = setTimeout(()=>ctrl.abort(), 8000);
     const res = await fetch(url, {signal:ctrl.signal, cache:'default'});
-    clearTimeout(t);
+    clearTimeout(wxTimer);
     if(!res.ok) return;
     const j = await res.json();
     const uv = (j.current && j.current.uv_index != null) ? j.current.uv_index
@@ -3207,9 +3211,9 @@ async function fetchWxExtra(key){
     // Build 7-day forecast array
     const fc = [];
     if(j.daily && j.daily.time){
-      j.daily.time.forEach((t,i)=>{
+      j.daily.time.forEach((dateStr,i)=>{
         fc.push({
-          date:        t,
+          date:        dateStr,
           temp_max:    j.daily.temperature_2m_max    ? j.daily.temperature_2m_max[i]    : null,
           temp_min:    j.daily.temperature_2m_min    ? j.daily.temperature_2m_min[i]    : null,
           precip_prob: j.daily.precipitation_probability_max ? j.daily.precipitation_probability_max[i] : null,
@@ -5811,14 +5815,18 @@ function applyTheme(t){
   __currentTheme = t;
   localStorage.setItem('rwc-theme', t);
   const root = document.documentElement;
-  root.classList.remove('night','glass','neon');
+  // Only remove theme classes, never touch 'night'
+  root.classList.remove('glass','neon');
   if(t === 'glass') root.classList.add('glass');
   else if(t === 'neon') root.classList.add('neon');
-  // navy = default, no class needed
   // Update swatch active state
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
   });
+  // Force body background repaint for theme change
+  document.body.style.display='none';
+  document.body.offsetHeight; // reflow
+  document.body.style.display='';
 }
 
 function applyIconStyle(style){

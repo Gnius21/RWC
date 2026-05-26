@@ -542,10 +542,8 @@ tr:last-child td{border-bottom:none;}
 
 /* WEATHER TAB */
 #tab-weather{display:flex;flex-direction:column;gap:10px;}
-.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-@media(max-width:1100px){.wgrid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:680px){.wgrid{grid-template-columns:1fr;}}
-.wcard{border-radius:var(--rl);border:1px solid var(--bdr);background:var(--card);position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.wgrid{display:flex;flex-direction:column;gap:12px;}
+.wcard{border-radius:var(--rl);border:1px solid var(--bdr);background:var(--card);position:relative;overflow:auto;transition:border-color .2s,box-shadow .2s;}
 .wcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc2),var(--acc),transparent);z-index:2;}
 .wcard:hover{border-color:var(--bdrb);box-shadow:0 4px 18px rgba(77,184,255,0.08);}
 .wcard.crit{border-color:rgba(255,79,79,0.35);box-shadow:0 0 22px rgba(255,79,79,0.1);}
@@ -1301,7 +1299,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
       <button id="help-btn" class="bg" aria-label="Keyboard shortcuts" title="Show keyboard shortcuts">?</button>
       <button id="mute-btn" class="bg" aria-pressed="false" title="Mute alerts (M)">&#128266;</button>
       <button id="test-btn" class="bg" title="Test mode (T)">&#9879;</button>
-      <button id="settings-btn" class="bg" title="Theme &amp; Icons">⚙️</button>
+      <button id="settings-btn" class="bg" title="Settings: Theme &amp; Icons (S)">⚙️</button>
       <button id="night-btn" class="bg" aria-pressed="false" title="Toggle night mode (N)">&#127769;</button>
     </div>
   </div>
@@ -1723,20 +1721,20 @@ body.tab-hidden *{animation-play-state:paused !important;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; METAR &middot; TAF &middot; SYNOP &middot; Stations &middot; Weather &middot; Forecast &middot; ATC)</span>
+      <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 9</kbd><span>Switch tabs (Monitor &middot; METAR &middot; TAF &middot; SYNOP &middot; Stations &middot; Weather &middot; Forecast &middot; ATC &middot; Mapping)</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">T</kbd><span>Toggle test mode</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">Esc</kbd><span>Release ADS-B map interaction</span>
     </div>
-    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);font-family:var(--sans);font-size:10px;color:var(--muted);">All tabs auto-refresh in background &middot; METAR every 30s &middot; TAF/SYNOP/Stations every 5min</div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);font-family:var(--sans);font-size:10px;color:var(--muted);">All tabs auto-refresh in background &middot; METAR 30s &middot; TAF/SYNOP 5min &middot; Stations 60s &middot; Weather/Monitor 60s</div>
   </div>
 </div>
 
 <div class="footer">
   <div class="fbrand">&#11041; GNIUS &middot; RWC</div>
-  <div class="fnote" id="footer-note">Press <kbd style="font-family:var(--mono);padding:1px 5px;border:1px solid var(--bdrb);border-radius:3px;font-size:9px;">?</kbd> for shortcuts &middot; METAR 30s &middot; TAF/SYNOP/Stations 5min &middot; Forecast: Windy AROME + Ventusky HARMONIE</div>
+  <div class="fnote" id="footer-note">Press <kbd style="font-family:var(--mono);padding:1px 5px;border:1px solid var(--bdrb);border-radius:3px;font-size:9px;">?</kbd> for shortcuts &middot; METAR 30s &middot; TAF/SYNOP 5min &middot; Stations/Weather 60s &middot; Forecast 10min</div>
 </div>
 </div>
 
@@ -3092,13 +3090,15 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'metar','3':'taf','4':'synop','5':'stations','6':'weather','7':'forecast','8':'atc'};
+  const map={'1':'monitor','2':'metar','3':'taf','4':'synop','5':'stations','6':'weather','7':'forecast','8':'atc','9':'mapping'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
   else if(e.key==='n' || e.key==='N'){ byId('night-btn').click(); e.preventDefault(); }
   else if(e.key==='t' || e.key==='T'){ byId('test-btn').click(); e.preventDefault(); }
   else if(e.key==='?' || e.key==='/'){ byId('help-btn').click(); e.preventDefault(); }
+  else if(e.key==='s' || e.key==='S'){ byId('settings-btn').click(); e.preventDefault(); }
+  else if(e.key==='s' || e.key==='S'){ byId('settings-btn').click(); e.preventDefault(); }
 });
 
 /* ─── BUTTONS ─── */
@@ -3230,7 +3230,9 @@ async function fetchWxExtra(key){
     // Fetch air quality separately (Open-Meteo Air Quality API)
     try {
       const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${s.lat}&longitude=${s.lon}&current=pm10,pm2_5,ozone,sulphur_dioxide,carbon_monoxide,nitrogen_dioxide,european_aqi`;
-      const aqRes = await fetch(aqUrl, {cache:'default', signal:AbortSignal.timeout(4000)});
+      const aqCtrl=new AbortController(); const aqT=setTimeout(()=>aqCtrl.abort(),4000);
+      const aqRes = await fetch(aqUrl, {cache:'default', signal:aqCtrl.signal});
+      clearTimeout(aqT);
       if(aqRes.ok){
         const aq = await aqRes.json();
         const c = aq.current || {};
@@ -5784,7 +5786,7 @@ setInterval(() => { if(!testMode && !hidden()) refreshAllMetars(); }, 30000);
 setInterval(() => { if(!testMode && !hidden()){ loadAllTAFs(); loadAllSynops(); } }, 300000);
 setInterval(() => { if(!testMode && !hidden() && stationsTabOpened) fetchStationsData(); }, 60000);
 setInterval(() => { if(!testMode && !hidden() && forecastTabOpened) updateForecast(); }, 600000);
-setInterval(() => { if(!testMode && !hidden() && weatherTabOpened) updateWeatherTab(); }, 60000);
+setInterval(() => { if(!testMode && !hidden() && weatherTabOpened) updateWeatherTab(); }, 600000);
 
 function updateTitle(){
   let crit = 0, warn = 0;
@@ -5823,10 +5825,9 @@ function applyTheme(t){
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
   });
-  // Force body background repaint for theme change
-  document.body.style.display='none';
-  document.body.offsetHeight; // reflow
-  document.body.style.display='';
+  // Force CSS variable repaint without flash
+  document.documentElement.style.setProperty('--_r', Date.now());
+  requestAnimationFrame(()=>document.documentElement.style.removeProperty('--_r'));
 }
 
 function applyIconStyle(style){

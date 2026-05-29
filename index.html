@@ -1082,6 +1082,9 @@ body.tab-hidden *{animation-play-state:paused !important;}
 /* ═══ MAPPING TAB ═══ */
 #tab-mapping{overflow-y:auto;}
 .map-tab-wrap{display:flex;flex-direction:column;gap:10px;}
+.map-lock-btn{font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.5px;padding:6px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--bdrb);transition:all .2s;}
+.map-lock-btn.locked{background:rgba(46,201,130,0.15);border-color:rgba(46,201,130,0.5);color:#2ec97a;}
+.map-lock-btn.unlocked{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.5);color:#f59e0b;}
 .map-tab-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-shrink:0;}
 .map-tab-title{font-family:var(--cond);font-size:16px;font-weight:800;color:#dce9f7;letter-spacing:.3px;}
 .map-tab-sub{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.5px;}
@@ -1344,26 +1347,26 @@ body.tab-hidden *{animation-play-state:paused !important;}
 
 
 /* ═══ HOMEHABIT-STYLE DASHBOARD VIEW ═══ */
-.hh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;}
+.hh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-items:start;}
 @media(max-width:1100px){.hh-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:760px){.hh-grid{grid-template-columns:1fr;}}
-.hh-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
-.hh-sec-ttl{font-family:var(--cond);font-size:17px;font-weight:700;color:var(--txt);letter-spacing:.3px;margin:4px 2px 0;}
-.hh-card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;}
+.hh-col{display:flex;flex-direction:column;gap:9px;min-width:0;}
+.hh-sec-ttl{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--txt);letter-spacing:.3px;margin:2px 2px 0;}
+.hh-card{background:var(--card);border:1px solid var(--bdr);border-radius:13px;padding:11px;}
 /* Hero (weather today / week) */
 .hh-hero-top{display:flex;align-items:center;gap:12px;}
-.hh-hero-ico{width:64px;height:64px;flex-shrink:0;}
-.hh-hero-temp{font-family:var(--cond);font-size:46px;font-weight:300;color:var(--txt);line-height:1;letter-spacing:-1px;}
+.hh-hero-ico{width:48px;height:48px;flex-shrink:0;}
+.hh-hero-temp{font-family:var(--cond);font-size:36px;font-weight:300;color:var(--txt);line-height:1;letter-spacing:-1px;}
 .hh-hero-temp sup{font-size:20px;font-weight:400;vertical-align:super;opacity:.8;}
-.hh-hero-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px 10px;margin-top:12px;}
+.hh-hero-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 8px;margin-top:8px;}
 .hh-meta-item{display:flex;align-items:center;gap:6px;font-family:var(--cond);font-size:13px;color:var(--muted);}
 .hh-meta-item b{color:var(--txt);font-weight:600;}
 .hh-meta-ic{opacity:.7;font-size:13px;}
-.hh-hero-chart{margin-top:12px;height:90px;}
+.hh-hero-chart{margin-top:8px;height:64px;}
 .hh-hero-chart svg{width:100%;height:100%;overflow:visible;}
 /* Conditions list */
 .hh-cond-list{margin-top:10px;display:flex;flex-direction:column;}
-.hh-cond-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--bdr);}
+.hh-cond-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-top:1px solid var(--bdr);}
 .hh-cond-row:first-child{border-top:none;}
 .hh-cond-ic{width:30px;height:30px;flex-shrink:0;opacity:.85;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .hh-cond-lbl{flex:1;font-family:var(--cond);font-size:13.5px;color:var(--muted);}
@@ -1371,22 +1374,22 @@ body.tab-hidden *{animation-play-state:paused !important;}
 /* Metric card with sparkline */
 .hh-metric-ttl{display:flex;align-items:center;justify-content:space-between;font-family:var(--cond);font-size:14px;color:var(--muted);letter-spacing:.3px;}
 .hh-metric-ic{opacity:.6;font-size:15px;}
-.hh-metric-val{font-family:var(--cond);font-size:34px;font-weight:300;color:var(--txt);line-height:1.1;margin-top:2px;}
+.hh-metric-val{font-family:var(--cond);font-size:26px;font-weight:300;color:var(--txt);line-height:1.1;margin-top:1px;}
 .hh-metric-val small{font-size:15px;font-weight:400;color:var(--muted);}
-.hh-spark{height:48px;margin-top:6px;margin-left:-16px;margin-right:-16px;margin-bottom:-16px;}
+.hh-spark{height:34px;margin-top:4px;margin-left:-11px;margin-right:-11px;margin-bottom:-11px;}
 .hh-spark svg{width:100%;height:100%;display:block;}
 /* Windy map embed */
-.hh-map{border-radius:12px;overflow:hidden;position:relative;height:200px;background:#0a1525;margin-bottom:0;}
+.hh-map{border-radius:11px;overflow:hidden;position:relative;height:150px;background:#0a1525;margin-bottom:0;}
 .hh-map iframe{width:100%;height:100%;border:none;display:block;}
 .hh-map-label{position:absolute;top:8px;left:10px;z-index:3;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;background:rgba(8,18,40,0.7);padding:3px 8px;border-radius:5px;backdrop-filter:blur(4px);}
 .hh-map-shield{position:absolute;inset:0;z-index:2;cursor:pointer;}
 .hh-map-shield.active{display:none;}
 /* Wind compass */
-.hh-compass{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;}
-.hh-compass svg{width:130px;height:130px;}
+.hh-compass{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;}
+.hh-compass svg{width:96px;height:96px;}
 /* AQI / generic value rows */
 .hh-aqrow-ttl{display:flex;align-items:center;justify-content:space-between;font-family:var(--cond);font-size:14px;color:var(--muted);}
-.hh-aqrow-val{font-family:var(--cond);font-size:34px;font-weight:300;color:var(--txt);line-height:1.1;}
+.hh-aqrow-val{font-family:var(--cond);font-size:26px;font-weight:300;color:var(--txt);line-height:1.1;}
 .hh-aqrow-val small{font-size:14px;color:var(--muted);}
 .hh-note{font-family:var(--cond);font-size:12px;color:var(--muted);font-style:italic;margin-top:4px;}
 
@@ -1435,6 +1438,37 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .pw-cond-l{font-family:var(--cond);font-size:13px;color:var(--muted);}
 .pw-cond-v{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--txt);}
 .pw-note{font-family:var(--cond);font-size:11px;color:var(--muted);line-height:1.5;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:12px;padding:11px 14px;}
+
+
+/* ── Responsive optimization (mobile + desktop) ── */
+*{-webkit-tap-highlight-color:transparent;}
+html,body{max-width:100%;overflow-x:hidden;}
+/* Tablet / small laptop: tabs scroll horizontally so all 10 stay tappable */
+@media(max-width:820px){
+  .tabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;min-width:64px;scroll-snap-align:start;}
+  .tabs{scroll-snap-type:x proximity;}
+}
+/* Phones: comfortable tap targets, readable labels */
+@media(max-width:560px){
+  .page{padding:7px 7px;gap:8px;}
+  .tab{min-width:58px;min-height:46px;padding:8px 7px;font-size:10px;}
+  .tab-i{font-size:15px;}
+  .hh-grid,.pw-gauges,.pw-charts,.pw-stats{gap:8px;}
+  .hh-hero-temp{font-size:32px;}
+  .pw-hd-clock{font-size:22px;}
+  .pw-gauge-val{font-size:26px;}
+  /* settings panel full-width on phones */
+  #settings-panel{right:7px;left:7px;width:auto;top:50px;}
+  /* map cells taller-but-single-column already handled; ensure shields tappable */
+  .map-cell{min-height:300px;}
+  .map-lock-btn{font-size:11px;padding:5px 10px;}
+}
+/* Large desktop: use more width */
+@media(min-width:1600px){
+  .topbar,.tabs,.content,.footer{max-width:1600px;}
+}
 
 </style>
 </head>
@@ -1549,9 +1583,10 @@ body.tab-hidden *{animation-play-state:paused !important;}
       <div class="mon-tile mon-uv">
         <div class="mon-row">
           <div class="mon-left">
-            <div class="mon-lbl">UV Index</div>
+            <div class="mon-lbl">UV Index <span style="font-size:9px;opacity:.6;">&middot; Zonkracht</span></div>
             <div class="mon-big" id="monUvVal">&mdash;</div>
             <div class="mon-sm" id="monUvLabel">&mdash;</div>
+            <div class="mon-sm" id="monZonkracht" style="margin-top:3px;font-size:11px;">&mdash;</div>
           </div>
           <div class="mon-icon-r"><svg class="mon-gauge" viewBox="0 0 80 80" id="monUvGauge"></svg></div>
         </div>
@@ -1784,7 +1819,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
     <div class="map-tab-wrap">
       <div class="map-tab-hdr">
         <span class="map-tab-title">&#127752; ABC Islands &mdash; Live Weather Maps</span>
-        <span class="map-tab-sub">Aruba &middot; Cura&ccedil;ao &middot; Bonaire &middot; zoom locked</span>
+        <button id="mapLockToggle" class="map-lock-btn locked" onclick="toggleMapLock()">&#128274; Screen Lock: ON</button>
       </div>
       <div class="map-tab-grid" id="mapTabGrid">
         <div class="map-cell" data-overlay="radar">
@@ -3694,7 +3729,7 @@ function renderWxCard(key, P){
       const dt  = new Date(d.date); dt.setHours(12);
       const day = i===0?'Today':DAYS[dt.getDay()];
       const t   = d.temp_max!=null ? d.temp_max.toFixed(1) : '\u2014';
-      const ico = wxIcon(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
+      const ico = wxIconStyled(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
       return `<div class="wdb-fstrip-card">
         <div class="wdb-fstrip-ico">${ico}</div>
         <div class="wdb-fstrip-day">${day}</div>
@@ -3801,7 +3836,7 @@ function renderWxCard(key, P){
   }
 
   // ── Hero card ────────────────────────────────────────────────────────────
-  const heroIco = wxIcon(P.ww!=null?wmoToIcon(P.ww):(P.cloud_oktas!=null?cloudOktasToIcon(P.cloud_oktas):'sun'), 64);
+  const heroIco = wxIconStyled(P.ww!=null?wmoToIcon(P.ww):(P.cloud_oktas!=null?cloudOktasToIcon(P.cloud_oktas):'sun'), 64);
   const stationLbl = s ? s.name : key;
   const lastUpd = `Last Updated, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
 
@@ -4380,10 +4415,23 @@ function renderMonitor(data){
     byId('monUvLabel').textContent = lbl;
     byId('monUvLabel').style.color = col;
     byId('monUvGauge').innerHTML = buildRainbowGauge(uv);
+    // Zonkracht (KNMI sun-strength scale = UV index, rounded). 3+ = skin can burn.
+    const zk = Math.round(uv);
+    const zEl = byId('monZonkracht');
+    if(zEl){
+      let zmsg;
+      if(zk >= 8)      zmsg = 'Zonkracht ' + zk + ' \u2014 zeer sterk, bescherm je goed';
+      else if(zk >= 6) zmsg = 'Zonkracht ' + zk + ' \u2014 sterk, huid verbrandt snel';
+      else if(zk >= 3) zmsg = 'Zonkracht ' + zk + ' \u2014 huid kan verbranden';
+      else             zmsg = 'Zonkracht ' + zk + ' \u2014 laag, weinig risico';
+      zEl.textContent = '\u2600 ' + zmsg;
+      zEl.style.color = zk >= 3 ? col : 'var(--muted)';
+    }
   } else {
     byId('monUvVal').textContent = '\u2014';
     byId('monUvLabel').textContent = 'Loading\u2026';
     byId('monUvGauge').innerHTML = buildRainbowGauge(0);
+    const zEl = byId('monZonkracht'); if(zEl) zEl.textContent = '\u2014';
   }
   const windEl = byId('monWindRose');
   if(synopP && synopP.wind_dir != null && synopP.wind_kt != null){
@@ -5226,7 +5274,7 @@ function renderHomeView(data){
   var sunrise=fmtTime(omD.sunrise&&omD.sunrise[0]);
   var sunset =fmtTime(omD.sunset&&omD.sunset[0]);
   var wmo = _monWmoFromData(d);
-  var heroIco = buildWxIconSvg(wmo.icon, 64);
+  var heroIco = wxIconStyled(wmo.icon, 64);
 
   // forecast week (from __lastForecastData if available)
   var fc = (typeof __lastForecastData==='object' && __lastForecastData && __lastForecastData.days) ? __lastForecastData.days : null;
@@ -5598,7 +5646,7 @@ function buildRealisticIcon(key, size){
 
 /* ── Main icon dispatcher ─────────────────────────────────────────────── */
 const _origBuildWxIconSvg = buildWxIconSvg;
-function wxIcon(key, size){
+function wxIconStyled(key, size){
   if(__iconStyle === 'outline')   return buildOutlineIcon(key, size);
   if(__iconStyle === 'realistic') return buildRealisticIcon(key, size);
   return buildWxIconSvg(key, size);
@@ -6567,6 +6615,23 @@ byId('settings-btn').addEventListener('click', function(e){
   const p = document.getElementById('settings-panel');
   if(p) p.classList.toggle('open');
 });
+
+
+/* Mapping screen-lock toggle */
+window.__mapLocked = true;
+function toggleMapLock(){
+  window.__mapLocked = !window.__mapLocked;
+  var btn = document.getElementById('mapLockToggle');
+  document.querySelectorAll('#tab-mapping .map-cell-shield').forEach(function(s){
+    if(window.__mapLocked){ s.style.display=''; s.classList.remove('active'); }
+    else { s.style.display='none'; }
+  });
+  if(btn){
+    if(window.__mapLocked){ btn.className='map-lock-btn locked'; btn.innerHTML='\u{1F512} Screen Lock: ON'; }
+    else { btn.className='map-lock-btn unlocked'; btn.innerHTML='\u{1F513} Screen Lock: OFF'; }
+  }
+}
+window.toggleMapLock = toggleMapLock;
 
 })();
 </script>

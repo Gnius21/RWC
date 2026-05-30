@@ -458,8 +458,15 @@ tr:last-child td{border-bottom:none;}
   #tab-monitor{height:auto;overflow:visible;}
   .mon-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:auto;flex:initial;}
   .mon-wind,.mon-hum,.mon-temp,.mon-radar,.mon-stavg{grid-row:auto;grid-column:auto;}
+  .mon-grid > [style*="grid-column"]{grid-column:1 / -1 !important;}
+  .mon-tile{min-height:auto;}
 }
-@media(max-width:640px){.mon-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){
+  .mon-grid{grid-template-columns:1fr !important;grid-template-rows:auto !important;}
+  .mon-grid > *{grid-column:1 / -1 !important;grid-row:auto !important;}
+  .cw-grid{grid-template-columns:1fr !important;}
+  .mon-radar{grid-column:1 / -1 !important;}
+}
 .mon-tile{position:relative;display:flex;flex-direction:column;padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005) 60%),rgba(8,18,32,0.85);border:1px solid var(--bdr);overflow:hidden;min-height:0;min-width:0;transition:background .35s ease,border-color .35s ease,box-shadow .25s ease,transform .25s ease;backdrop-filter:blur(6px);justify-content:space-between;}
 .mon-tile:hover{transform:translateY(-1px);}
 .mon-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;z-index:2;background:linear-gradient(90deg,var(--acc2),var(--acc),transparent);}
@@ -467,6 +474,8 @@ tr:last-child td{border-bottom:none;}
 .mon-pres::before{background:linear-gradient(90deg,#a78bfa,#4db8ff,transparent);}
 .mon-dust::before{background:linear-gradient(90deg,#f59e0b,#ff8a3d,transparent);}
 .mon-sea::before{background:linear-gradient(90deg,#22d3ee,#0ea5e9,#0369a1,transparent);}
+.mon-rad::before{background:linear-gradient(90deg,#fde047,#fbbf24,#f59e0b,transparent);}
+.mon-rad .mon-big{color:#fbbf24;}
 .mon-sea .mon-big{color:#22d3ee;}
 .mon-uv::before{background:linear-gradient(90deg,#fbbf24,#f59e0b,#ff8a3d,#ff4f4f,#a78bfa,transparent);}
 .mon-wind::before{background:linear-gradient(90deg,#4db8ff,#22d3ee,transparent);}
@@ -1394,6 +1403,9 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .hh-note{font-family:var(--cond);font-size:12px;color:var(--muted);font-style:italic;margin-top:4px;}
 
 
+
+
+
 /* ═══ POWER STATION TAB ═══ */
 .pw-wrap{display:flex;flex-direction:column;gap:14px;}
 .pw-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
@@ -1470,6 +1482,89 @@ html,body{max-width:100%;overflow-x:hidden;}
   .topbar,.tabs,.content,.footer{max-width:1600px;}
 }
 
+
+
+
+/* ═══ NEW ANIMATED WEATHER ICONS ═══ */
+:root{
+  --wx-sun:#fbbf24; --wx-sun-hi:#fde68a;
+  --wx-cloud:#cbd5e1; --wx-cloud-hi:#e2e8f0;
+  --wx-cloud-dark:#94a3b8; --wx-cloud-dark-hi:#b8c4d4;
+  --wx-storm:#64748b; --wx-storm-hi:#94a3b8;
+  --wx-drop:#60a5fa;
+}
+.wx-svg{width:100%;height:100%;display:block;overflow:visible}
+.wx-sun-rays{transform-origin:40px 40px;animation:wxSunSpin 20s linear infinite}
+@keyframes wxSunSpin{to{transform:rotate(360deg)}}
+.wx-sun circle:nth-of-type(1){animation:wxSunPulse 3s ease-in-out infinite}
+@keyframes wxSunPulse{0%,100%{opacity:.85;transform-origin:40px 40px;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.wx-sun-rays-small{transform-origin:28px 28px;animation:wxSunSpin 20s linear infinite}
+.wx-cloud-drift{animation:wxCloudDrift 4s ease-in-out infinite}
+.wx-cloud-float{animation:wxCloudFloat 3.5s ease-in-out infinite}
+@keyframes wxCloudDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+@keyframes wxCloudFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.wx-drop{animation:wxDropFall 1.4s linear infinite;opacity:0}
+.wx-drop-1{animation-delay:0s}.wx-drop-2{animation-delay:.28s}.wx-drop-3{animation-delay:.56s}.wx-drop-4{animation-delay:.84s}.wx-drop-5{animation-delay:.42s}
+@keyframes wxDropFall{0%{opacity:0;transform:translateY(-8px)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(8px)}}
+.wx-bolt{transform-origin:42px 56px;animation:wxBoltFlash 2.6s ease-in-out infinite}
+@keyframes wxBoltFlash{0%,40%,100%{opacity:0;transform:scale(0.8)}45%{opacity:1;transform:scale(1.1);filter:drop-shadow(0 0 8px #fbbf24)}55%{opacity:.6}60%{opacity:1;transform:scale(1)}}
+.wx-fog-line{animation:wxFogSlide 4s ease-in-out infinite}
+.wx-fog-1{animation-delay:0s}.wx-fog-2{animation-delay:.7s}.wx-fog-3{animation-delay:1.4s}
+@keyframes wxFogSlide{0%,100%{transform:translateX(-3px);opacity:.7}50%{transform:translateX(3px);opacity:1}}
+
+
+/* ── Aviation sub-nav ── */
+.av-subnav{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.av-sub-btn{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.4px;padding:8px 16px;border-radius:20px;cursor:pointer;border:1px solid var(--bdr);background:rgba(255,255,255,0.03);color:var(--muted);transition:all .2s;}
+.av-sub-btn.active{background:var(--accd);border-color:var(--bdrb);color:var(--acc);}
+.av-sub-btn:hover:not(.active){background:rgba(255,255,255,0.06);color:var(--txt);}
+
+
+/* ── Monitor Curaçao SYNOP card ── */
+.mon-synop::before{background:linear-gradient(90deg,#0ea5e9,#38bdf8,transparent);}
+.mon-synop-body{display:flex;flex-direction:column;gap:8px;padding-top:4px;}
+.mon-synop-raw{font-family:var(--mono);font-size:13px;color:#38bdf8;background:rgba(14,165,233,0.08);border:1px solid rgba(56,189,248,0.2);border-radius:8px;padding:9px 12px;word-break:break-all;line-height:1.5;}
+.mon-synop-decoded{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;}
+.mon-synop-dc{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:8px;padding:7px 9px;}
+.mon-synop-dc-l{font-family:var(--cond);font-size:10px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;}
+.mon-synop-dc-v{font-family:var(--cond);font-size:16px;font-weight:700;color:var(--txt);margin-top:2px;}
+
+
+/* ── Curaçao Weather 3-tile row ── */
+.cw-section{margin-bottom:4px;}
+.cw-title{font-family:var(--cond);font-size:15px;font-weight:800;color:var(--txt);letter-spacing:.4px;margin:2px 2px 8px;}
+.cw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start;}
+.cw-tile{height:100%;min-width:0;overflow:hidden;}
+.cw-grid .mon-synop-raw{font-size:11px;padding:7px 9px;word-break:break-all;overflow-wrap:anywhere;}
+.cw-grid .mon-synop-decoded{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.cw-grid{grid-template-columns:1fr;}}
+
+
+.cw-rose-wrap{display:flex;justify-content:flex-start;padding:6px 0 2px;}
+
+
+/* ── METAR Regional Overview ── */
+.ovw-card{display:flex;flex-direction:column;}
+.ovw-card-hd{font-family:var(--cond);font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;}
+.ovw-rows{display:flex;flex-direction:column;gap:6px;flex:1;justify-content:space-around;}
+.ovw-row{display:flex;align-items:center;gap:10px;}
+.ovw-row-ic{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ovw-row-name{flex:1;font-family:var(--cond);font-size:13px;font-weight:700;color:var(--txt);letter-spacing:.3px;}
+.ovw-row-temp{font-family:var(--cond);font-size:18px;font-weight:800;color:var(--txt);}
+
+
+.hh-sat-img{width:100%;height:100%;object-fit:cover;display:block;}
+.hh-sat-fallback{position:absolute;inset:0;align-items:center;justify-content:center;font-family:var(--cond);font-size:12px;color:var(--muted);}
+.hh-sat-link{position:absolute;top:8px;right:10px;z-index:3;color:#fff;background:rgba(8,18,40,0.7);padding:2px 7px;border-radius:5px;font-size:13px;text-decoration:none;backdrop-filter:blur(4px);}
+
+
+/* ── Data freshness badge ── */
+.fresh-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px;padding:4px 9px;border-radius:12px;background:rgba(46,201,130,0.12);border:1px solid rgba(46,201,130,0.3);color:#2ec97a;}
+.fresh-badge.stale{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#f59e0b;}
+.fresh-badge.old{background:rgba(255,79,79,0.12);border-color:rgba(255,79,79,0.35);color:#ff4f4f;}
+.fresh-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:freshPulse 2s ease-in-out infinite;}
+@keyframes freshPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
 </style>
 </head>
 <body>
@@ -1492,6 +1587,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   <div class="ctrl">
     <div class="brow">
       <div class="lbadge"><span class="lbadge-d"></span>AUTO</div>
+      <div id="fresh-badge" class="fresh-badge" title="Time since last successful data fetch"><span class="fresh-dot"></span><span id="fresh-txt">--</span></div>
       <button id="refresh-btn" class="bg" aria-label="Refresh all data" title="Refresh all data (R)">&#8635;</button>
       <button id="help-btn" class="bg" aria-label="Keyboard shortcuts" title="Show keyboard shortcuts">?</button>
       <button id="mute-btn" class="bg" aria-pressed="false" title="Mute alerts (M)">&#128266;</button>
@@ -1505,9 +1601,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 <!-- TABS -->
 <nav class="tabs" role="tablist">
   <button class="tab active" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
-  <button class="tab" data-tab="metar"><span class="tab-i">&#128225;</span>METAR<span class="tbadge">6</span></button>
-  <button class="tab" data-tab="taf"><span class="tab-i">&#128202;</span>TAF<span class="tbadge">3</span></button>
-  <button class="tab" data-tab="synop"><span class="tab-i">&#127760;</span>SYNOP<span class="tbadge">5</span></button>
+  <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="forecast"><span class="tab-i">&#127782;</span>Forecast</button>
@@ -1563,7 +1657,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <div class="mon-tile mon-dust">
         <div class="mon-row">
           <div class="mon-left">
-            <div class="mon-lbl">Sahara Dust <span style="font-size:9px;opacity:.6;letter-spacing:.5px;">SYNOP+VIS</span></div>
+            <div class="mon-lbl">Dust Index <span style="font-size:9px;opacity:.6;letter-spacing:.5px;">VIS+PM10+SYNOP</span></div>
             <div class="mon-big" id="monDustVal">&mdash;</div>
             <div class="mon-sm" id="monDustDesc">&mdash;</div>
           </div>
@@ -1578,6 +1672,16 @@ html,body{max-width:100%;overflow-x:hidden;}
             <div class="mon-sm" id="monSeaDesc">&mdash;</div>
           </div>
           <div class="mon-icon-r"><svg class="mon-gauge" viewBox="0 0 80 80" id="monSeaGauge"></svg></div>
+        </div>
+      </div>
+      <div class="mon-tile mon-rad">
+        <div class="mon-row">
+          <div class="mon-left">
+            <div class="mon-lbl">Solar Radiation <span style="font-size:9px;opacity:.6;letter-spacing:.5px;">LIVE</span></div>
+            <div class="mon-big" id="monRadVal">&mdash;</div>
+            <div class="mon-sm" id="monRadDesc">&mdash;</div>
+          </div>
+          <div class="mon-icon-r"><svg class="mon-gauge" viewBox="0 0 80 80" id="monRadGauge"></svg></div>
         </div>
       </div>
       <div class="mon-tile mon-uv">
@@ -1616,11 +1720,23 @@ html,body{max-width:100%;overflow-x:hidden;}
           </div>
         </div>
       </div>
-      <div class="mon-tile mon-temp">
-        <div class="mon-tile-hd"><span class="mon-tile-ttl">Temperature</span><span class="mon-tile-sub">TNCC live</span></div>
+      <div class="cw-section" style="grid-column:1/-1;">
+        <div class="cw-title">&#127464;&#127484; Cura&ccedil;ao Weather</div>
+        <div class="cw-grid">
+      <div class="mon-tile mon-synop cw-tile">
+        <div class="mon-tile-hd"><span class="mon-tile-ttl">&#127760; SYNOP 78988</span><span class="mon-tile-sub">Ogimet live</span></div>
+        <div class="mon-synop-body">
+          <div class="mon-synop-raw" id="monSynopRaw">&mdash;</div>
+          <div class="cw-rose-wrap"><div id="monSynopRose"></div></div>
+          <div class="mon-synop-decoded" id="monSynopDecoded"></div>
+        </div>
+      </div>
+      <div class="mon-tile mon-temp cw-tile">
+        <div class="mon-tile-hd"><span class="mon-tile-ttl">&#9992; TNCC</span><span class="mon-tile-sub">METAR/SYNOP live</span></div>
         <div class="mon-temp-body">
           <div class="mon-temp-big" id="monTemp">&mdash;<span class="mon-temp-deg">&deg;</span></div>
           <div class="mon-temp-feels">Feels like <b id="monFeels">&mdash;&deg;</b></div>
+          <div class="cw-rose-wrap"><div id="monTnccRose"></div></div>
           <div class="mon-temp-divider"></div>
           <div class="mon-temp-meta">
             <div class="mon-temp-meta-row"><span class="mon-temp-meta-l">Cloud base</span><span class="mon-temp-meta-v" id="monCloud">&mdash;</span></div>
@@ -1632,7 +1748,7 @@ html,body{max-width:100%;overflow-x:hidden;}
           </div>
         </div>
       </div>
-      <div class="mon-tile mon-stavg">
+      <div class="mon-tile mon-stavg cw-tile">
         <div class="srow-hd" style="margin-bottom:8px;">
           <div class="sname">&#127758; Island Average <span style="font-size:10px;color:var(--muted);font-weight:400;" id="monStavgSrc"></span></div>
           <div class="srow-time-box"><span class="stime-s" id="monStavgTime">&mdash;</span><span class="stime-lbl">avg</span></div>
@@ -1667,6 +1783,8 @@ html,body{max-width:100%;overflow-x:hidden;}
           </div>
         </div>
       </div>
+        </div><!-- /cw-grid -->
+      </div><!-- /cw-section -->
       <div class="mon-tile mon-radar" style="grid-column:span 2;">
         <div class="mon-tile-hd" style="display:flex;justify-content:space-between;align-items:center;">
           <span class="mon-tile-ttl">&#127968; ABC Islands &middot; Live View</span>
@@ -1695,7 +1813,13 @@ html,body{max-width:100%;overflow-x:hidden;}
   </div>
 
   <!-- METAR -->
-  <div id="tab-metar" class="tpanel hidden">
+  <div id="tab-aviation" class="tpanel hidden">
+    <div class="av-subnav">
+      <button class="av-sub-btn active" data-avsub="metar" onclick="showAviationSub('metar')">&#128225; METAR</button>
+      <button class="av-sub-btn" data-avsub="taf" onclick="showAviationSub('taf')">&#128202; TAF</button>
+      <button class="av-sub-btn" data-avsub="synop" onclick="showAviationSub('synop')">&#127760; SYNOP</button>
+    </div>
+  <div id="tab-metar" class="av-view">
     <div class="shdr">
       <div class="stitle">METAR Observations</div>
       <span id="metar-ts" style="color:var(--muted);font-size:9px;font-family:var(--mono);">Last updated: --</span>
@@ -1708,7 +1832,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   </div>
 
   <!-- TAF -->
-  <div id="tab-taf" class="tpanel hidden">
+  <div id="tab-taf" class="av-view" style="display:none;">
     <div class="shdr">
       <div class="stitle">Terminal Aerodrome Forecast</div>
       <span id="taf-ts" style="color:var(--muted);font-size:9px;font-family:var(--mono);">TAF last updated: --</span>
@@ -1721,12 +1845,13 @@ html,body{max-width:100%;overflow-x:hidden;}
   </div>
 
   <!-- SYNOP -->
-  <div id="tab-synop" class="tpanel hidden">
+  <div id="tab-synop" class="av-view" style="display:none;">
     <div class="shdr">
       <div class="stitle">SYNOP Surface Reports &mdash; Decoded</div>
       <span id="synop-ts" style="color:var(--muted);font-size:9px;font-family:var(--mono);">SYNOP last updated: --</span>
     </div>
     <div class="syngrid" id="synop-grid"></div>
+  </div>
   </div>
 
   <!-- STATIONS -->
@@ -1966,6 +2091,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
+
   <div id="tab-atc" class="tpanel hidden">
     <div class="atc-layout">
       <div class="adsbcard">
@@ -2024,7 +2150,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 0</kbd><span>Switch tabs (Monitor &middot; METAR &middot; TAF &middot; SYNOP &middot; Stations &middot; Weather &middot; Forecast &middot; ATC &middot; Mapping &middot; Power)</span>
+      <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Forecast &middot; ATC &middot; Mapping &middot; Power)</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:10px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -2046,10 +2172,10 @@ html,body{max-width:100%;overflow-x:hidden;}
 (function(){'use strict';
 
 /* ─── CONFIG ─── */
-const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI','SVVA'];
+const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI'];
 const TAF_ICAOS = ['TNCA','TNCB','TNCC'];
-const FLAGS   = {TNCA:'\u{1F1E6}\u{1F1FC}',TNCB:'\u{1F1E7}\u{1F1F6}',TNCC:'\u{1F1E8}\u{1F1FC}',TNCM:'\u{1F1F8}\u{1F1FD}',SVMI:'\u{1F1FB}\u{1F1EA}',SVVA:'\u{1F1FB}\u{1F1EA}'};
-const STN_NAMES = {TNCA:'Aruba',TNCB:'Bonaire',TNCC:'Cura\u00e7ao',TNCM:'St Maarten',SVMI:'Caracas',SVVA:'Valencia'};
+const FLAGS   = {TNCA:'\u{1F1E6}\u{1F1FC}',TNCB:'\u{1F1E7}\u{1F1F6}',TNCC:'\u{1F1E8}\u{1F1FC}',TNCM:'\u{1F1F8}\u{1F1FD}',SVMI:'\u{1F1FB}\u{1F1EA}'};
+const STN_NAMES = {TNCA:'Aruba',TNCB:'Bonaire',TNCC:'Cura\u00e7ao',TNCM:'St Maarten',SVMI:'Caracas'};
 const SYNOP_SRCS = [
   {key:'tncc-og',icao:'TNCC',flag:'\u{1F1E8}\u{1F1FC}',label:'Cura\u00e7ao \u00b7 Ogimet Live',url:'https://www.ogimet.com/ultimos_synops2.php?estado=Cura&fmt=html&Enviar=Ver',ogimet:true,wide:true},
   {key:'tnca-si',icao:'TNCA',flag:'\u{1F1E6}\u{1F1FC}',label:'TNCA \u00b7 SINU50',url:'https://tgftp.nws.noaa.gov/data/raw/si/sinu50.tnca..txt'},
@@ -2104,6 +2230,28 @@ function alarm(){
 /* ─── FETCH (cache + race) ─── */
 const __fetchCache = new Map();
 const FETCH_CACHE_TTL = 45000;
+const PERSIST_PREFIX = 'rwc-cache-';
+const PERSIST_MAX_AGE = 6 * 3600 * 1000;  // serve persisted data up to 6h old on cold start
+
+// Persist a successful response to localStorage (best-effort; never throws)
+function persistCache(url, data){
+  try {
+    if(!data || !data.ok || !data.text) return;
+    if(data.text.length > 200000) return;  // skip very large payloads
+    localStorage.setItem(PERSIST_PREFIX + url, JSON.stringify({t: Date.now(), text: data.text}));
+  } catch(e){ /* quota or disabled storage: ignore */ }
+}
+// Retrieve last persisted response if recent enough (best-effort; never throws)
+function readPersisted(url){
+  try {
+    const raw = localStorage.getItem(PERSIST_PREFIX + url);
+    if(!raw) return null;
+    const o = JSON.parse(raw);
+    if(!o || !o.text) return null;
+    if(Date.now() - o.t > PERSIST_MAX_AGE) return null;
+    return {ok: true, text: o.text, stale: true, cachedAt: o.t};
+  } catch(e){ return null; }
+}
 
 async function tryFetch(url, ms = 5000, signal){
   let ac, id;
@@ -2181,11 +2329,14 @@ async function fetchURL(url, tries = 1, opts = {}){
   for(let i = 0; i < tries; i++){
     const o = await robustGet(url);
     if(o.ok || o.perm){
-      if(o.ok) __fetchCache.set(url, {t: Date.now(), data: o});
+      if(o.ok){ __fetchCache.set(url, {t: Date.now(), data: o}); persistCache(url, o); window.__lastFetchOK = Date.now(); }
       return o;
     }
     if(i < tries - 1) await new Promise(r => setTimeout(r, 300));
   }
+  // All live attempts failed — fall back to last persisted copy (offline / cold start)
+  const persisted = readPersisted(url);
+  if(persisted){ __fetchCache.set(url, {t: Date.now() - FETCH_CACHE_TTL + 5000, data: persisted}); return persisted; }
   return {ok:false};
 }
 window.__clearFetchCache = () => __fetchCache.clear();
@@ -2423,6 +2574,84 @@ function miniRose(dir, spd){
 
 /* ─── METAR WIDGETS ─── */
 const mState = {};
+
+
+/* ═══ METAR REGIONAL OVERVIEW (icon + temp) ═══ */
+var OVW_STNS = [
+  {icao:'EHAM', name:'Amsterdam', flag:'\u{1F1F3}\u{1F1F1}'},
+  {icao:'KMIA', name:'Miami',     flag:'\u{1F1FA}\u{1F1F8}'},
+  {icao:'KLGA', name:'New York',  flag:'\u{1F1FA}\u{1F1F8}'},
+  {icao:'TNCE', name:'St Eustatius', flag:'\u{1F1E7}\u{1F1F6}'},
+  {icao:'TBPB', name:'Barbados',  flag:'\u{1F1E7}\u{1F1E7}'}
+];
+var __ovwTimer = null;
+
+// Derive an icon key from a parsed METAR
+function ovwIconKey(p){
+  if(!p) return 'cloud';
+  var wx = (p.wxToks||[]).join(' ').toUpperCase();
+  if(/TS/.test(wx)) return 'thunder';
+  if(/SN|SG|PL|GS|GR/.test(wx)) return 'snow';
+  if(/SH/.test(wx)) return 'showers';
+  if(/RA|DZ/.test(wx)) return 'rain';
+  if(/FG|BR|HZ|FU|SA|DU/.test(wx)) return 'fog';
+  // cloud cover from layers
+  var cld = p.cldToks||[];
+  var maxCover = 0;
+  cld.forEach(function(c){
+    if(/OVC/i.test(c)) maxCover=Math.max(maxCover,8);
+    else if(/BKN/i.test(c)) maxCover=Math.max(maxCover,6);
+    else if(/SCT/i.test(c)) maxCover=Math.max(maxCover,4);
+    else if(/FEW/i.test(c)) maxCover=Math.max(maxCover,2);
+  });
+  if(maxCover>=6) return 'cloud';
+  if(maxCover>=2) return 'cloud-sun';
+  return 'sun';  // clear / CAVOK
+}
+
+function renderOverview(results){
+  var grid = byId('metar-grid'); if(!grid) return;
+  // Single overview card (same size as a METAR tile) holding all stations
+  var existing = grid.querySelector('#ovw-card');
+  var rows = OVW_STNS.map(function(s){
+    var p = results[s.icao];
+    var icon = wxIconStyled(ovwIconKey(p), 30);
+    var temp = (p && p.tempC!=null && isFinite(p.tempC)) ? Math.round(p.tempC)+'\u00b0' : '\u2014';
+    return '<div class="ovw-row">'+
+      '<span class="ovw-row-ic">'+icon+'</span>'+
+      '<span class="ovw-row-name">'+s.flag+' '+s.icao+'</span>'+
+      '<span class="ovw-row-temp">'+temp+'</span>'+
+    '</div>';
+  }).join('');
+  var inner = '<div class="ovw-card-hd">&#127758; Regional Overview</div><div class="ovw-rows">'+rows+'</div>';
+  if(existing){ existing.innerHTML = inner; }
+  else { grid.insertAdjacentHTML('beforeend', '<div class="mcard ovw-card" id="ovw-card">'+inner+'</div>'); }
+}
+
+async function fetchOverview(){
+  var results = {};
+  await Promise.all(OVW_STNS.map(async function(s){
+    try {
+      var o = await fetchURL(METAR_URL(s.icao), 1);
+      if(o && o.ok && o.text){
+        var lines = o.text.trim().split('\n');
+        for(var i=lines.length-1;i>=0;i--){
+          var ln=lines[i].trim();
+          if(ln.startsWith(s.icao) || /\b\d{6}Z\b/.test(ln)){ results[s.icao]=parseMetar(ln); break; }
+        }
+      }
+    } catch(e){}
+  }));
+  renderOverview(results);
+}
+
+function startOverview(){
+  fetchOverview();
+  if(__ovwTimer) clearInterval(__ovwTimer);
+  __ovwTimer = setInterval(function(){
+    if(byId('tab-aviation') && !byId('tab-aviation').classList.contains('hidden')) fetchOverview();
+  }, 300000);  // 5 min
+}
 
 function buildMetarGrid(){
   const grid = byId('metar-grid');
@@ -2671,7 +2900,7 @@ async function fetchMetar(icao){
     for(let i=lines.length-1;i>=0;i--){
       const ln=lines[i];
       if(ln.startsWith(icao) || /\b\d{6}Z\b/.test(ln)){
-        if((icao==='SVMI'||icao==='SVVA') && /\bAUTO\b/i.test(ln)) continue;
+        if(icao==='SVMI' && /\bAUTO\b/i.test(ln)) continue;
         renderMetarCard(icao, ln);
         return true;
       }
@@ -3317,8 +3546,7 @@ function makeTest(){
     TNCB:`TNCB ${t} 34020G35KT 0400 +TSRA FEW020CB BKN030 26/24 Q0980`,
     TNCC:`TNCC ${t} 12045G60KT 0500 +TSRA FEW016TCU OVC025 27/25 Q1000`,
     TNCM:`TNCM ${t} 20015G35KT 0800 SHRA FEW020TCU BKN018 25/23 Q0995`,
-    SVMI:`SVMI ${t} 30025G45KT 9999 VCSH FEW020CB BKN030 28/26 Q1002`,
-    SVVA:`SVVA ${t} 04010G20KT 0300 -SHRA FEW020 BKN025 22/21 Q1008`
+    SVMI:`SVMI ${t} 30025G45KT 9999 VCSH FEW020CB BKN030 28/26 Q1002`
   };
 }
 const TTAF={
@@ -3348,8 +3576,8 @@ function stopTest(){if(testInt){clearInterval(testInt);testInt=null;}}
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   monitor: byId('tab-monitor'),
-  metar: byId('tab-metar'), taf: byId('tab-taf'),
-  synop: byId('tab-synop'), stations: byId('tab-stations'),
+  aviation: byId('tab-aviation'),
+  stations: byId('tab-stations'),
   weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc'), mapping: byId('tab-mapping'), power: byId('tab-power')
 };
 let stationsTabOpened = false;
@@ -3357,6 +3585,20 @@ let weatherTabOpened = false;
 let forecastTabOpened = false;
 let __monitorOpened = false;
 let __monitorTimer = null;
+
+
+/* Aviation sub-tab switcher */
+function showAviationSub(which){
+  ['metar','taf','synop'].forEach(function(k){
+    var el = byId('tab-'+k);
+    if(el) el.style.display = (k===which) ? '' : 'none';
+  });
+  document.querySelectorAll('.av-sub-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.avsub===which); });
+  // trigger the relevant loader if not yet loaded
+  if(which==='taf' && typeof loadAllTAFs==='function' && !window.__tafLoaded){ window.__tafLoaded=true; loadAllTAFs(); }
+  if(which==='synop' && typeof loadAllSynops==='function' && !window.__synopLoadedAv){ window.__synopLoadedAv=true; loadAllSynops(); }
+}
+window.showAviationSub = showAviationSub;
 
 function switchTab(name){
   tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
@@ -3375,6 +3617,12 @@ function switchTab(name){
   if(name==='monitor'){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
     else { updateMonitor(); }
+  }
+  if(name==='aviation'){
+    // default to METAR sub-view if none active
+    var anyActive = document.querySelector('.av-sub-btn.active');
+    showAviationSub(anyActive ? anyActive.dataset.avsub : 'metar');
+    if(!window.__ovwStarted){ window.__ovwStarted=true; startOverview(); }
   }
   if(name==='mapping'){
     // Lazy-load iframes on first open (src set to about:blank until then)
@@ -3398,7 +3646,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'metar','3':'taf','4':'synop','5':'stations','6':'weather','7':'forecast','8':'atc','9':'mapping','0':'power'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'forecast','6':'atc','7':'mapping','8':'power'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -4261,19 +4509,70 @@ function calcFeelsMonitor(tempC, rh){
   const e = rh/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC));
   return Math.round((tempC + 0.348 * e - 0.7 * 0 - 4.25) * 10) / 10;
 }
+/* Multi-signal Saharan Dust Index (0-100), fusing visibility, SYNOP codes, PM10.
+   KNMI insight: low visibility = dust ONLY when air is dry; high humidity = haze/fog instead.
+   Signals (weighted): KNMI/SYNOP visibility 45%, PM10 aerosol 35%, SYNOP present-weather dust codes 20%. */
 function assessDust(synopP, visKm){
-  let level = 0, desc = '\u2014', text = 'None';
+  var signals = [], score = 0, wsum = 0;
+  var rh = (synopP && synopP.rh != null) ? synopP.rh : null;
+
+  // 1) Visibility signal — only counts as dust when air is relatively dry (rh<80).
+  if(visKm != null){
+    var visScore;
+    if(visKm < 5)       visScore = 100;
+    else if(visKm < 8)  visScore = 80;
+    else if(visKm < 12) visScore = 55;
+    else if(visKm < 18) visScore = 30;
+    else if(visKm < 25) visScore = 12;
+    else                visScore = 0;
+    // Humidity gate: if humid, reduced vis is more likely haze/fog than dust
+    var dryFactor = (rh != null) ? Math.max(0.25, Math.min(1, (95 - rh) / 35)) : 0.85;
+    visScore *= dryFactor;
+    score += visScore * 0.45; wsum += 0.45;
+    if(visScore > 25) signals.push('vis ' + visKm.toFixed(0) + 'km');
+  }
+
+  // 2) PM10 aerosol signal (Open-Meteo air quality, µg/m³) — direct dust proxy.
+  var pm10 = null;
+  try {
+    ['curacao','aruba','bonaire'].forEach(function(k){
+      if(pm10==null && WX_EXTRA[k] && WX_EXTRA[k].aq && WX_EXTRA[k].aq.pm10 != null) pm10 = WX_EXTRA[k].aq.pm10;
+    });
+  } catch(e){}
+  if(pm10 != null){
+    var pmScore;
+    if(pm10 >= 120)     pmScore = 100;
+    else if(pm10 >= 80) pmScore = 80;
+    else if(pm10 >= 50) pmScore = 55;
+    else if(pm10 >= 25) pmScore = 30;
+    else if(pm10 >= 15) pmScore = 12;
+    else                pmScore = 0;
+    score += pmScore * 0.35; wsum += 0.35;
+    if(pmScore > 25) signals.push('PM10 ' + Math.round(pm10));
+  }
+
+  // 3) SYNOP present-weather dust codes (ww) — authoritative when present.
   if(synopP && synopP.ww !== undefined){
-    if(synopP.ww >= 30 && synopP.ww <= 35){ level = 3; text = 'Severe'; desc = 'Duststorm reported'; }
-    else if(synopP.ww >= 6 && synopP.ww <= 9){ level = 2; text = 'Active'; desc = 'Dust haze (ww '+synopP.ww+')'; }
+    var wwScore = 0;
+    if(synopP.ww >= 30 && synopP.ww <= 35) wwScore = 100;     // duststorm
+    else if(synopP.ww >= 6 && synopP.ww <= 9) wwScore = 65;   // dust haze / suspended dust
+    if(wwScore > 0){
+      score += wwScore * 0.20; wsum += 0.20;
+      signals.push('SYNOP ww' + synopP.ww);
+    }
   }
-  if(level < 2 && visKm != null){
-    if(visKm < 5)  { level = 3; text = 'Severe'; desc = 'Visibility severely reduced'; }
-    else if(visKm < 10) { level = 2; text = 'Active'; desc = 'Reduced visibility'; }
-    else if(visKm < 18) { level = 1; text = 'Light'; desc = 'Haze present'; }
-  }
-  if(level === 0){ desc = 'Clear air'; }
-  return {level, desc, text};
+
+  var index = wsum > 0 ? Math.round(score / wsum) : 0;
+
+  // Map 0-100 index to level/text/desc
+  var level, text, desc;
+  if(index >= 70)      { level = 3; text = 'Severe';   desc = 'Heavy Saharan dust'; }
+  else if(index >= 45) { level = 2; text = 'Active';    desc = 'Significant dust'; }
+  else if(index >= 22) { level = 1; text = 'Light';     desc = 'Light dust / haze'; }
+  else                 { level = 0; text = 'Clear';     desc = 'Clean air'; }
+  if(signals.length) desc += ' \u00b7 ' + signals.join(', ');
+
+  return {level: level, text: text, desc: desc, index: index, pct: index/100};
 }
 
 const ABC_LAT = 12.15, ABC_LON = -69.0;
@@ -4282,7 +4581,7 @@ async function fetchMonitorData(){
   async function fetchMonitorOM(){
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${ABC_LAT}&longitude=${ABC_LON}` +
-        `&current=uv_index,precipitation,rain,weathercode` +
+        `&current=uv_index,precipitation,rain,weathercode,shortwave_radiation` +
         `&daily=sunrise,sunset,precipitation_sum,rain_sum` +
         `&timezone=auto&forecast_days=2`;
       const ctrl = new AbortController();
@@ -4311,9 +4610,9 @@ async function fetchMonitorData(){
     fetchMonitorOM(),
     fetchSeaTemp()
   ]);
-  let synopP = null, bonaireVisM = null, omCurrent = null, omDaily = null, seaTemp = null;
+  let synopP = null, bonaireVisM = null, omCurrent = null, omDaily = null, seaTemp = null, synopRaw = null;
   if(tasks[0].status === 'fulfilled' && tasks[0].value && tasks[0].value.ok){
-    try { const scraped = scrapeOgimetSynop(tasks[0].value.text); if(scraped) synopP = extractWxFromSynop(scraped, '78988'); } catch(e){ console.warn('Ogimet parse failed', e); }
+    try { const scraped = scrapeOgimetSynop(tasks[0].value.text); if(scraped){ synopRaw = scraped; synopP = extractWxFromSynop(scraped, '78988'); } } catch(e){ console.warn('Ogimet parse failed', e); }
   }
   if(tasks[1].status === 'fulfilled' && tasks[1].value && tasks[1].value.ok){
     try { bonaireVisM = extractVis(tasks[1].value.text); } catch(e){ console.warn('KNMI vis parse failed', e); }
@@ -4325,11 +4624,11 @@ async function fetchMonitorData(){
   if(tasks[3] && tasks[3].status === 'fulfilled' && tasks[3].value != null){
     seaTemp = tasks[3].value;
   }
-  return {synopP, bonaireVisM, omCurrent, omDaily, seaTemp};
+  return {synopP, bonaireVisM, omCurrent, omDaily, seaTemp, synopRaw};
 }
 
 function renderMonitor(data){
-  const {synopP, bonaireVisM, omCurrent, omDaily, seaTemp} = data || {};
+  const {synopP, bonaireVisM, omCurrent, omDaily, seaTemp, synopRaw} = data || {};
   const allFailed = !synopP && bonaireVisM == null && !omCurrent;
   if(!allFailed){
     document.querySelectorAll('#tab-monitor .mon-tile').forEach(t => {
@@ -4340,8 +4639,7 @@ function renderMonitor(data){
   const visTile = byId('tab-monitor').querySelector('.mon-vis');
   if(bonaireVisM != null){
     const km = bonaireVisM / 1000;
-    byId('monVisVal').innerHTML = (bonaireVisM >= 1000 ? km.toFixed(1) : bonaireVisM)
-                                + ' <span class="mon-unit">' + (bonaireVisM >= 1000 ? 'km' : 'm') + '</span>';
+    byId('monVisVal').innerHTML = km + ' <span class="mon-unit">km</span>';
     let desc, cls = '', col = '#2ec97a';
     if(km < 5)        { desc = '\u26a0 ALARM \u2014 under 5km'; cls = 'vis-alarm'; col = '#ff4f4f'; }
     else if(km < 10)  { desc = 'Reduced \u2014 under 10km'; cls = 'vis-low';   col = '#ff4f4f'; }
@@ -4376,11 +4674,11 @@ function renderMonitor(data){
   }
   const visKmForDust = bonaireVisM != null ? bonaireVisM/1000 : null;
   const dust = assessDust(synopP, visKmForDust);
-  byId('monDustVal').textContent = dust.text;
-  byId('monDustDesc').textContent = dust.desc;
+  byId('monDustVal').textContent = dust.index + ' / 100';
+  byId('monDustDesc').textContent = dust.text + ' \u00b7 ' + dust.desc;
   byId('monDustGauge').innerHTML = buildArcGauge({
-    value: dust.level, max: 3,
-    color: dust.level >= 3 ? '#ff4f4f' : dust.level >= 2 ? '#ff8a3d' : dust.level >= 1 ? '#f59e0b' : '#2ec97a',
+    value: dust.index, max: 100,
+    color: dust.index >= 70 ? '#ff4f4f' : dust.index >= 45 ? '#ff8a3d' : dust.index >= 22 ? '#f59e0b' : '#2ec97a',
     bgColor: 'rgba(255,255,255,0.06)'
   });
   // ── Sea surface temperature (Marine API) ──
@@ -4404,6 +4702,53 @@ function renderMonitor(data){
     byId('monSeaDesc').textContent = 'Marine source unavailable';
     byId('monSeaGauge').innerHTML = '';
   }
+  // ── Solar radiation (Open-Meteo shortwave_radiation, W/m²) ──
+  (function(){
+    var rv = byId('monRadVal'), rd = byId('monRadDesc'), rg = byId('monRadGauge');
+    if(!rv) return;
+    var rad = (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation : null;
+    if(rad != null && isFinite(rad)){
+      rv.innerHTML = Math.round(rad) + ' <span class="mon-unit">W/m\u00b2</span>';
+      var rlbl, rcol;
+      if(rad < 1)        { rlbl='Night / no sun';  rcol='#64748b'; }
+      else if(rad < 200) { rlbl='Low';             rcol='#fde047'; }
+      else if(rad < 500) { rlbl='Moderate';        rcol='#fbbf24'; }
+      else if(rad < 800) { rlbl='Strong';          rcol='#f59e0b'; }
+      else               { rlbl='Very strong';     rcol='#ff8a3d'; }
+      rd.textContent = rlbl;
+      rd.style.color = rcol;
+      if(rg) rg.innerHTML = buildArcGauge({ value: Math.min(rad,1200), max: 1200, color: rcol, bgColor: 'rgba(255,255,255,0.06)' });
+    } else {
+      rv.innerHTML = '\u2014 <span class="mon-unit">W/m\u00b2</span>';
+      rd.textContent = 'Source unavailable';
+      if(rg) rg.innerHTML = '';
+    }
+  })();
+  // ── Curaçao SYNOP (Ogimet Live) card ──
+  (function(){
+    var rawEl = byId('monSynopRaw'), decEl = byId('monSynopDecoded');
+    if(!rawEl || !decEl) return;
+    if(synopRaw){
+      rawEl.textContent = String(synopRaw).trim();
+    } else { rawEl.textContent = 'SYNOP source unavailable'; }
+    var synRoseEl = byId('monSynopRose');
+    if(synRoseEl) synRoseEl.innerHTML = miniRose(synopP&&synopP.wind_dir!=null?synopP.wind_dir:null, synopP&&synopP.wind_kt!=null?synopP.wind_kt:null);
+    if(synopP){
+      var COMPASS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      function dc(l,v){ return v!=null&&v!==''&&!(typeof v==='number'&&isNaN(v)) ? '<div class="mon-synop-dc"><div class="mon-synop-dc-l">'+l+'</div><div class="mon-synop-dc-v">'+v+'</div></div>' : ''; }
+      var dir = synopP.wind_dir!=null ? (COMPASS[Math.round(synopP.wind_dir/22.5)%16]+' '+synopP.wind_dir+'\u00b0') : null;
+      decEl.innerHTML =
+        dc('Temp', synopP.temp_c!=null?synopP.temp_c+'\u00b0C':null) +
+        dc('Dew', synopP.dew_c!=null?synopP.dew_c+'\u00b0C':null) +
+        dc('RH', synopP.rh!=null?synopP.rh+'%':null) +
+        dc('Wind', synopP.wind_kt!=null?Math.round(synopP.wind_kt)+' kt':null) +
+        dc('Dir', dir) +
+        dc('MSLP', synopP.slp!=null?synopP.slp+' hPa':null) +
+        dc('Vis', synopP.vis_m!=null?(synopP.vis_m/1000)+' km':null) +
+        dc('Cloud', synopP.cloud_oktas!=null?synopP.cloud_oktas+'/8':null) +
+        dc('Wx', synopP.wx_desc||null);
+    } else { decEl.innerHTML = ''; }
+  })();
   if(omCurrent && omCurrent.uv_index != null){
     const uv = omCurrent.uv_index;
     byId('monUvVal').textContent = uv.toFixed(1);
@@ -4486,6 +4831,12 @@ function renderMonitor(data){
   const tnccMetarRaw = (typeof mState === 'object' && mState && mState.TNCC) ? mState.TNCC.lastRaw : null;
   let metarP = null;
   if(tnccMetarRaw){ try { metarP = parseMetar(tnccMetarRaw); } catch(e){} }
+  (function(){
+    var tr = byId('monTnccRose'); if(!tr) return;
+    var wd = (metarP && metarP.windDir!=null) ? metarP.windDir : (synopP && synopP.wind_dir!=null ? synopP.wind_dir : null);
+    var wk = (metarP && metarP.windSpd!=null) ? metarP.windSpd : (synopP && synopP.wind_kt!=null ? synopP.wind_kt : null);
+    tr.innerHTML = miniRose(typeof wd==='number'?wd:null, typeof wk==='number'?wk:null);
+  })();
   if(metarP && metarP.cldToks && metarP.cldToks.length){
     const layers = metarP.cldToks.map(tok => {
       const m = tok.match(/^(FEW|SCT|BKN|OVC|CB|TCU)(\d{3})/i);
@@ -4578,11 +4929,6 @@ function setMonStyle(style){
   // if switching into a forecast-backed view and the cache is empty, fetch it now
   if((style === 'sky' || style === 'gauges' || style === 'graphics' || style === 'home') && !__lastForecastData){
     updateForecast().then(() => { if(__monLastData) renderMonitorViews(__monLastData); }).catch(()=>{});
-  }
-  // lazy-load Windy iframes in the home dashboard on first open
-  if(style === 'home' && !window.__homeMapsLoaded){
-    window.__homeMapsLoaded = true;
-    setTimeout(()=>{ document.querySelectorAll('#monViewHome .windy-frame[data-src]').forEach(f=>{ if(f.dataset.src) f.src=f.dataset.src; }); }, 100);
   }
 }
 document.querySelectorAll('.mon-style-btn').forEach(btn => {
@@ -5281,11 +5627,15 @@ function renderHomeView(data){
   var weekTemp = fc && fc.length ? fc[0].tempMax : null;
 
   // Windy embed builder
-  function windyMap(overlay, product, label){
+  // NOAA GOES-19 Caribbean satellite image (free, no API key, ~10-min updates) — replaces Windy iframes
+  function satImage(label){
+    var url = 'https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/car/GEOCOLOR/latest.jpg?_=' + Date.now();
     return '<div class="hh-map">'
       +'<div class="hh-map-label">'+label+'</div>'
-      +'<iframe class="windy-frame" src="about:blank" data-src="https://embed.windy.com/embed2.html?lat=12.3&lon=-69.0&detailLat=12.3&detailLon=-69.0&zoom=7&level=surface&overlay='+overlay+'&product='+product+'&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
-      +'<div class="hh-map-shield" onclick="this.classList.add(\'active\')"></div>'
+      +'<img class="hh-sat-img" src="'+url+'" alt="'+label+'" loading="lazy" '
+      +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"/>'
+      +'<div class="hh-sat-fallback" style="display:none;">Satellite image unavailable</div>'
+      +'<a class="hh-sat-link" href="https://www.star.nesdis.noaa.gov/GOES/sector.php?sat=G19&sector=car" target="_blank" rel="noopener" title="Open NOAA GOES-19">&#8599;</a>'
       +'</div>';
   }
 
@@ -5324,7 +5674,7 @@ function renderHomeView(data){
     +metricCard('Humidity','\u{1F4A7}', num(rh,0),'%','rh','#d4a017','#d4a017')
     +metricCard('Dew Point','\u{1F4A7}', num(dew,1),'\u00b0C','dew','#818cf8','#818cf8')
     +'<div class="hh-sec-ttl">Air Pressure</div>'
-    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+windyMap('pressure','ecmwf','Pressure')+'</div>'
+    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+satImage('GOES-19 Satellite')+'</div>'
     +metricCard('Air Pressure','\u23F1', num(slp,1),'hPa','pres','#818cf8','#818cf8')
   +'</div>';
 
@@ -5344,11 +5694,11 @@ function renderHomeView(data){
       +'<div class="hh-note">7-day outlook for the ABC islands. See Forecast tab for full multi-model detail.</div>'
     +'</div>'
     +'<div class="hh-sec-ttl">Precipitation</div>'
-    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+windyMap('rain','ecmwf','Rain, thunder')+'</div>'
+    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+satImage('GOES-19 Satellite')+'</div>'
     +metricCard('% Chance Precip.','\u{1F4A7}', (om.precipitation_probability!=null?om.precipitation_probability:0),'%','rain1h','#4db8ff','#4db8ff')
     +metricCard('Rain Rate','\u{1F327}', (precip!=null?precip.toFixed(1):'0'),'mm','rain1h','#4db8ff','#4db8ff')
     +'<div class="hh-sec-ttl">Cloud Coverage</div>'
-    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+windyMap('clouds','ecmwf','Clouds')+'</div>'
+    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+satImage('GOES-19 Clouds')+'</div>'
     +metricCard('Visibility','\u{1F441}', num(visKm,2),'km','vis','#8aa0c0','#8aa0c0')
   +'</div>';
 
@@ -5369,7 +5719,7 @@ function renderHomeView(data){
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Sea Temp</span><span class="hh-metric-ic">\u{1F30A}</span></div>'
       +'<div class="hh-aqrow-val">'+num(seaTemp,1)+' <small>\u00b0C</small></div></div>'
     +'<div class="hh-sec-ttl">Wind</div>'
-    +'<div class="hh-card" style="padding:0;overflow:hidden;">'+windyMap('wind','ecmwf','Wind')+'</div>'
+    
     +'<div class="hh-card"><div class="hh-compass">'+monitorWindCompass(windDir, windKt!=null?Math.round(windKt):null)+'</div></div>'
     +metricCard('Wind Speed','\u{1F32C}', num(windKt,1),'kt','wind','#a78bfa','#a78bfa')
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Wind Bearing</span><span class="hh-metric-ic">\u{1F9ED}</span></div>'
@@ -5379,14 +5729,6 @@ function renderHomeView(data){
 
   host.innerHTML = '<div class="hh-grid">'+col1+col2+col3+'</div>';
 
-  // lazy-load maps if this view is visible
-  if(__monStyle==='home' && !window.__homeMapsLoaded){
-    window.__homeMapsLoaded = true;
-    setTimeout(function(){ host.querySelectorAll('.windy-frame[data-src]').forEach(function(f){ if(f.dataset.src) f.src=f.dataset.src; }); }, 100);
-  } else if(__monStyle==='home'){
-    // re-trigger load for freshly rendered iframes
-    setTimeout(function(){ host.querySelectorAll('.windy-frame[data-src]').forEach(function(f){ if(f.src==='about:blank' && f.dataset.src) f.src=f.dataset.src; }); }, 100);
-  }
 }
 
 function renderGraphicsView(data){
@@ -5850,8 +6192,61 @@ function decodeWmoCode(code, isNight){
   return {icon:'cloud', desc:'Unknown', sev:1};
 }
 
+
+/* ═══ NEW ANIMATED WEATHER ICONS (class-based CSS animation) ═══ */
+function animatedWeatherSVG(code){
+  var sun = '<svg class="wx-svg wx-sun" viewBox="0 0 80 80"><g class="wx-sun-rays">'+
+    [0,45,90,135,180,225,270,315].map(function(a){return '<line x1="40" y1="10" x2="40" y2="20" stroke="var(--wx-sun)" stroke-width="2.5" stroke-linecap="round" transform="rotate('+a+' 40 40)"/>';}).join('')+
+    '</g><circle cx="40" cy="40" r="13" fill="var(--wx-sun)" filter="url(#sunBlur)"/><circle cx="40" cy="40" r="11" fill="var(--wx-sun-hi)"/>'+
+    '<defs><filter id="sunBlur"><feGaussianBlur stdDeviation="1.8"/></filter></defs></svg>';
+  var sunCloud = '<svg class="wx-svg wx-sun-cloud" viewBox="0 0 80 80"><g class="wx-sun-rays-small">'+
+    [0,90,180,270].map(function(a){return '<line x1="28" y1="14" x2="28" y2="20" stroke="var(--wx-sun)" stroke-width="2" stroke-linecap="round" transform="rotate('+a+' 28 28)"/>';}).join('')+
+    '</g><circle cx="28" cy="28" r="10" fill="var(--wx-sun)" filter="url(#sc-blur)"/><circle cx="28" cy="28" r="8" fill="var(--wx-sun-hi)"/>'+
+    '<g class="wx-cloud-drift"><ellipse cx="48" cy="50" rx="20" ry="11" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="38" cy="48" rx="11" ry="9" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="58" cy="48" rx="11" ry="8" fill="var(--wx-cloud)" opacity="0.85"/></g>'+
+    '<defs><filter id="sc-blur"><feGaussianBlur stdDeviation="1.5"/></filter></defs></svg>';
+  var cloud = '<svg class="wx-svg wx-cloud" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="46" rx="26" ry="13" fill="var(--wx-cloud)"/><ellipse cx="28" cy="42" rx="14" ry="11" fill="var(--wx-cloud-hi)"/><ellipse cx="50" cy="40" rx="15" ry="12" fill="var(--wx-cloud-hi)"/></g></svg>';
+  var rain = '<svg class="wx-svg wx-rain" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="32" rx="24" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="28" cy="28" rx="12" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="50" cy="26" rx="14" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops">'+
+    '<line x1="26" y1="48" x2="22" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="40" y1="48" x2="36" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="54" y1="48" x2="50" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="33" y1="55" x2="29" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-4"/><line x1="47" y1="55" x2="43" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
+  var showers = '<svg class="wx-svg wx-showers" viewBox="0 0 80 80"><circle cx="60" cy="22" r="9" fill="var(--wx-sun)" opacity="0.9"/><g class="wx-cloud-float"><ellipse cx="35" cy="34" rx="22" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="24" cy="30" rx="11" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="44" cy="28" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops">'+
+    '<line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="34" y1="50" x2="30" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="46" y1="48" x2="42" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
+  var tstorm = '<svg class="wx-svg wx-tstorm" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="26" ry="12" fill="var(--wx-storm)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-storm-hi)"/><ellipse cx="52" cy="24" rx="15" ry="11" fill="var(--wx-storm-hi)"/></g>'+
+    '<g class="wx-bolt"><polygon points="38,42 48,42 42,54 50,54 36,72 40,58 32,58" fill="var(--wx-sun)" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></g>'+
+    '<g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="58" y1="48" x2="54" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/></g></svg>';
+  var fog = '<svg class="wx-svg wx-fog" viewBox="0 0 80 80"><g><line x1="14" y1="32" x2="66" y2="32" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-1"/><line x1="10" y1="42" x2="62" y2="42" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-2"/><line x1="16" y1="52" x2="70" y2="52" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-3"/></g></svg>';
+  if(code===0||code===1) return sun;
+  if(code===2)           return sunCloud;
+  if(code===3)           return cloud;
+  if(code===45||code===48) return fog;
+  if(code>=51 && code<=57) return showers;
+  if(code===80||code===81) return showers;
+  if(code===82)            return tstorm;
+  if(code>=61 && code<=67) return rain;
+  if(code===95||code===96||code===99) return tstorm;
+  return cloud;
+}
+// Bridge: string icon key -> representative WMO code for animatedWeatherSVG
+function _iconKeyToWMO(key){
+  switch(String(key)){
+    case 'sun': case 'clear': return 0;
+    case 'sun-cloud': return 2;
+    case 'cloud-sun': return 2;
+    case 'cloud': case 'overcast': return 3;
+    case 'fog': case 'mist': case 'haze': case 'dust': return 45;
+    case 'drizzle': return 51;
+    case 'rain': return 63;
+    case 'showers': return 80;
+    case 'snow': return 71;
+    case 'thunder': case 'storm': return 95;
+    default: return 3;
+  }
+}
+
 function buildWxIconSvg(iconKey, size=64){
   const s = size;
+  // Use the new class-based animated icons for standard daytime weather keys
+  if(['sun','clear','sun-cloud','cloud-sun','cloud','overcast','fog','mist','haze','dust','drizzle','rain','showers','thunder','storm','snow'].indexOf(String(iconKey))>=0){
+    return '<span style="display:inline-block;width:'+s+'px;height:'+s+'px;">' + animatedWeatherSVG(_iconKeyToWMO(iconKey)) + '</span>';
+  }
   switch(iconKey){
     case 'moon':
       return `<svg class="wx-anim" viewBox="0 0 64 64" width="${s}" height="${s}"><defs><radialGradient id="moonGrad${s}" cx="40%" cy="40%"><stop offset="0%" stop-color="#f1f5f9"/><stop offset="100%" stop-color="#94a3b8"/></radialGradient></defs><g style="animation:moonGlow 4s ease-in-out infinite;"><circle cx="32" cy="32" r="17" fill="url(#moonGrad${s})"/><circle cx="38" cy="28" r="14" fill="#0a1525"/></g><g style="animation:starTwinkle 2.2s ease-in-out infinite;"><circle cx="12" cy="14" r="0.9" fill="#cce4ff"/><circle cx="52" cy="12" r="0.7" fill="#cce4ff"/><circle cx="50" cy="54" r="0.8" fill="#cce4ff"/></g></svg>`;
@@ -6393,6 +6788,7 @@ async function fetchStationsData(){
   });
   stationData = rows;
   window.__rwcStations = rows;
+  if(rows && rows.length) window.__lastFetchOK = Date.now();
   console.log('[RWC] Stations loaded:', rows.length, rows[0]||'');
   const ts = 'Last fetched: '+new Date().toLocaleString();
   const lf=byId('stn-ts'); if(lf) lf.textContent=ts;
@@ -6450,6 +6846,7 @@ document.querySelectorAll('.atcplayer').forEach(player => {
 const hidden = () => document.hidden;
 
 buildMetarGrid();
+try{ startOverview(); }catch(e){}
 /* apply saved Monitor dashboard style (current / sky / gauges) */
 try { setMonStyle(__monStyle); } catch(e){}
 buildTAFTable();
@@ -6632,6 +7029,26 @@ function toggleMapLock(){
   }
 }
 window.toggleMapLock = toggleMapLock;
+
+
+/* Data freshness badge updater */
+(function(){
+  function updateFreshBadge(){
+    var el = document.getElementById('fresh-badge'), txt = document.getElementById('fresh-txt');
+    if(!el || !txt) return;
+    var last = window.__lastFetchOK;
+    if(!last){ txt.textContent = '--'; el.className='fresh-badge'; return; }
+    var sec = Math.floor((Date.now() - last)/1000);
+    var label;
+    if(sec < 60) label = sec + 's';
+    else if(sec < 3600) label = Math.floor(sec/60) + 'm';
+    else label = Math.floor(sec/3600) + 'h';
+    txt.textContent = label;
+    el.className = 'fresh-badge' + (sec >= 1800 ? ' old' : sec >= 300 ? ' stale' : '');
+  }
+  if(typeof setInterval==='function') setInterval(updateFreshBadge, 5000);
+  setTimeout(updateFreshBadge, 1500);
+})();
 
 })();
 </script>

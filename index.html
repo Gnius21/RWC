@@ -2267,7 +2267,7 @@ function alarm(){
 /* ─── FETCH (cache + race) ─── */
 const __fetchCache = new Map();
 const FETCH_CACHE_TTL = 45000;
-const PERSIST_PREFIX = 'rwc-cache-';
+const PERSIST_PREFIX = 'rwc-v2-';
 const PERSIST_MAX_AGE = 6 * 3600 * 1000;  // serve persisted data up to 6h old on cold start
 
 // Persist a successful response to localStorage (best-effort; never throws)
@@ -4732,7 +4732,16 @@ function renderMonitor(data){
     byId('monPresTend').textContent = '\u2014';
     byId('monPresBarDot').style.left = '50%';
   }
-  const visKmForDust = bonaireVisM != null ? bonaireVisM/1000 : null;
+  // Visibility for dust: TNCB METAR (live Bonaire airport) → bonaireVisM → SYNOP 78988
+  var visKmForDust = null;
+  try {
+    if(typeof mState!=='undefined' && mState['TNCB'] && mState['TNCB'].lastRaw){
+      var tncbP = parseMetar(mState['TNCB'].lastRaw);
+      if(tncbP && !isNaN(tncbP.visM) && tncbP.visM > 0) visKmForDust = tncbP.visM/1000;
+    }
+  } catch(e){}
+  if(visKmForDust == null && bonaireVisM != null) visKmForDust = bonaireVisM/1000;
+  if(visKmForDust == null && synopP && synopP.vis_m != null) visKmForDust = synopP.vis_m/1000;
   const dust = assessDust(synopP, visKmForDust);
   byId('monDustVal').textContent = dust.index + ' / 100';
   byId('monDustDesc').textContent = dust.text + ' \u00b7 ' + dust.desc;

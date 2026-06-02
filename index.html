@@ -1460,30 +1460,61 @@ body.tab-hidden *{animation-play-state:paused !important;}
 *{-webkit-tap-highlight-color:transparent;}
 html,body{max-width:100%;overflow-x:hidden;}
 /* Tablet / small laptop: tabs scroll horizontally so all 10 stay tappable */
+/* ── Tablet / small laptop: tab bar scrolls horizontally ── */
 @media(max-width:820px){
-  .tabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;}
   .tabs::-webkit-scrollbar{display:none;}
   .tab{flex:0 0 auto;min-width:64px;scroll-snap-align:start;}
-  .tabs{scroll-snap-type:x proximity;}
+  /* Conditions map toggle buttons wrap on tablet */
+  .cond-map-hd{flex-direction:column;align-items:flex-start;gap:6px;}
+  .cond-map-toggles{gap:4px;}
 }
-/* Phones: comfortable tap targets, readable labels */
+/* ── Phones ── */
 @media(max-width:560px){
-  .page{padding:7px 7px;gap:8px;}
-  .tab{min-width:58px;min-height:46px;padding:8px 7px;font-size:10px;}
+  .page{padding:7px;gap:8px;}
+  /* Tabs */
+  .tab{min-width:56px;min-height:46px;padding:8px 6px;font-size:10px;}
   .tab-i{font-size:15px;}
-  .hh-grid,.pw-gauges,.pw-charts,.pw-stats{gap:8px;}
-  .hh-hero-temp{font-size:32px;}
-  .pw-hd-clock{font-size:22px;}
-  .pw-gauge-val{font-size:26px;}
-  /* settings panel full-width on phones */
+  /* Settings panel */
   #settings-panel{right:7px;left:7px;width:auto;top:50px;}
-  /* map cells taller-but-single-column already handled; ensure shields tappable */
-  .map-cell{min-height:300px;}
+  /* Monitor sub-view buttons: scroll horizontally on phones */
+  .mon-switcher{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+  .mon-switcher::-webkit-scrollbar{display:none;}
+  .mon-style-btn{flex:0 0 auto;font-size:10px;padding:5px 10px;}
+  /* Power sub-view inside Monitor */
+  .pw-wrap{padding:8px;}
+  .pw-hd-clock{font-size:20px;}
+  .pw-gauge-val{font-size:24px;}
+  .pw-gauges,.pw-charts,.pw-stats,.pw-lower{gap:8px;}
+  .pw-hd{flex-direction:column;gap:4px;}
+  /* Conditions map */
+  .cond-map-body{height:280px;}
+  .cmap-btn{font-size:10px;padding:4px 8px;}
+  /* Dashboard */
+  .hh-grid{gap:8px;}
+  .hh-hero-temp{font-size:28px;}
+  /* Map tab */
+  .map-cell{min-height:260px;}
   .map-lock-btn{font-size:11px;padding:5px 10px;}
+  /* METAR overview card */
+  .ovw-card{padding:10px;}
+  .ovw-row-temp{font-size:16px;}
 }
-/* Large desktop: use more width */
+/* ── Very small phones (≤380px) ── */
+@media(max-width:380px){
+  .tab{min-width:50px;font-size:9px;}
+  .mon-style-btn{font-size:9px;padding:4px 8px;}
+  .pw-gauge-val{font-size:20px;}
+  .cw-grid{grid-template-columns:1fr !important;}
+  .cw-tile.mon-stavg{grid-column:auto !important;}
+}
+/* ── Large desktop ── */
+@media(min-width:1400px){
+  .mon-grid{grid-template-columns:repeat(4,1fr);}
+}
 @media(min-width:1600px){
   .topbar,.tabs,.content,.footer{max-width:1600px;}
+  .cond-map-body{height:520px;}
 }
 
 
@@ -1492,10 +1523,11 @@ html,body{max-width:100%;overflow-x:hidden;}
 /* ═══ NEW ANIMATED WEATHER ICONS ═══ */
 :root{
   --wx-sun:#fbbf24; --wx-sun-hi:#fde68a;
-  --wx-cloud:#cbd5e1; --wx-cloud-hi:#e2e8f0;
-  --wx-cloud-dark:#94a3b8; --wx-cloud-dark-hi:#b8c4d4;
-  --wx-storm:#64748b; --wx-storm-hi:#94a3b8;
-  --wx-drop:#60a5fa;
+  --wx-cloud:#94a3b8; --wx-cloud-hi:#cbd5e1;
+  --wx-cloud-dark:#475569; --wx-cloud-dark-hi:#64748b;
+  --wx-storm:#334155; --wx-storm-hi:#475569;
+  --wx-drop:#7dd3fc;
+  --wx-snow:#e2e8f0;
 }
 .wx-svg{width:100%;height:100%;display:block;overflow:visible}
 .wx-sun-rays{transform-origin:40px 40px;animation:wxSunSpin 20s linear infinite}
@@ -1583,6 +1615,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 .cmap-popup{font-family:var(--cond);font-size:12px;line-height:1.6;min-width:130px;}
 .cmap-popup b{font-size:13px;color:var(--acc);}
 
+.cmap-dust-tip{font-family:var(--cond);font-size:12px;font-weight:700;background:rgba(5,18,34,0.9);color:#fbbf24;border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:4px 10px;}
 </style>
 </head>
 <body>
@@ -1799,6 +1832,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <div class="mon-lbl">Solar Power <span style="font-size:9px;opacity:.6;letter-spacing:.5px;">LIVE</span></div>
             <div class="mon-big" id="monSolarVal">&mdash;</div>
             <div class="mon-sm" id="monSolarDesc">&mdash;</div>
+            <div class="mon-sm" id="monSolarDay" style="margin-top:3px;font-size:11px;color:var(--muted);">&mdash;</div>
           </div>
           <div class="mon-icon-r"><svg class="mon-gauge" viewBox="0 0 80 80" id="monSolarGauge"></svg></div>
         </div>
@@ -2068,6 +2102,8 @@ html,body{max-width:100%;overflow-x:hidden;}
             <button class="cmap-btn active" data-layer="stations" onclick="condMapToggle('stations',this)">&#9681; Stations</button>
             <button class="cmap-btn active" data-layer="wind" onclick="condMapToggle('wind',this)">&#127788; Wind</button>
             <button class="cmap-btn" data-layer="rain" onclick="condMapToggle('rain',this)">&#127783; Rain</button>
+            <button class="cmap-btn" data-layer="satellite" onclick="condMapToggle('satellite',this)">&#128752; Satellite</button>
+            <button class="cmap-btn" data-layer="dust" onclick="condMapToggle('dust',this)">&#127773; Dust</button>
           </div>
         </div>
         <div id="condMap" class="cond-map-body"></div>
@@ -4795,7 +4831,7 @@ function renderMonitor(data){
   })();
   // ── Solar power estimate (5 kW array) using live radiation + calibrated model ──
   (function(){
-    var sv = byId('monSolarVal'), sd = byId('monSolarDesc'), sg = byId('monSolarGauge');
+    var sv = byId('monSolarVal'), sd = byId('monSolarDesc'), sg = byId('monSolarGauge'), sday = byId('monSolarDay');
     if(!sv) return;
     var rad = (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation : null;
     var uvv = (omCurrent && omCurrent.uv_index != null) ? omCurrent.uv_index : null;
@@ -4814,10 +4850,29 @@ function renderMonitor(data){
       sd.textContent = slbl + (rad!=null ? ' \u00b7 live' : ' \u00b7 est');
       sd.style.color = scol;
       if(sg) sg.innerHTML = buildArcGauge({ value: watts, max: 800, color: scol, bgColor: 'rgba(255,255,255,0.06)' });
+      // ── Daily total: integrate solar model from sunrise to now (10-min steps) ──
+      if(sday && typeof pwSunElevation === 'function' && typeof pwSolarPower === 'function'){
+        var now = new Date();
+        var startOfDay = new Date(now); startOfDay.setHours(0,0,0,0);
+        var wh = 0, step = 10; // 10-minute steps
+        for(var m = 0; m < (now - startOfDay)/60000; m += step){
+          var t = new Date(startOfDay.getTime() + m*60000);
+          var e = pwSunElevation(t);
+          // Use current radiation as a proxy scaled by sun position vs now
+          // This approximates the curve shape using today's cloud conditions
+          var radEst = (rad!=null && elev > 2) ? rad * Math.max(0, Math.sin(Math.max(0,e)*Math.PI/180)) / Math.max(0.01, Math.sin(Math.max(0.01,elev)*Math.PI/180)) : null;
+          var w = pwSolarPower(e, oktas, uvv, radEst);
+          wh += w * (step/60); // W × hours = Wh
+        }
+        var kwh = wh/1000;
+        sday.textContent = '\u2600 Today: ' + kwh.toFixed(2) + ' kWh';
+        sday.style.color = scol;
+      }
     } else {
       sv.innerHTML = '\u2014 <span class="mon-unit">kW</span>';
       sd.textContent = 'Unavailable';
       if(sg) sg.innerHTML = '';
+      if(sday) sday.textContent = '\u2014';
     }
   })();
   // ── Curaçao SYNOP (Ogimet Live) card ──
@@ -6303,35 +6358,28 @@ function decodeWmoCode(code, isNight){
 
 /* ═══ NEW ANIMATED WEATHER ICONS (class-based CSS animation) ═══ */
 function animatedWeatherSVG(code){
-  var sun = '<svg class="wx-svg wx-sun" viewBox="0 0 80 80"><g class="wx-sun-rays">'+
-    [0,45,90,135,180,225,270,315].map(function(a){return '<line x1="40" y1="10" x2="40" y2="20" stroke="var(--wx-sun)" stroke-width="2.5" stroke-linecap="round" transform="rotate('+a+' 40 40)"/>';}).join('')+
-    '</g><circle cx="40" cy="40" r="13" fill="var(--wx-sun)" filter="url(#sunBlur)"/><circle cx="40" cy="40" r="11" fill="var(--wx-sun-hi)"/>'+
-    '<defs><filter id="sunBlur"><feGaussianBlur stdDeviation="1.8"/></filter></defs></svg>';
-  var sunCloud = '<svg class="wx-svg wx-sun-cloud" viewBox="0 0 80 80"><g class="wx-sun-rays-small">'+
-    [0,90,180,270].map(function(a){return '<line x1="28" y1="14" x2="28" y2="20" stroke="var(--wx-sun)" stroke-width="2" stroke-linecap="round" transform="rotate('+a+' 28 28)"/>';}).join('')+
-    '</g><circle cx="28" cy="28" r="10" fill="var(--wx-sun)" filter="url(#sc-blur)"/><circle cx="28" cy="28" r="8" fill="var(--wx-sun-hi)"/>'+
-    '<g class="wx-cloud-drift"><ellipse cx="48" cy="50" rx="20" ry="11" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="38" cy="48" rx="11" ry="9" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="58" cy="48" rx="11" ry="8" fill="var(--wx-cloud)" opacity="0.85"/></g>'+
-    '<defs><filter id="sc-blur"><feGaussianBlur stdDeviation="1.5"/></filter></defs></svg>';
-  var cloud = '<svg class="wx-svg wx-cloud" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="46" rx="26" ry="13" fill="var(--wx-cloud)"/><ellipse cx="28" cy="42" rx="14" ry="11" fill="var(--wx-cloud-hi)"/><ellipse cx="50" cy="40" rx="15" ry="12" fill="var(--wx-cloud-hi)"/></g></svg>';
-  var rain = '<svg class="wx-svg wx-rain" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="32" rx="24" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="28" cy="28" rx="12" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="50" cy="26" rx="14" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops">'+
-    '<line x1="26" y1="48" x2="22" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="40" y1="48" x2="36" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="54" y1="48" x2="50" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="33" y1="55" x2="29" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-4"/><line x1="47" y1="55" x2="43" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
-  var showers = '<svg class="wx-svg wx-showers" viewBox="0 0 80 80"><circle cx="60" cy="22" r="9" fill="var(--wx-sun)" opacity="0.9"/><g class="wx-cloud-float"><ellipse cx="35" cy="34" rx="22" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="24" cy="30" rx="11" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="44" cy="28" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops">'+
-    '<line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="34" y1="50" x2="30" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="46" y1="48" x2="42" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
-  var tstorm = '<svg class="wx-svg wx-tstorm" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="26" ry="12" fill="var(--wx-storm)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-storm-hi)"/><ellipse cx="52" cy="24" rx="15" ry="11" fill="var(--wx-storm-hi)"/></g>'+
-    '<g class="wx-bolt"><polygon points="38,42 48,42 42,54 50,54 36,72 40,58 32,58" fill="var(--wx-sun)" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></g>'+
-    '<g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="58" y1="48" x2="54" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/></g></svg>';
-  var fog = '<svg class="wx-svg wx-fog" viewBox="0 0 80 80"><g><line x1="14" y1="32" x2="66" y2="32" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-1"/><line x1="10" y1="42" x2="62" y2="42" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-2"/><line x1="16" y1="52" x2="70" y2="52" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-3"/></g></svg>';
+  var sun='<svg class="wx-svg wx-sun" viewBox="0 0 80 80"><g class="wx-sun-rays">'+[0,45,90,135,180,225,270,315].map(function(a){return '<line x1="40" y1="10" x2="40" y2="20" stroke="var(--wx-sun)" stroke-width="2.5" stroke-linecap="round" transform="rotate('+a+' 40 40)"/>';}).join('')+'</g><circle cx="40" cy="40" r="13" fill="var(--wx-sun)" filter="url(#sunBlur)"/><circle cx="40" cy="40" r="11" fill="var(--wx-sun-hi)"/><defs><filter id="sunBlur"><feGaussianBlur stdDeviation="1.8"/></filter></defs></svg>';
+  var sunCloud='<svg class="wx-svg wx-sun-cloud" viewBox="0 0 80 80"><g class="wx-sun-rays-small">'+[0,90,180,270].map(function(a){return '<line x1="28" y1="14" x2="28" y2="20" stroke="var(--wx-sun)" stroke-width="2" stroke-linecap="round" transform="rotate('+a+' 28 28)"/>';}).join('')+'</g><circle cx="28" cy="28" r="10" fill="var(--wx-sun)" filter="url(#sc-blur)"/><circle cx="28" cy="28" r="8" fill="var(--wx-sun-hi)"/><g class="wx-cloud-drift"><ellipse cx="48" cy="50" rx="20" ry="11" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="38" cy="48" rx="11" ry="9" fill="var(--wx-cloud)" opacity="0.85"/><ellipse cx="58" cy="48" rx="11" ry="8" fill="var(--wx-cloud)" opacity="0.85"/></g><defs><filter id="sc-blur"><feGaussianBlur stdDeviation="1.5"/></filter></defs></svg>';
+  var cloud='<svg class="wx-svg wx-cloud" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="46" rx="26" ry="13" fill="var(--wx-cloud)"/><ellipse cx="28" cy="42" rx="14" ry="11" fill="var(--wx-cloud-hi)"/><ellipse cx="50" cy="40" rx="15" ry="12" fill="var(--wx-cloud-hi)"/></g></svg>';
+  var rain='<svg class="wx-svg wx-rain" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="32" rx="24" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="28" cy="28" rx="12" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="50" cy="26" rx="14" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops"><line x1="26" y1="48" x2="22" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="40" y1="48" x2="36" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="54" y1="48" x2="50" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="33" y1="55" x2="29" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-4"/><line x1="47" y1="55" x2="43" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
+  var showers='<svg class="wx-svg wx-showers" viewBox="0 0 80 80"><circle cx="60" cy="22" r="9" fill="var(--wx-sun)" opacity="0.9"/><g class="wx-cloud-float"><ellipse cx="35" cy="34" rx="22" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="24" cy="30" rx="11" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="44" cy="28" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="34" y1="50" x2="30" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="46" y1="48" x2="42" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
+  var tstorm='<svg class="wx-svg wx-tstorm" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="26" ry="12" fill="var(--wx-storm)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-storm-hi)"/><ellipse cx="52" cy="24" rx="15" ry="11" fill="var(--wx-storm-hi)"/></g><g class="wx-bolt"><polygon points="38,42 48,42 42,54 50,54 36,72 40,58 32,58" fill="var(--wx-sun)" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></g><g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="58" y1="48" x2="54" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/></g></svg>';
+  var fog='<svg class="wx-svg wx-fog" viewBox="0 0 80 80"><g><line x1="14" y1="32" x2="66" y2="32" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-1"/><line x1="10" y1="42" x2="62" y2="42" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-2"/><line x1="16" y1="52" x2="70" y2="52" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-3"/></g></svg>';
+  var snow='<svg class="wx-svg wx-snow" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="24" ry="11" fill="var(--wx-cloud-dark)"/><ellipse cx="28" cy="26" rx="12" ry="9" fill="var(--wx-cloud)"/><ellipse cx="50" cy="24" rx="14" ry="10" fill="var(--wx-cloud)"/></g><circle cx="26" cy="52" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-1"/><circle cx="40" cy="50" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-2"/><circle cx="54" cy="52" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-3"/><circle cx="33" cy="62" r="2" fill="var(--wx-snow)" class="wx-drop wx-drop-4"/><circle cx="47" cy="64" r="2" fill="var(--wx-snow)" class="wx-drop wx-drop-5"/><line x1="40" y1="47" x2="40" y2="55" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="37" y1="49" x2="43" y2="53" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="43" y1="49" x2="37" y2="53" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/></svg>';
   if(code===0||code===1) return sun;
   if(code===2)           return sunCloud;
   if(code===3)           return cloud;
   if(code===45||code===48) return fog;
-  if(code>=51 && code<=57) return showers;
+  if(code>=51&&code<=57) return showers;
+  if(code>=61&&code<=67) return rain;
+  if(code>=71&&code<=77) return snow;
   if(code===80||code===81) return showers;
-  if(code===82)            return tstorm;
-  if(code>=61 && code<=67) return rain;
+  if(code===82)          return tstorm;
+  if(code===85||code===86) return snow;
   if(code===95||code===96||code===99) return tstorm;
   return cloud;
 }
+
 // Bridge: string icon key -> representative WMO code for animatedWeatherSVG
 function _iconKeyToWMO(key){
   switch(String(key)){
@@ -6347,6 +6395,53 @@ function _iconKeyToWMO(key){
     case 'thunder': case 'storm': return 95;
     default: return 3;
   }
+}
+
+
+/* WMO wind barb rose — full wind barb notation with gust arc */
+var _wrUID = 0;
+function windRoseSVG(opts){
+  var deg=opts.deg||0, speedKt=opts.speedKt||0, gustKt=opts.gustKt||0, size=opts.size||80, windCol=opts.windCol||'#22d3ee';
+  var uid=++_wrUID, cx=size/2, cy=size/2, R=size*0.42;
+  var toRad=function(d){return d*Math.PI/180;};
+  var isCalm=speedKt<3, isVar=deg===999;
+  var pointDeg=isCalm||isVar?0:(deg+180)%360;
+  var shaftLen=isCalm?0:Math.min(R*0.88,R*0.18+speedKt*R*0.026);
+  var ticks=Array.from({length:16},function(_,i){
+    var a=toRad(i*22.5-90),isCard=i%4===0,isOrd=i%2===0;
+    var r1=isCard?R*0.80:isOrd?R*0.85:R*0.89,r2=R*0.96,sw=isCard?1.3:0.7,op=isCard?0.55:isOrd?0.3:0.18;
+    return '<line x1="'+(cx+Math.cos(a)*r1).toFixed(2)+'" y1="'+(cy+Math.sin(a)*r1).toFixed(2)+'" x2="'+(cx+Math.cos(a)*r2).toFixed(2)+'" y2="'+(cy+Math.sin(a)*r2).toFixed(2)+'" stroke="rgba(155,212,255,'+op+')" stroke-width="'+sw+'"/>';
+  }).join('');
+  var cardLabels=[['N',0],['E',90],['S',180],['W',270]].map(function(p){
+    var a=toRad(p[1]-90),r=R*0.68,fs=size*0.092;
+    return '<text x="'+(cx+Math.cos(a)*r).toFixed(2)+'" y="'+(cy+Math.sin(a)*r).toFixed(2)+'" text-anchor="middle" dominant-baseline="middle" font-size="'+fs+'" fill="rgba(155,212,255,0.7)" font-family="monospace" font-weight="700">'+p[0]+'</text>';
+  }).join('');
+  var rings=[[R*0.32,0.14],[R*0.55,0.10],[R*0.76,0.07]].map(function(p){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+p[0].toFixed(2)+'" fill="none" stroke="rgba(34,211,238,'+p[1]+')" stroke-width="0.6" stroke-dasharray="2 3"/>';}).join('');
+  var shaftX1=cx,shaftY1=cy,shaftX2=cx,shaftY2=cy-shaftLen;
+  var hw=size*0.056,hl=size*0.092;
+  var arrowHead=isCalm?'':'<polygon points="'+shaftX2+','+(shaftY2-hl).toFixed(2)+' '+(shaftX2-hw).toFixed(2)+','+shaftY2+' '+(shaftX2+hw).toFixed(2)+','+shaftY2+'" fill="'+windCol+'" filter="url(#wrGlow'+uid+')"/>';
+  var feathers='';
+  if(!isCalm&&speedKt>=3){
+    var remaining=Math.round(speedKt/5)*5,fy=cy-size*0.04,step=size*0.068,bLen=size*0.145,bOff=size*0.062;
+    while(remaining>=50&&fy>shaftY2+step){feathers+='<polygon points="'+shaftX1+','+fy.toFixed(2)+' '+(shaftX1+bLen).toFixed(2)+','+(fy-bOff*2).toFixed(2)+' '+shaftX1+','+(fy-step*0.8).toFixed(2)+'" fill="'+windCol+'" opacity="0.9"/>';remaining-=50;fy-=step*0.9;}
+    while(remaining>=10&&fy>shaftY2+size*0.03){feathers+='<line x1="'+shaftX1+'" y1="'+fy.toFixed(2)+'" x2="'+(shaftX1+bLen).toFixed(2)+'" y2="'+(fy-bOff).toFixed(2)+'" stroke="'+windCol+'" stroke-width="'+(size*0.028).toFixed(2)+'" stroke-linecap="round" opacity="0.92"/>';remaining-=10;fy-=step;}
+    if(remaining>=5&&fy>shaftY2+size*0.02){feathers+='<line x1="'+shaftX1+'" y1="'+fy.toFixed(2)+'" x2="'+(shaftX1+bLen*0.5).toFixed(2)+'" y2="'+(fy-bOff*0.5).toFixed(2)+'" stroke="'+windCol+'" stroke-width="'+(size*0.028).toFixed(2)+'" stroke-linecap="round" opacity="0.92"/>';}
+  }
+  var gustArc='';
+  if(gustKt>speedKt+3){var gr=Math.min(R*0.92,R*0.18+gustKt*R*0.026);gustArc='<circle cx="'+cx+'" cy="'+cy+'" r="'+gr.toFixed(2)+'" fill="none" stroke="'+windCol+'" stroke-width="0.8" stroke-dasharray="3 4" opacity="0.35"/>';}
+  var centreMark=isCalm?'<circle cx="'+cx+'" cy="'+cy+'" r="'+(size*0.085).toFixed(2)+'" fill="none" stroke="'+windCol+'" stroke-width="1.6" opacity="0.75"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(size*0.028).toFixed(2)+'" fill="'+windCol+'" opacity="0.85"/><text x="'+cx+'" y="'+(cy+size*0.22).toFixed(2)+'" text-anchor="middle" font-size="'+(size*0.09).toFixed(2)+'" fill="'+windCol+'" font-family="monospace" font-weight="700" opacity="0.9">CALM</text>':isVar?'<text x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle" font-size="'+(size*0.1).toFixed(2)+'" fill="'+windCol+'" font-family="monospace" font-weight="700">VRB</text>':'<circle cx="'+cx+'" cy="'+cy+'" r="'+(size*0.042).toFixed(2)+'" fill="'+windCol+'" opacity="0.95" filter="url(#wrGlow'+uid+')"/>';
+  var speedLabel=(!isCalm&&!isVar)?'<text x="'+cx+'" y="'+(cy+R*1.14).toFixed(2)+'" text-anchor="middle" font-size="'+(size*0.088).toFixed(2)+'" fill="'+windCol+'" font-family="monospace" font-weight="700" opacity="0.88">'+speedKt+(gustKt>speedKt+3?' G'+gustKt:'')+'kt</text>':'';
+  return '<svg class="wind-rose-svg" viewBox="0 0 '+size+' '+size+'" style="width:'+size+'px;height:'+size+'px;overflow:visible;display:block">'+
+    '<defs><radialGradient id="wrBg'+uid+'" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="'+windCol+'" stop-opacity="0.07"/><stop offset="100%" stop-color="'+windCol+'" stop-opacity="0"/></radialGradient>'+
+    '<filter id="wrGlow'+uid+'" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+R.toFixed(2)+'" fill="url(#wrBg'+uid+')"/>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+R.toFixed(2)+'" fill="none" stroke="rgba(34,211,238,0.28)" stroke-width="0.8"/>'+
+    rings+'<line x1="'+cx+'" y1="'+(cy-R*0.95).toFixed(2)+'" x2="'+cx+'" y2="'+(cy+R*0.95).toFixed(2)+'" stroke="rgba(34,211,238,0.07)" stroke-width="0.5"/>'+
+    '<line x1="'+(cx-R*0.95).toFixed(2)+'" y1="'+cy+'" x2="'+(cx+R*0.95).toFixed(2)+'" y2="'+cy+'" stroke="rgba(34,211,238,0.07)" stroke-width="0.5"/>'+
+    ticks+cardLabels+gustArc+
+    '<g style="transform:rotate('+pointDeg+'deg);transform-origin:'+cx+'px '+cy+'px;transition:transform 1.4s cubic-bezier(.4,0,.2,1)">'+
+    (isCalm?'':'<line x1="'+shaftX1+'" y1="'+shaftY1.toFixed(2)+'" x2="'+shaftX2+'" y2="'+shaftY2.toFixed(2)+'" stroke="'+windCol+'" stroke-width="'+(size*0.038).toFixed(2)+'" stroke-linecap="round" filter="url(#wrGlow'+uid+')"/>')+
+    feathers+arrowHead+'</g>'+centreMark+speedLabel+'</svg>';
 }
 
 function buildWxIconSvg(iconKey, size=64){
@@ -6664,8 +6759,8 @@ window.__fcDebug = () => __lastForecastData;
 
 /* ═══ CONDITIONS MAP (Leaflet, ABC Islands) ═══ */
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
-var condRainLayer = null;
-var __condMapLayers = {stations:true, wind:true, rain:false};
+var condRainLayer = null, condSatLayer = null, condDustCircle = null;
+var __condMapLayers = {stations:true, wind:true, rain:false, satellite:false, dust:false};
 var __condMapReady = false;
 
 // ABC island lat/lons for the map bounds
@@ -6684,21 +6779,33 @@ function initCondMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB'}).addTo(condMap);
   condMarkerLayer = L.layerGroup().addTo(condMap);
-  // RainViewer radar (free, no key) — fetch latest frame path from their API, then build tiles
+
+  // ── SATELLITE: NOAA GOES-19 Caribbean WMS (free, no key) ──
+  condSatLayer = L.tileLayer.wms('https://nowcoast.noaa.gov/geoserver/satellite/wms', {
+    layers: 'goes_longwave_imagery', format: 'image/png', transparent: true,
+    opacity: 0.6, version: '1.3.0', attribution: 'NOAA GOES Longwave IR', maxZoom: 12
+  });
+
+  // ── RAIN: RainViewer radar (free, no key) — fetch latest frame ──
   fetch('https://api.rainviewer.com/public/weather-maps.json')
     .then(function(r){ return r.json(); })
     .then(function(j){
       try{
-        var frames = (j.radar && (j.radar.nowcast||j.radar.past)) || [];
+        var frames = (j.radar && j.radar.past) ? j.radar.past : [];
+        if(j.radar && j.radar.nowcast) frames = frames.concat(j.radar.nowcast);
         var frame = frames.length ? frames[frames.length-1] : null;
         if(frame && j.host){
-          condRainLayer = L.tileLayer(j.host + frame.path + '/256/{z}/{x}/{y}/2/1_1.png',
-            {opacity:0.55, maxZoom:12, attribution:'RainViewer'});
+          condRainLayer = L.tileLayer(j.host + frame.path + '/256/{z}/{x}/{y}/8/1_1.png',
+            {opacity:0.6, maxZoom:12, attribution:'RainViewer'});
           if(__condMapLayers.rain && condMap) condRainLayer.addTo(condMap);
         }
       }catch(e){}
     })
     .catch(function(){});
+
+  // ── DUST: CAMS circle overlay — size/colour driven by live dust µg/m³ ──
+  // Built later in renderCondMap when data is available
+
   __condMapReady = true;
   renderCondMap();
   condMap.on('click', function(e){ condMap.closePopup(); });
@@ -6748,21 +6855,19 @@ function renderCondMap(){
         var popupHtml = '<div class="cmap-popup"><b>'+s.flag+' '+s.name+'</b><br>'+
           'Temp: '+(mp&&mp.tempC!=null?mp.tempC.toFixed(1)+'°C':'—')+'<br>'+
           'Wind: '+(windSpd!=null?windSpd+' kt':'—')+(windDir!=null?' '+windDir+'°':'')+'<br>'+
-          'Visibility: '+(mp&&mp.vis!=null?(mp.vis/1000).toFixed(1)+' km':'—')+'<br>'+
+          'Visibility: '+(mp&&mp.visM!=null?(mp.visM/1000).toFixed(1)+' km':'—')+'<br>'+
           (mp&&mp.wxToks&&mp.wxToks.length?'WX: '+mp.wxToks.join(' ')+'<br>':'')+'</div>';
         marker.bindPopup(popupHtml, {maxWidth:200});
         marker.addTo(condMarkerLayer);
       }
-      // Wind arrows (separate so can be toggled)
+      // Wind barb (separate layer so it can be toggled). Uses the WMO wind rose.
       if(__condMapLayers.wind && windDir!=null && windSpd!=null){
-        var arrowHtml = '<div style="transform:rotate('+(windDir+180)+'deg);font-size:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));color:#22d3ee;">&#10148;</div>';
-        var arrowIcon = L.divIcon({html:arrowHtml, className:'', iconAnchor:[11,11]});
-        var arrPt = [lat + 0.04, lon + 0.04];
-        var arrow = L.marker(arrPt, {icon:arrowIcon, interactive:false});
-        var spdHtml = '<div style="font-family:monospace;font-size:10px;font-weight:700;color:#22d3ee;background:rgba(5,18,34,0.8);padding:1px 4px;border-radius:3px;">'+windSpd+'kt</div>';
-        var spdIcon = L.divIcon({html:spdHtml, className:'', iconAnchor:[14,5]});
-        L.marker([lat+0.06, lon+0.04], {icon:spdIcon, interactive:false}).addTo(condMarkerLayer);
-        arrow.addTo(condMarkerLayer);
+        var roseHtml = (typeof windRoseSVG === 'function')
+          ? windRoseSVG({deg:windDir, speedKt:windSpd, size:54, windCol:'#22d3ee'})
+          : '<div style="transform:rotate('+((windDir+180-90)%360)+'deg);font-size:22px;color:#22d3ee;">&#10148;</div>';
+        var roseIcon = L.divIcon({html:'<div style="filter:drop-shadow(0 1px 4px rgba(0,0,0,0.8));">'+roseHtml+'</div>', className:'', iconSize:[54,54], iconAnchor:[27,27]});
+        // Offset the rose slightly NE of the station icon so they don't overlap
+        L.marker([lat+0.05, lon+0.05], {icon:roseIcon, interactive:false}).addTo(condMarkerLayer);
       }
     });
   }
@@ -6770,6 +6875,60 @@ function renderCondMap(){
   if(condRainLayer){
     if(__condMapLayers.rain){ condRainLayer.addTo(condMap); }
     else if(condMap.hasLayer(condRainLayer)){ condMap.removeLayer(condRainLayer); }
+  }
+
+  // Satellite layer (NOAA GOES-19 WMS)
+  if(condSatLayer){
+    if(__condMapLayers.satellite){ condSatLayer.addTo(condMap); }
+    else if(condMap.hasLayer(condSatLayer)){ condMap.removeLayer(condSatLayer); }
+  }
+
+  // Dust overlay — soft layered gradient blob over the ABC region (not a hard circle)
+  if(condDustCircle){ condDustCircle.remove(); condDustCircle = null; }
+  if(__condMapLayers.dust){
+    var dustUg = null;
+    try{
+      ['curacao','aruba','bonaire'].forEach(function(k){
+        if(dustUg==null && WX_EXTRA[k] && WX_EXTRA[k].aq && WX_EXTRA[k].aq.dust!=null) dustUg=WX_EXTRA[k].aq.dust;
+      });
+    }catch(e){}
+    if(dustUg==null) try{
+      ['curacao','aruba','bonaire'].forEach(function(k){
+        if(dustUg==null && WX_EXTRA[k] && WX_EXTRA[k].aq && WX_EXTRA[k].aq.pm10!=null) dustUg=WX_EXTRA[k].aq.pm10*0.6;
+      });
+    }catch(e){}
+    var dustCol='#fde047', dustBase=0.10;
+    if(dustUg!=null){
+      if(dustUg >= 400)     { dustCol='#ff4f4f'; dustBase=0.42; }
+      else if(dustUg >= 150){ dustCol='#ff8a3d'; dustBase=0.32; }
+      else if(dustUg >= 75) { dustCol='#f59e0b'; dustBase=0.24; }
+      else if(dustUg >= 25) { dustCol='#fde047'; dustBase=0.16; }
+      else                  { dustCol='#fde047'; dustBase=0.08; }
+    }
+    // Build a soft plume from concentric circles, fading outward (inner = densest)
+    condDustCircle = L.layerGroup();
+    var radii = [
+      {r:90,  o:dustBase*1.4},
+      {r:160, o:dustBase*1.0},
+      {r:240, o:dustBase*0.6},
+      {r:330, o:dustBase*0.3}
+    ];
+    radii.forEach(function(ring){
+      L.circle([12.15,-69.0], {
+        radius: ring.r*1000, color: dustCol, fillColor: dustCol,
+        fillOpacity: Math.min(0.6, ring.o), opacity: 0, weight: 0, interactive:false
+      }).addTo(condDustCircle);
+    });
+    // A faint dashed outline on the outermost ring for definition
+    var outline = L.circle([12.15,-69.0], {
+      radius: 330*1000, color: dustCol, fill:false, opacity: 0.3, weight: 1, dashArray:'4 6'
+    });
+    if(dustUg!=null){
+      outline.bindTooltip('\u{1F32B} CAMS Dust: ' + Math.round(dustUg) + ' \u03bcg/m\u00b3',
+        {permanent:false, direction:'top', className:'cmap-dust-tip'});
+    }
+    outline.addTo(condDustCircle);
+    condDustCircle.addTo(condMap);
   }
 }
 

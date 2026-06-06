@@ -727,51 +727,15 @@ body.night .tab-bar::before{
 }
 body.night .tab-btn:hover{background:rgba(204,136,0,0.06);}
 
-/* ── OBSMONITOR tab — bigger tap target + persistent glow ── */
-.tab-btn.tab-obsmon{
-  flex:1.4;                       /* larger hit area than siblings */
-  min-width:128px;
-  padding:13px 18px;
-  font-size:.72rem;
-  letter-spacing:.2em;
-  font-weight:700;
-  color:var(--cyan);
-  background:linear-gradient(180deg,rgba(34,211,238,0.16),rgba(34,211,238,0.04));
-  box-shadow:
-    0 0 18px var(--cyan-glow),
-    0 0 6px rgba(34,211,238,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.10);
-  animation:obsmonGlow 2.6s ease-in-out infinite;
+/* ── ATC sub-nav buttons ── */
+.atc-subbtn{
+  font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:8px 18px;border-radius:20px;cursor:pointer;
+  border:1px solid var(--bdr);background:rgba(255,255,255,.03);color:var(--text-dim);
+  transition:all .18s;white-space:nowrap;
 }
-.tab-btn.tab-obsmon::after{
-  content:'';position:absolute;inset:-1px;border-radius:10px;pointer-events:none;
-  background:linear-gradient(120deg,transparent 30%,rgba(34,211,238,0.22) 50%,transparent 70%);
-  background-size:200% 100%;
-  animation:obsmonSweep 4s linear infinite;
-  mix-blend-mode:screen;
-}
-.tab-btn.tab-obsmon:hover{
-  color:#fff;
-  transform:translateY(-2px) scale(1.03);
-  box-shadow:
-    0 0 30px var(--cyan-glow),
-    0 0 12px rgba(34,211,238,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.16);
-}
-.tab-btn.tab-obsmon.active{
-  color:#fff;
-}
-@keyframes obsmonGlow{
-  0%,100%{box-shadow:0 0 18px var(--cyan-glow),0 0 6px rgba(34,211,238,0.35),inset 0 1px 0 rgba(255,255,255,0.10);}
-  50%    {box-shadow:0 0 32px var(--cyan-glow),0 0 16px rgba(34,211,238,0.6), inset 0 1px 0 rgba(255,255,255,0.16);}
-}
-@keyframes obsmonSweep{
-  0%  {background-position:200% 0}
-  100%{background-position:-200% 0}
-}
-@media(max-width:680px){
-  .tab-btn.tab-obsmon{flex:1.3;min-width:96px;padding:9px 12px;font-size:.56rem}
-}
+.atc-subbtn:hover{border-color:var(--bdrb);color:var(--cyan);}
+.atc-subbtn.active{background:var(--accd);border-color:var(--bdrb);color:var(--acc);}
 
 .tab-pane{display:none}
 .tab-pane.active{display:block}
@@ -3471,13 +3435,12 @@ body.night .tab-btn.active{
 <!-- TAB BAR -->
 <div class="tab-bar" role="tablist" aria-label="Dashboard sections">
   <div class="tab-btn active" data-tab="atc"      role="tab" id="tabbtn-atc"      aria-controls="tab-atc"      aria-selected="true"  tabindex="0">📡 ATC <span class="tab-key" aria-hidden="true">1</span></div>
-  <div class="tab-btn tab-obsmon" data-tab="monitor" role="tab" id="tabbtn-monitor" aria-controls="tab-monitor" aria-selected="false" tabindex="-1">⚡ MONITOR <span class="tab-key" aria-hidden="true">2</span></div>
-  <div class="tab-btn tab-obsmon" data-tab="obsmon" role="tab" id="tabbtn-obsmon" aria-controls="tab-obsmon" aria-selected="false" tabindex="-1">🛰 OBSMONITOR <span class="tab-key" aria-hidden="true">3</span></div>
+  <div class="tab-btn"         data-tab="monitor" role="tab" id="tabbtn-monitor" aria-controls="tab-monitor" aria-selected="false" tabindex="-1">⚡ MONITOR <span class="tab-key" aria-hidden="true">2</span></div>
+  <div class="tab-btn"         data-tab="obsmon" role="tab" id="tabbtn-obsmon" aria-controls="tab-obsmon" aria-selected="false" tabindex="-1">🛰 RWC <span class="tab-key" aria-hidden="true">3</span></div>
   <div class="tab-btn"        data-tab="weather"  role="tab" id="tabbtn-weather"  aria-controls="tab-weather"  aria-selected="false" tabindex="-1">🌤 Weather <span class="tab-key" aria-hidden="true">4</span></div>
   <div class="tab-btn"        data-tab="forecast" role="tab" id="tabbtn-forecast" aria-controls="tab-forecast" aria-selected="false" tabindex="-1">📅 Forecast <span class="tab-key" aria-hidden="true">5</span></div>
   <div class="tab-btn"        data-tab="marine"   role="tab" id="tabbtn-marine"   aria-controls="tab-marine"   aria-selected="false" tabindex="-1">🌊 Marine <span class="tab-key" aria-hidden="true">6</span></div>
-  <div class="tab-btn"        data-tab="flights"  role="tab" id="tabbtn-flights"  aria-controls="tab-flights"  aria-selected="false" tabindex="-1">✈ Flights <span class="tab-key" aria-hidden="true">7</span></div>
-  <div class="tab-btn"        data-tab="world"    role="tab" id="tabbtn-world"    aria-controls="tab-world"    aria-selected="false" tabindex="-1">🌍 World <span class="tab-key" aria-hidden="true">8</span></div>
+  <div class="tab-btn"        data-tab="world"    role="tab" id="tabbtn-world"    aria-controls="tab-world"    aria-selected="false" tabindex="-1">🌍 World <span class="tab-key" aria-hidden="true">7</span></div>
 </div>
 
 <!-- ═══ TAB: ATC ═══ -->
@@ -3485,6 +3448,15 @@ body.night .tab-btn.active{
 <div class="layout">
 
   <div class="full">
+
+    <!-- ATC Sub-nav -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="atc-subbtn active" data-atcsub="audio" onclick="switchAtcSub('audio',this)">📡 ATC AUDIO</button>
+      <button class="atc-subbtn"        data-atcsub="flights" onclick="switchAtcSub('flights',this)">✈ FLIGHTS</button>
+    </div>
+
+    <!-- ATC AUDIO sub-view -->
+    <div id="atc-sub-audio">
     <div class="section-title">Live ATC — Curaçao · Aruba · Bonaire</div>
     <div class="panel">
       <div class="atc-players">
@@ -3774,7 +3746,20 @@ body.night .tab-btn.active{
 </div>
 
 <!-- ═══ TAB: FLIGHTS (Dep + Arr toggle) ═══ -->
-<div class="tab-pane" id="tab-flights" role="tabpanel" aria-labelledby="tabbtn-flights">
+
+
+<!-- ═══ TAB: WORLD ═══ -->
+<div class="tab-pane" id="tab-world" role="tabpanel" aria-labelledby="tabbtn-world">
+<div class="layout">
+  <div class="full">
+    <div class="section-title">World Overview — Connecting Airports <span class="data-badge loading" id="worldOvrBadge">LOADING</span></div>
+    <div id="world-ovr-grid" class="island-widgets-grid">
+      <div style="padding:20px;font-family:var(--mono);font-size:.6rem;color:var(--text-dim);text-align:center;grid-column:1/-1">Loading…</div>
+    </div>
+      </div><!-- /atc-sub-audio -->
+
+    <!-- FLIGHTS sub-view (hidden by default) -->
+    <div id="atc-sub-flights" style="display:none;">
 <div class="layout">
   <div class="full">
     <div class="section-title">Flights — Curaçao International (TNCC)
@@ -3790,16 +3775,8 @@ body.night .tab-btn.active{
     </div>
   </div>
 </div>
-</div>
+    </div><!-- /atc-sub-flights -->
 
-<!-- ═══ TAB: WORLD ═══ -->
-<div class="tab-pane" id="tab-world" role="tabpanel" aria-labelledby="tabbtn-world">
-<div class="layout">
-  <div class="full">
-    <div class="section-title">World Overview — Connecting Airports <span class="data-badge loading" id="worldOvrBadge">LOADING</span></div>
-    <div id="world-ovr-grid" class="island-widgets-grid">
-      <div style="padding:20px;font-family:var(--mono);font-size:.6rem;color:var(--text-dim);text-align:center;grid-column:1/-1">Loading…</div>
-    </div>
   </div>
 </div>
 </div>
@@ -4214,7 +4191,13 @@ function switchTab(name){
         f.dataset.loaded='1';
         try{
           const b64=document.getElementById('obsmon-b64').textContent.trim();
-          const html=decodeURIComponent(escape(atob(b64)));
+          let html=decodeURIComponent(escape(atob(b64)));
+          /* Inject style to hide OBS tab bar + show only Monitor panel */
+          const monStyle='<style id="monitor-only">'
+            +'nav.tabs{display:none!important}'
+            +'#tab-monitor{display:block!important}'
+            +'</style>';
+          html=html.replace('</head>',monStyle+'</head>');
           if('srcdoc' in f){ f.srcdoc=html; }
           else { const blob=new Blob([html],{type:'text/html'}); f.src=URL.createObjectURL(blob); }
         }catch(err){ console.error('[Monitor] load failed:',err); f.dataset.loaded=''; }
@@ -4332,7 +4315,7 @@ function wireTabs(){
 function wireTabKeys(){
   document.addEventListener('keydown', e=>{
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-    const map={'1':'atc','2':'monitor','3':'obsmon','4':'weather','5':'forecast','6':'marine','7':'flights','8':'world'};
+    const map={'1':'atc','2':'monitor','3':'obsmon','4':'weather','5':'forecast','6':'marine','7':'world'};
     if(map[e.key]){ try{ switchTab(map[e.key]); }catch(err){ console.error('[Tabs] key switch failed:', err); } }
   });
 }
@@ -5592,7 +5575,7 @@ document.addEventListener('visibilitychange', () => {
 (function applyUrlTab(){
   try{
     const tab = new URLSearchParams(window.location.search).get('tab');
-    if(tab && ['atc','weather','forecast','marine','flights','world','obsmon','monitor'].includes(tab)){
+    if(tab && ['atc','weather','forecast','marine','world','obsmon','monitor'].includes(tab)){
       setTimeout(()=>{ try{ switchTab(tab); }catch(_){} }, 100);
     }
   }catch(_){}
@@ -5744,6 +5727,17 @@ function triggerManualRefresh(){
   ind.addEventListener('keydown', e=>{
     if(e.key==='Enter' || e.key===' '){ e.preventDefault(); triggerManualRefresh(); }
   });
+
+  // ── ATC sub-tab switcher (Audio ↔ Flights) ──
+  window.switchAtcSub = function(name, btn){
+    document.querySelectorAll('.atc-subbtn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    const audio   = document.getElementById('atc-sub-audio');
+    const flights = document.getElementById('atc-sub-flights');
+    if(audio)   audio.style.display   = name === 'audio'   ? '' : 'none';
+    if(flights) flights.style.display = name === 'flights' ? '' : 'none';
+  };
+
 })();
 
 // refresh() calls fetchWorldOvr() internally — no double-call needed

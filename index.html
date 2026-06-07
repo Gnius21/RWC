@@ -2182,13 +2182,13 @@ html,body{max-width:100%;overflow-x:hidden;}
         <div class="cond-map-hd">
           <span class="cond-map-title">&#127758; ABC Islands &middot; Conditions Map</span>
           <div class="cond-map-toggles" id="condMapToggles">
-            <button class="cmap-btn active" data-layer="stations" onclick="condMapToggle('stations',this)">&#9681; Stations</button>
+            <button class="cmap-btn" data-layer="stations" onclick="condMapToggle('stations',this)">&#9681; Stations</button>
             <button class="cmap-btn active" data-layer="wind" onclick="condMapToggle('wind',this)">&#127788; Wind</button>
             <button class="cmap-btn active" data-layer="rain" onclick="condMapToggle('rain',this)">&#127783; Rain</button>
             <button class="cmap-btn active" data-layer="satellite" onclick="condMapToggle('satellite',this)">&#128752; Satellite</button>
-            <button class="cmap-btn active" data-layer="dust" onclick="condMapToggle('dust',this)">&#127773; Dust</button>
-            <button class="cmap-btn active" data-layer="marine" onclick="condMapToggle('marine',this)">&#127754; Waves</button>
-            <button class="cmap-btn active" data-layer="buoys" onclick="condMapToggle('buoys',this)">&#128679; Buoys</button>
+            <button class="cmap-btn" data-layer="dust" onclick="condMapToggle('dust',this)">&#127773; Dust</button>
+            <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)">&#127754; Waves</button>
+            <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)">&#128679; Buoys</button>
             <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)">&#127786; Storm</button>
           </div>
         </div>
@@ -4847,16 +4847,21 @@ function renderMonitor(data){
     });
   }
   const visTile = byId('tab-monitor').querySelector('.mon-vis');
-  if(bonaireVisM != null){
-    const km = bonaireVisM / 1000;
-    byId('monVisVal').innerHTML = km + ' <span class="mon-unit">km</span>';
+  // KNMI visibility: prefer window.__knmiData.vis_m (parsed by KNMI tab),
+  // fallback to bonaireVisM (Monitor's own KNMI fetch via extractVis)
+  var _knmiVis = (window.__knmiData && window.__knmiData.vis_m != null)
+    ? window.__knmiData.vis_m
+    : bonaireVisM;
+  if(_knmiVis != null){
+    const km = _knmiVis / 1000;
+    byId('monVisVal').innerHTML = km.toFixed(1) + ' <span class="mon-unit">km</span>';
     let desc, cls = '', col = '#2ec97a';
     if(km < 5)        { desc = '\u26a0 ALARM \u2014 under 5km'; cls = 'vis-alarm'; col = '#ff4f4f'; }
     else if(km < 10)  { desc = 'Reduced \u2014 under 10km'; cls = 'vis-low';   col = '#ff4f4f'; }
-    else if(km < 20)  { desc = 'Moderate \u2014 10\u201320km';   cls = 'vis-mid';   col = '#f59e0b'; }
+    else if(km < 20)  { desc = 'Moderate \u2014 10\u201320km';  cls = 'vis-mid';   col = '#f59e0b'; }
     else if(km >= 50) { desc = '50km+ \u00b7 crystal clear'; cls = 'vis-good'; }
     else              { desc = 'Excellent \u00b7 above 20km'; cls = 'vis-good'; }
-    byId('monVisDesc').textContent = desc;
+    byId('monVisDesc').textContent = desc + ' \u00b7 KNMI';
     visTile.className = 'mon-tile mon-vis ' + cls;
     const fillCount = Math.min(5, Math.max(1, Math.ceil(km / 6)));
     let bars = '';
@@ -4868,30 +4873,29 @@ function renderMonitor(data){
     byId('monVisIcon').innerHTML = bars;
   } else {
     byId('monVisVal').innerHTML = '\u2014 <span class="mon-unit">km</span>';
-    byId('monVisDesc').textContent = 'KNMI source unavailable';
+    byId('monVisDesc').textContent = 'No KNMI data';
     visTile.className = 'mon-tile mon-vis';
     byId('monVisIcon').innerHTML = '';
   }
-  if(synopP && synopP.slp != null){
-    byId('monPresVal').innerHTML = synopP.slp.toFixed(0) + ' <span class="mon-unit">mb</span>';
-    byId('monPresTend').textContent = synopP.tend_type || 'Steady';
-    const pct = Math.max(0, Math.min(100, ((synopP.slp - 980) / 60) * 100));
+  var _slp = (window.__knmiData && window.__knmiData.slp != null) ? window.__knmiData.slp
+           : (synopP && synopP.slp != null ? synopP.slp : null);
+  var _tend = (synopP && synopP.tend_type) ? synopP.tend_type : 'Steady';
+  if(_slp != null){
+    byId('monPresVal').innerHTML = _slp.toFixed(0) + ' <span class="mon-unit">mb</span>';
+    byId('monPresTend').textContent = _tend;
+    const pct = Math.max(0, Math.min(100, ((_slp - 980) / 60) * 100));
     byId('monPresBarDot').style.left = pct + '%';
   } else {
     byId('monPresVal').innerHTML = '\u2014 <span class="mon-unit">mb</span>';
     byId('monPresTend').textContent = '\u2014';
     byId('monPresBarDot').style.left = '50%';
   }
-  // Visibility for dust: TNCB METAR (live Bonaire airport) → bonaireVisM → SYNOP 78988
-  var visKmForDust = null;
-  try {
-    if(typeof mState!=='undefined' && mState['TNCB'] && mState['TNCB'].lastRaw){
-      var tncbP = parseMetar(mState['TNCB'].lastRaw);
-      if(tncbP && !isNaN(tncbP.visM) && tncbP.visM > 0) visKmForDust = tncbP.visM/1000;
-    }
-  } catch(e){}
-  if(visKmForDust == null && bonaireVisM != null) visKmForDust = bonaireVisM/1000;
-  if(visKmForDust == null && synopP && synopP.vis_m != null) visKmForDust = synopP.vis_m/1000;
+  // Dust vis: KNMI only (window.__knmiData.vis_m → bonaireVisM → SYNOP)
+  var _dustVis = (window.__knmiData && window.__knmiData.vis_m != null)
+    ? window.__knmiData.vis_m
+    : bonaireVisM;
+  var visKmForDust = _dustVis != null ? _dustVis/1000
+    : (synopP && synopP.vis_m != null ? synopP.vis_m/1000 : null);
   const dust = assessDust(synopP, visKmForDust);
   byId('monDustVal').textContent = dust.index + ' / 100';
   byId('monDustDesc').textContent = dust.text + ' \u00b7 ' + dust.desc;
@@ -4925,7 +4929,8 @@ function renderMonitor(data){
   (function(){
     var rv = byId('monRadVal'), rd = byId('monRadDesc'), rg = byId('monRadGauge');
     if(!rv) return;
-    var rad = (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation : null;
+    var rad = (window.__knmiData && window.__knmiData.radiation != null) ? window.__knmiData.radiation
+            : (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation : null;
     if(rad != null && isFinite(rad)){
       rv.innerHTML = Math.round(rad) + ' <span class="mon-unit">W/m\u00b2</span>';
       var rlbl, rcol;
@@ -5043,18 +5048,23 @@ function renderMonitor(data){
     byId('monUvGauge').innerHTML = buildRainbowGauge(0);
     const zEl = byId('monZonkracht'); if(zEl) zEl.textContent = '\u2014';
   }
+  // ── Wind/Hum/Temp: KNMI primary → SYNOP fallback ──
+  var _k = window.__knmiData || null;
+  var _wDir = (_k && _k.wind_dir != null) ? _k.wind_dir : (synopP && synopP.wind_dir != null ? synopP.wind_dir : null);
+  var _wKt  = (_k && _k.wind_kt  != null) ? _k.wind_kt  : (synopP && synopP.wind_kt  != null ? synopP.wind_kt  : null);
+  var _wGust= (_k && _k.gust_kt  != null) ? _k.gust_kt  : (synopP && synopP.wind_gust != null ? synopP.wind_gust : null);
+  var _wTime= (_k && _k.time) ? _k.time : (synopP && synopP.time ? synopP.time : null);
   const windEl = byId('monWindRose');
-  if(synopP && synopP.wind_dir != null && synopP.wind_kt != null){
-    windEl.innerHTML = monitorWindCompass(synopP.wind_dir, synopP.wind_kt);
-    byId('monWindSpd').textContent = synopP.wind_kt;
-    let gust = synopP.wind_gust;
-    if(gust == null && synopP.wind_kt >= 15) gust = Math.round(synopP.wind_kt * 1.5);
-    byId('monWindGust').textContent = gust != null ? gust : '\u2014';
+  if(_wDir != null && _wKt != null){
+    windEl.innerHTML = monitorWindCompass(_wDir, _wKt);
+    byId('monWindSpd').textContent = _wKt;
+    if(_wGust == null && _wKt >= 15) _wGust = Math.round(_wKt * 1.5);
+    byId('monWindGust').textContent = _wGust != null ? _wGust : '\u2014';
     const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-    const compass = COMPASS[Math.round(synopP.wind_dir/22.5)%16];
-    byId('monWindDir').textContent = compass + ' \u00b7 ' + String(synopP.wind_dir).padStart(3,'0') + '\u00b0';
-    byId('monWindBft').textContent = bftMonitor(synopP.wind_kt);
-    byId('monWindTime').textContent = synopP.time || '\u2014';
+    const compass = COMPASS[Math.round(_wDir/22.5)%16];
+    byId('monWindDir').textContent = compass + ' \u00b7 ' + String(_wDir).padStart(3,'0') + '\u00b0';
+    byId('monWindBft').textContent = bftMonitor(_wKt);
+    byId('monWindTime').textContent = _wTime || '\u2014';
   } else {
     windEl.innerHTML = monitorWindCompass(null, null);
     byId('monWindSpd').textContent = '\u2014';
@@ -5062,16 +5072,18 @@ function renderMonitor(data){
     byId('monWindDir').textContent = '\u2014';
     byId('monWindBft').textContent = '\u2014';
   }
-  if(synopP && synopP.rh != null){
-    byId('monHumPct').textContent = synopP.rh;
+  var _rh  = (_k && _k.rh   != null) ? _k.rh   : (synopP && synopP.rh   != null ? synopP.rh   : null);
+  var _dew = (_k && _k.dew_c != null) ? _k.dew_c : (synopP && synopP.dew_c != null ? synopP.dew_c : null);
+  if(_rh != null){
+    byId('monHumPct').textContent = Math.round(_rh);
     let lbl = 'Comfortable';
-    if(synopP.rh >= 80) lbl = 'Very Humid';
-    else if(synopP.rh >= 65) lbl = 'Humid';
-    else if(synopP.rh < 40) lbl = 'Dry';
+    if(_rh >= 80) lbl = 'Very Humid';
+    else if(_rh >= 65) lbl = 'Humid';
+    else if(_rh < 40) lbl = 'Dry';
     byId('monHumLabel').textContent = lbl;
-    byId('monDewVal').textContent = synopP.dew_c != null ? Math.round(synopP.dew_c) : '\u2014';
+    byId('monDewVal').textContent = _dew != null ? Math.round(_dew) : '\u2014';
     const bars = byId('monHumBars');
-    const filled = Math.round((synopP.rh / 100) * 8);
+    const filled = Math.round((_rh / 100) * 8);
     let html = '';
     for(let i = 0; i < 8; i++){
       const isFilled = i < filled;
@@ -5085,9 +5097,10 @@ function renderMonitor(data){
     byId('monDewVal').textContent = '\u2014';
     byId('monHumBars').innerHTML = Array(8).fill('<div class="mon-hum-bar"></div>').join('');
   }
-  if(synopP && synopP.temp_c != null){
-    byId('monTemp').innerHTML = synopP.temp_c.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';
-    const feels = calcFeelsMonitor(synopP.temp_c, synopP.rh);
+  var _temp = (_k && _k.temp_c != null) ? _k.temp_c : (synopP && synopP.temp_c != null ? synopP.temp_c : null);
+  if(_temp != null){
+    byId('monTemp').innerHTML = _temp.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';
+    const feels = calcFeelsMonitor(_temp, _rh);
     byId('monFeels').textContent = (feels != null ? feels.toFixed(1) : '\u2014') + '\u00b0';
   } else {
     byId('monTemp').innerHTML = '\u2014<span class="mon-temp-deg">\u00b0</span>';
@@ -5119,6 +5132,16 @@ function renderMonitor(data){
     }
     const wxTags = (metarP.wxToks || []).filter(t => t && !/^NSW$/i.test(t));
     byId('monWx').textContent = wxTags.length ? wxTags.join(' ') : (metarP.cldToks.length === 0 ? 'CAVOK' : 'No sig wx');
+  } else if(window.__knmiData && window.__knmiData.cloud_octa != null){
+    var _octa = window.__knmiData.cloud_octa;
+    let cover = 'Clear';
+    if(_octa <= 2) cover = 'Few';
+    else if(_octa <= 4) cover = 'Scat';
+    else if(_octa <= 6) cover = 'Brkn';
+    else if(_octa >= 7) cover = 'Ovrcst';
+    byId('monCloud').textContent = '\u2014';
+    byId('monCloudCover').textContent = cover + ' \u00b7 ' + _octa + '/8 \u00b7 KNMI';
+    byId('monWx').textContent = (synopP && synopP.wx_desc) ? synopP.wx_desc : '\u2014';
   } else if(synopP && synopP.cloud_base_h){
     byId('monCloud').textContent = synopP.cloud_base_h;
     let cover = '\u2014';
@@ -5137,8 +5160,11 @@ function renderMonitor(data){
     byId('monCloudCover').textContent = '\u2014';
     byId('monWx').textContent = '\u2014';
   }
-  // Rain (Open-Meteo current + daily)
-  if(omCurrent){
+  // Rain: KNMI 10-min precip → Open-Meteo fallback
+  var _precip10 = (window.__knmiData && window.__knmiData.precip_10m != null) ? window.__knmiData.precip_10m : null;
+  if(_precip10 != null){
+    byId('monRain1h').textContent = _precip10.toFixed(1) + ' mm/10m \u00b7 KNMI';
+  } else if(omCurrent){
     const r1 = omCurrent.rain != null ? omCurrent.rain : omCurrent.precipitation;
     byId('monRain1h').textContent = (r1 != null ? r1.toFixed(1) : '0.0') + ' mm';
   } else { byId('monRain1h').textContent = '\u2014'; }
@@ -6906,7 +6932,7 @@ window.__fcDebug = () => __lastForecastData;
 /* ═══ CONDITIONS MAP (Leaflet, ABC Islands) ═══ */
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
 var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null;
-var __condMapLayers = {stations:true, wind:true, rain:true, satellite:true, dust:true, marine:true, buoys:true, storm:true};
+var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true};
 var __condMapReady = false;
 
 // ABC island lat/lons for the map bounds
@@ -6945,7 +6971,7 @@ function initCondMap(){
   // Uses the global IR mosaic which includes the Western Hemisphere / Caribbean region.
   condSatLayer = L.tileLayer.wms('https://nowcoast.noaa.gov/geoserver/satellite/wms', {
     layers: 'global_longwave_imagery_mosaic', format: 'image/png', transparent: true,
-    opacity: 0.6, version: '1.3.0', attribution: 'NOAA GMGSI Longwave IR', maxZoom: 12,
+    opacity: 0.28, version: '1.3.0', attribution: 'NOAA GMGSI Longwave IR', maxZoom: 12,
     bounds: [[9.5,-71.5],[19.0,-61.0]]
   });
 
@@ -6968,7 +6994,7 @@ function initCondMap(){
         var sframe = sat.length ? sat[sat.length-1] : null;
         if(sframe && j.host){
           condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/0/0_0.png',
-            {opacity:0.7, maxZoom:12, attribution:'RainViewer IR', bounds:[[9.5,-71.5],[19.0,-61.0]]});
+            {opacity:0.28, maxZoom:12, attribution:'RainViewer IR', bounds:[[9.5,-71.5],[19.0,-61.0]]});
           // If satellite layer is on, swap the WMS for the live IR
           if(__condMapLayers.satellite && condMap){
             if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
@@ -7357,6 +7383,11 @@ async function loadKnmiData(force){
 
     // Stash normalized numeric values so other views (e.g. Graphics) can use live KNMI data.
     knmiToNormalized(parsed);
+
+    // Re-render Current pane immediately with fresh KNMI data
+    if(typeof renderMonitor === 'function'){
+      try { renderMonitor(__monLastData || {}); } catch(e){}
+    }
 
     // Map the KNMI labels → display tiles (label substring match, unit, value transform)
     var FIELDS = [

@@ -465,14 +465,20 @@ tr:last-child td{border-bottom:none;}
   .mon-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:auto;flex:initial;}
   .mon-wind,.mon-hum,.mon-temp,.mon-radar,.mon-stavg{grid-row:auto;grid-column:auto;}
   .mon-grid > [style*="grid-column"]{grid-column:1 / -1 !important;}
-  .mon-tile{min-height:auto;}
+  .mon-tile{min-height:120px;}
+  .mon-stavg{grid-column:1 / -1 !important;}
 }
 @media(max-width:640px){
-  .mon-grid{grid-template-columns:1fr !important;grid-template-rows:auto !important;}
-  .mon-grid > *{grid-column:1 / -1 !important;grid-row:auto !important;}
+  .mon-grid{grid-template-columns:repeat(2,1fr) !important;grid-template-rows:auto !important;}
+  .mon-grid > *{grid-column:auto !important;grid-row:auto !important;}
   .cw-grid{grid-template-columns:repeat(2,1fr) !important;}
-  .cw-tile.mon-stavg{grid-column:1 / -1 !important;}
-  .mon-radar{grid-column:1 / -1 !important;}
+  .cw-tile.mon-stavg,.mon-radar,.mon-stavg,.mon-islt{
+    grid-column:1 / -1 !important;
+  }
+}
+@media(max-width:400px){
+  .mon-grid{grid-template-columns:1fr !important;}
+  .mon-grid > *{grid-column:1 / -1 !important;}
 }
 .mon-tile{position:relative;display:flex;flex-direction:column;padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005) 60%),rgba(8,18,32,0.85);border:1px solid var(--bdr);overflow:hidden;min-height:0;min-width:0;transition:background .35s ease,border-color .35s ease,box-shadow .25s ease,transform .25s ease;backdrop-filter:blur(6px);justify-content:space-between;}
 .mon-tile:hover{transform:translateY(-1px);}
@@ -1623,9 +1629,12 @@ html,body{max-width:100%;overflow-x:hidden;}
 .cond-map-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
 .cond-map-title{font-family:var(--cond);font-size:15px;font-weight:800;color:var(--txt);letter-spacing:.4px;}
 .cond-map-toggles{display:flex;gap:6px;flex-wrap:wrap;}
-.cmap-btn{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.4px;padding:5px 11px;border-radius:14px;cursor:pointer;border:1px solid var(--bdr);background:rgba(255,255,255,0.03);color:var(--muted);transition:all .18s;}
-.cmap-btn.active{background:rgba(77,184,255,0.15);border-color:rgba(77,184,255,0.5);color:var(--acc);}
-.cond-map-body{width:100%;height:420px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr);background:#0a1525;}
+.cmap-btn{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.4px;padding:6px 13px;border-radius:16px;cursor:pointer;border:1px solid var(--bdr);background:rgba(255,255,255,0.04);color:var(--muted);transition:color .15s,background .15s,border-color .15s,box-shadow .15s;white-space:nowrap;}
+.cmap-btn:hover{background:rgba(77,184,255,0.1);border-color:rgba(77,184,255,0.35);color:var(--acc);}
+.cmap-btn.active{background:rgba(77,184,255,0.18);border-color:rgba(77,184,255,0.6);color:var(--acc);box-shadow:0 0 10px rgba(77,184,255,0.2);}
+.cmap-btn-reset{border-color:rgba(148,163,184,0.3);color:var(--muted);margin-left:4px;}
+.cmap-btn-reset:hover{border-color:rgba(148,163,184,0.6);color:var(--txt);background:rgba(148,163,184,0.08);}
+.cond-map-body{width:100%;height:520px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr);background:#0a1525;box-shadow:0 0 0 1px rgba(77,184,255,0.08),0 8px 32px rgba(0,0,0,0.5);}
 @media(max-width:640px){.cond-map-body{height:320px;}}
 /* Station marker popups */
 .cmap-marker{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
@@ -1986,8 +1995,10 @@ html,body{max-width:100%;overflow-x:hidden;}
           <div class="mon-islt-src" id="monIsltSrc"></div>
         </div>
       </div>
+      <div style="grid-column:1/-1;padding:4px 2px 0;display:flex;align-items:center;gap:6px;">
         <div class="cw-title">&#127464;&#127484; Cura&ccedil;ao Weather</div>
-        <div class="cw-grid">
+      </div>
+      <div class="cw-grid" style="grid-column:1/-1;">
       <div class="mon-tile mon-stavg cw-tile">
         <div class="srow-hd" style="margin-bottom:8px;">
           <div class="sname">&#127758; Island Average <span style="font-size:12px;color:var(--muted);font-weight:400;" id="monStavgSrc"></span></div>
@@ -2209,16 +2220,17 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="map-tab-wrap">
       <div class="cond-map-wrap">
         <div class="cond-map-hd">
-          <span class="cond-map-title">&#127758; ABC Islands &middot; Conditions Map</span>
+          <span class="cond-map-title">&#127758; ABC Islands &middot; Live Conditions Map <span style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.2px;margin-left:6px;" id="condMapTs"></span></span>
           <div class="cond-map-toggles" id="condMapToggles">
-            <button class="cmap-btn" data-layer="stations" onclick="condMapToggle('stations',this)">&#9681; Stations</button>
-            <button class="cmap-btn active" data-layer="wind" onclick="condMapToggle('wind',this)">&#127788; Wind</button>
-            <button class="cmap-btn active" data-layer="rain" onclick="condMapToggle('rain',this)">&#127783; Rain</button>
-            <button class="cmap-btn active" data-layer="satellite" onclick="condMapToggle('satellite',this)">&#128752; Satellite</button>
-            <button class="cmap-btn" data-layer="dust" onclick="condMapToggle('dust',this)">&#127773; Dust</button>
-            <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)">&#127754; Waves</button>
-            <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)">&#128679; Buoys</button>
-            <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)">&#127786; Storm</button>
+            <button class="cmap-btn" data-layer="stations" onclick="condMapToggle('stations',this)" title="Show weather station markers">&#9681; Stations</button>
+            <button class="cmap-btn active" data-layer="wind" onclick="condMapToggle('wind',this)" title="Show wind vanes">&#127788; Wind</button>
+            <button class="cmap-btn active" data-layer="rain" onclick="condMapToggle('rain',this)" title="RainViewer radar">&#127783; Rain</button>
+            <button class="cmap-btn active" data-layer="satellite" onclick="condMapToggle('satellite',this)" title="Live infrared satellite">&#128752; Satellite</button>
+            <button class="cmap-btn" data-layer="dust" onclick="condMapToggle('dust',this)" title="Saharan dust overlay">&#127773; Dust</button>
+            <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)" title="Wave &amp; swell data">&#127754; Waves</button>
+            <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)" title="NDBC ocean buoys">&#128679; Buoys</button>
+            <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)" title="NOAA NHC storm cone">&#127786; Storm</button>
+            <button class="cmap-btn cmap-btn-reset" onclick="condMapReset()" title="Reset map view to ABC islands">&#8635; Reset</button>
           </div>
         </div>
         <div id="condMap" class="cond-map-body"></div>
@@ -2360,7 +2372,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 (function(){'use strict';
 
 /* ─── CONFIG ─── */
-const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI'];
+const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI','TBPB','TTPP','TJSJ'];
 const TAF_ICAOS = ['TNCA','TNCB','TNCC'];
 const FLAGS   = {TNCA:'\u{1F1E6}\u{1F1FC}',TNCB:'\u{1F1E7}\u{1F1F6}',TNCC:'\u{1F1E8}\u{1F1FC}',TNCM:'\u{1F1F8}\u{1F1FD}',SVMI:'\u{1F1FB}\u{1F1EA}'};
 const STN_NAMES = {TNCA:'Aruba',TNCB:'Bonaire',TNCC:'Cura\u00e7ao',TNCM:'St Maarten',SVMI:'Caracas'};
@@ -6984,16 +6996,16 @@ var CMAP_STNS = [
 function initCondMap(){
   if(condMap || typeof L==='undefined') return;
   // Locked view matching the uploaded framing: ABC islands + eastern Caribbean.
-  var VIEW_BOUNDS = [[9.5,-71.5],[19.0,-61.0]];   // data render + display region
+  var VIEW_BOUNDS = [[9.0,-68.5],[19.5,-57.5]];   // expanded: ABC + Barbados + T&T + Puerto Rico
   condMap = L.map('condMap', {
     zoomControl:true, attributionControl:true,
     maxBounds: VIEW_BOUNDS,           // cannot pan outside this region
     maxBoundsViscosity: 1.0,          // hard edge
     minZoom: 6, maxZoom: 9
-  }).fitBounds([[10.0,-70.5],[18.7,-62.0]]);
-  condMap.setMaxBounds(VIEW_BOUNDS);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB', bounds: VIEW_BOUNDS}).addTo(condMap);
+  }).fitBounds([[9.2,-68.2],[19.4,-57.8]]);
+  condMap.setMaxBounds([[8.5,-70.0],[20.5,-56.0]]);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB'}).addTo(condMap);
   condMarkerLayer = L.layerGroup().addTo(condMap);
 
   // ── STORM CONE: NOAA NHC tropical weather (forecast cone + track). Auto-empty when no storms. ──
@@ -7021,7 +7033,7 @@ function initCondMap(){
         var frame = frames.length ? frames[frames.length-1] : null;
         if(frame && j.host){
           condRainLayer = L.tileLayer(j.host + frame.path + '/256/{z}/{x}/{y}/8/1_1.png',
-            {opacity:0.6, maxZoom:12, attribution:'RainViewer'});
+            {opacity:0.75, maxZoom:12, attribution:'RainViewer'});
           if(__condMapLayers.rain && condMap) condRainLayer.addTo(condMap);
         }
         // LIVE infrared satellite (~10-min updates) — preferred over the laggy GMGSI WMS
@@ -7029,7 +7041,7 @@ function initCondMap(){
         var sframe = sat.length ? sat[sat.length-1] : null;
         if(sframe && j.host){
           condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/0/0_0.png',
-            {opacity:0.28, maxZoom:12, attribution:'RainViewer IR', bounds:[[9.5,-71.5],[19.0,-61.0]]});
+            {opacity:0.28, maxZoom:12, attribution:'RainViewer IR', zIndex:200});
           // If satellite layer is on, swap the WMS for the live IR
           if(__condMapLayers.satellite && condMap){
             if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
@@ -7046,6 +7058,31 @@ function initCondMap(){
   __condMapReady = true;
   renderCondMap();
   condMap.on('click', function(e){ condMap.closePopup(); });
+  // Auto-refresh rain + satellite tiles every 10 min
+  setInterval(function(){
+    if(!condMap) return;
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        try{
+          var frames=(j.radar&&j.radar.past)?j.radar.past:[];
+          if(j.radar&&j.radar.nowcast) frames=frames.concat(j.radar.nowcast);
+          var frame=frames.length?frames[frames.length-1]:null;
+          if(frame&&j.host){
+            var newRain=L.tileLayer(j.host+frame.path+'/256/{z}/{x}/{y}/8/1_1.png',{opacity:0.75,maxZoom:12,attribution:'RainViewer'});
+            if(condRainLayer&&condMap.hasLayer(condRainLayer)){ newRain.addTo(condMap); condMap.removeLayer(condRainLayer); }
+            condRainLayer=newRain;
+          }
+          var sat=(j.satellite&&j.satellite.infrared)?j.satellite.infrared:[];
+          var sframe=sat.length?sat[sat.length-1]:null;
+          if(sframe&&j.host){
+            var newSat=L.tileLayer(j.host+sframe.path+'/256/{z}/{x}/{y}/0/0_0.png',{opacity:0.28,maxZoom:12,attribution:'RainViewer IR',zIndex:200});
+            if(condSatLive&&condMap.hasLayer(condSatLive)){ newSat.addTo(condMap); condMap.removeLayer(condSatLive); }
+            condSatLive=newSat;
+          }
+        }catch(e){}
+      }).catch(function(){});
+  }, 10*60*1000);
 }
 
 function condMapToggle(layer, btn){
@@ -7054,6 +7091,10 @@ function condMapToggle(layer, btn){
   renderCondMap();
 }
 window.condMapToggle = condMapToggle;
+function condMapReset(){
+  if(condMap) condMap.fitBounds([[9.2,-68.2],[19.4,-57.8]]);
+}
+window.condMapReset = condMapReset;
 
 
 /* NDBC buoys — nearest reporting stations to the ABC islands.
@@ -7185,11 +7226,15 @@ function renderCondMap(){
           '</div>';
         var divIcon = L.divIcon({html:iconHtml, className:'', iconAnchor:[17,38]});
         var marker = L.marker([dispLat,dispLon], {icon:divIcon});
+        var _dew = mp&&mp.dewC!=null ? mp.dewC.toFixed(1)+'°C' : '—';
+        var _rh  = mp&&mp.rh!=null   ? Math.round(mp.rh)+'%'   : '—';
         var popupHtml = '<div class="cmap-popup"><b>'+s.flag+' '+s.name+'</b><br>'+
-          'Temp: '+(mp&&mp.tempC!=null?mp.tempC.toFixed(1)+'°C':'—')+'<br>'+
-          'Wind: '+(windSpd!=null?windSpd+' kt':'—')+(windDir!=null?' '+windDir+'°':'')+'<br>'+
-          'Visibility: '+(mp&&mp.visM!=null?(mp.visM/1000).toFixed(1)+' km':'—')+'<br>'+
-          (mp&&mp.wxToks&&mp.wxToks.length?'WX: '+mp.wxToks.join(' ')+'<br>':'')+'</div>';
+          '&#127777; Temp: '+(mp&&mp.tempC!=null?mp.tempC.toFixed(1)+'°C':'—')+
+          (mp&&mp.rh!=null?' &middot; RH: '+_rh:'')+'<br>'+
+          '&#128168; Wind: '+(windSpd!=null?windSpd+' kt':'—')+(windDir!=null?' @ '+windDir+'°':'')+'<br>'+
+          '&#128065; Vis: '+(mp&&mp.visM!=null?(mp.visM/1000).toFixed(1)+' km':'—')+'<br>'+
+          '&#127752; Dew: '+_dew+'<br>'+
+          (mp&&mp.wxToks&&mp.wxToks.length?'&#9928; WX: '+mp.wxToks.join(' ')+'<br>':'')+'</div>';
         marker.bindPopup(popupHtml, {maxWidth:200});
         marker.addTo(condMarkerLayer);
       }
@@ -7208,6 +7253,44 @@ function renderCondMap(){
           '</div>';
         var vaneIcon = L.divIcon({html:vaneHtml, className:'', iconSize:[42,54], iconAnchor:[21,21]});
         L.marker([dispLat, dispLon - 0.42], {icon:vaneIcon, interactive:false}).addTo(condMarkerLayer);
+      }
+    });
+
+    // ── Extra stations: Barbados, Trinidad & Tobago, Puerto Rico ──
+    var EXTRA_STNS = [
+      {id:'TBPB', name:'Barbados',     lat:13.075, lon:-59.492, flag:'🇧🇧'},
+      {id:'TTPP', name:'Trinidad',     lat:10.595, lon:-61.337, flag:'🇹🇹'},
+      {id:'TJSJ', name:'Puerto Rico',  lat:18.439, lon:-66.002, flag:'🇵🇷'},
+    ];
+    EXTRA_STNS.forEach(function(s){
+      var mp2 = null;
+      try{ if(typeof mState!=='undefined' && mState[s.id] && mState[s.id].lastRaw) mp2=parseMetar(mState[s.id].lastRaw); }catch(e){}
+      var eWkt  = mp2&&mp2.windKt!=null  ? mp2.windKt  : null;
+      var eTmp  = mp2&&mp2.tempC!=null   ? mp2.tempC.toFixed(1) : null;
+      var eVis  = mp2&&mp2.visM!=null    ? (mp2.visM/1000).toFixed(1) : null;
+      var eWdir = mp2&&mp2.windDir!=null ? mp2.windDir : null;
+      var eCol  = eWkt!=null ? (eWkt>=25?'#f87171':eWkt>=17?'#fbbf24':'#22d3ee') : '#94a3b8';
+      var eHtml = '<div style="background:rgba(5,15,28,0.9);border:1.5px solid '+eCol+';border-radius:8px;'+
+        'padding:3px 8px;font-family:monospace;font-size:12px;font-weight:700;color:'+eCol+';'+
+        'white-space:nowrap;box-shadow:0 0 8px '+eCol+'44;line-height:1.3;">'+
+        s.flag+' '+s.name+(eTmp?' <span style="color:#fff">'+eTmp+'°</span>':'')+
+        (eWkt?' <span style="color:'+eCol+'">'+eWkt+'kt</span>':'')+'</div>';
+      var eIco = L.divIcon({className:'',iconSize:[0,0],html:eHtml});
+      L.marker([s.lat,s.lon],{icon:eIco,zIndexOffset:800}).addTo(condMarkerLayer)
+        .bindPopup('<b>'+s.flag+' '+s.name+'</b><br>'+
+          (eTmp?'Temp: '+eTmp+'°C<br>':'')+
+          (eWkt?'Wind: '+eWkt+'kt'+(eWdir?(' @ '+eWdir+'°'):'')+'<br>':'')+
+          (eVis?'Vis: '+eVis+' km<br>':'')+
+          (mp2&&mp2.wxDesc?'WX: '+mp2.wxDesc+'<br>':'')+
+          (!mp2?'<span style="color:#94a3b8;font-size:11px">METAR not loaded yet</span>':''));
+      // Add wind vane for extra stations if wind layer on
+      if(__condMapLayers.wind && eWdir!=null && eWkt!=null){
+        var eVaneSize = Math.max(22, Math.min(44, 22 + eWkt));
+        var eArrow = typeof windRoseSVG==='function'
+          ? windRoseSVG({deg:eWdir,speedKt:eWkt,size:eVaneSize})
+          : '<svg width="'+eVaneSize+'" height="'+eVaneSize+'"></svg>';
+        var eVIcon = L.divIcon({className:'',iconSize:[eVaneSize,eVaneSize],html:eArrow,iconAnchor:[eVaneSize/2,eVaneSize/2]});
+        L.marker([s.lat,s.lon-0.3],{icon:eVIcon,interactive:false}).addTo(condMarkerLayer);
       }
     });
   }
@@ -7313,6 +7396,9 @@ function renderCondMap(){
   }
   // Live NDBC buoys
   renderBuoys();
+  // Update map timestamp
+  var _ts = document.getElementById('condMapTs');
+  if(_ts) _ts.textContent = '· ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + ' UTC';
 }
 
 

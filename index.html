@@ -1634,7 +1634,41 @@ html,body{max-width:100%;overflow-x:hidden;}
 .cmap-btn.active{background:rgba(77,184,255,0.18);border-color:rgba(77,184,255,0.6);color:var(--acc);box-shadow:0 0 10px rgba(77,184,255,0.2);}
 .cmap-btn-reset{border-color:rgba(148,163,184,0.3);color:var(--muted);margin-left:4px;}
 .cmap-btn-reset:hover{border-color:rgba(148,163,184,0.6);color:var(--txt);background:rgba(148,163,184,0.08);}
-.cond-map-body{width:100%;height:520px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr);background:#0a1525;box-shadow:0 0 0 1px rgba(77,184,255,0.08),0 8px 32px rgba(0,0,0,0.5);}
+/* ── Station info box on condition map ── */
+.cond-map-body .leaflet-container{background:#0b2e5e;}
+.cmap-sbox{
+  background:rgba(4,12,24,0.94);
+  border:1.5px solid rgba(77,184,255,0.35);
+  border-radius:10px;
+  padding:7px 9px 6px;
+  font-family:monospace;
+  font-size:12px;
+  color:#e2e8f0;
+  line-height:1.35;
+  min-width:130px;
+  max-width:170px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.7),0 0 12px rgba(77,184,255,0.1);
+  pointer-events:auto;
+}
+.cmap-sbox-hd{
+  font-family:var(--cond,monospace);
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.8px;
+  margin-bottom:5px;
+  padding-bottom:4px;
+  border-bottom:1px solid rgba(77,184,255,0.18);
+}
+.cmap-sbox-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:6px;
+  margin:1px 0;
+}
+.cmap-sbox-lbl{color:rgba(148,163,184,0.8);font-size:11px;}
+.cmap-sbox-val{font-weight:700;font-size:13px;}
+.cond-map-body{width:100%;height:520px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr);background:#0b2e5e;box-shadow:0 0 0 1px rgba(77,184,255,0.08),0 8px 32px rgba(0,0,0,0.5);}
 @media(max-width:640px){.cond-map-body{height:320px;}}
 /* Station marker popups */
 .cmap-marker{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
@@ -2230,6 +2264,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)" title="Wave &amp; swell data">&#127754; Waves</button>
             <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)" title="NDBC ocean buoys">&#128679; Buoys</button>
             <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)" title="NOAA NHC storm cone">&#127786; Storm</button>
+            <button class="cmap-btn active" data-layer="info" onclick="condMapToggle('info',this)" title="Toggle station info boxes">&#9432; Info</button>
             <button class="cmap-btn cmap-btn-reset" onclick="condMapReset()" title="Reset map view to ABC islands">&#8635; Reset</button>
           </div>
         </div>
@@ -2372,7 +2407,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 (function(){'use strict';
 
 /* ─── CONFIG ─── */
-const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI','TBPB','TTPP','TJSJ'];
+const STATIONS = ['TNCA','TNCB','TNCC','TNCM','SVMI'];
 const TAF_ICAOS = ['TNCA','TNCB','TNCC'];
 const FLAGS   = {TNCA:'\u{1F1E6}\u{1F1FC}',TNCB:'\u{1F1E7}\u{1F1F6}',TNCC:'\u{1F1E8}\u{1F1FC}',TNCM:'\u{1F1F8}\u{1F1FD}',SVMI:'\u{1F1FB}\u{1F1EA}'};
 const STN_NAMES = {TNCA:'Aruba',TNCB:'Bonaire',TNCC:'Cura\u00e7ao',TNCM:'St Maarten',SVMI:'Caracas'};
@@ -2946,7 +2981,12 @@ function updateCstrip(icao, p){
     } else wd.textContent = '\u2014';
   }
   if(vs){
-    vs.textContent = (!isNaN(p.visM) && p.visM!=null) ? (p.visM/1000).toFixed(1)+'km' : '\u2014';
+    var _vm = null;
+    if(icao==='TNCA' && window.__synopPAru && window.__synopPAru.vis_m!=null) _vm = window.__synopPAru.vis_m;
+    else if(icao==='TNCC' && window.__synopPCur && window.__synopPCur.vis_m!=null) _vm = window.__synopPCur.vis_m;
+    else if(icao==='TNCB' && window.__knmiData && window.__knmiData.vis_m!=null) _vm = window.__knmiData.vis_m;
+    if(_vm==null && p.visM!=null && !isNaN(p.visM)) _vm = p.visM;
+    vs.textContent = _vm!=null ? (_vm/1000).toFixed(1)+'km' : '\u2014';
   }
 }
 
@@ -3139,6 +3179,7 @@ async function fetchMetar(icao){
 }
 async function refreshAllMetars(){
   await Promise.all(STATIONS.map(fetchMetar));
+  try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
   const el=byId('metar-ts'); if(el) el.textContent='Last updated: '+nowStamp();
   // FIX #5: simplified — no redundant double-check
   const freshCount = STATIONS.filter(icao=>mState[icao]?.lastRaw).length;
@@ -4863,13 +4904,16 @@ async function fetchMonitorData(){
   ]);
   let synopP = null, bonaireVisM = null, omCurrent = null, omDaily = null, seaTemp = null, synopRaw = null;
   if(tasks[0].status === 'fulfilled' && tasks[0].value && tasks[0].value.ok){
-    try { const scraped = scrapeOgimetSynop(tasks[0].value.text); if(scraped){ synopRaw = scraped; synopP = extractWxFromSynop(scraped, '78988'); window.__synopPCur = synopP; } } catch(e){ console.warn('Ogimet parse failed', e); }
+    try { const scraped = scrapeOgimetSynop(tasks[0].value.text); if(scraped){ synopRaw = scraped; synopP = extractWxFromSynop(scraped, '78988'); window.__synopPCur = synopP;
+      try{ window.__synopPAru = extractWxFromSynop(scraped, '78762'); }catch(_e){}
+    } } catch(e){ console.warn('Ogimet parse failed', e); }
   }
   if(tasks[1].status === 'fulfilled' && tasks[1].value && tasks[1].value.ok){
     try { bonaireVisM = extractVis(tasks[1].value.text); } catch(e){ console.warn('KNMI vis parse failed', e); }
   }
   if(tasks[2].status === 'fulfilled' && tasks[2].value){
     omCurrent = tasks[2].value.current || null;
+    window.__omCurrent = omCurrent; // expose for condition map boxes
     omDaily   = tasks[2].value.daily   || null;
   }
   if(tasks[3] && tasks[3].status === 'fulfilled' && tasks[3].value != null){
@@ -4938,6 +4982,7 @@ function renderMonitor(data){
   var visKmForDust = _dustVis != null ? _dustVis/1000
     : (synopP && synopP.vis_m != null ? synopP.vis_m/1000 : null);
   const dust = assessDust(synopP, visKmForDust);
+  window.__monDust = dust; // expose for condition map
   byId('monDustVal').textContent = dust.index + ' / 100';
   byId('monDustDesc').textContent = dust.text + ' \u00b7 ' + dust.desc;
   byId('monDustGauge').innerHTML = buildArcGauge({
@@ -6979,7 +7024,7 @@ window.__fcDebug = () => __lastForecastData;
 /* ═══ CONDITIONS MAP (Leaflet, ABC Islands) ═══ */
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
 var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null;
-var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true};
+var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true, info:true};
 var __condMapReady = false;
 
 // ABC island lat/lons for the map bounds
@@ -6996,14 +7041,14 @@ var CMAP_STNS = [
 function initCondMap(){
   if(condMap || typeof L==='undefined') return;
   // Locked view matching the uploaded framing: ABC islands + eastern Caribbean.
-  var VIEW_BOUNDS = [[9.0,-68.5],[19.5,-57.5]];   // expanded: ABC + Barbados + T&T + Puerto Rico
+  var VIEW_BOUNDS = [[9.5,-71.5],[19.0,-61.0]];   // ABC region
   condMap = L.map('condMap', {
     zoomControl:true, attributionControl:true,
     maxBounds: VIEW_BOUNDS,           // cannot pan outside this region
     maxBoundsViscosity: 1.0,          // hard edge
     minZoom: 6, maxZoom: 9
-  }).fitBounds([[9.2,-68.2],[19.4,-57.8]]);
-  condMap.setMaxBounds([[8.5,-70.0],[20.5,-56.0]]);
+  }).fitBounds([[10.0,-70.8],[13.2,-67.5]]);
+  condMap.setMaxBounds([[9.5,-71.5],[19.0,-61.0]]);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB'}).addTo(condMap);
   condMarkerLayer = L.layerGroup().addTo(condMap);
@@ -7092,7 +7137,7 @@ function condMapToggle(layer, btn){
 }
 window.condMapToggle = condMapToggle;
 function condMapReset(){
-  if(condMap) condMap.fitBounds([[9.2,-68.2],[19.4,-57.8]]);
+  if(condMap) condMap.fitBounds([[10.0,-70.8],[13.2,-67.5]]);
 }
 window.condMapReset = condMapReset;
 
@@ -7184,6 +7229,77 @@ function renderBuoys(){
 }
 
 
+/* Build a station info box HTML for condition map markers */
+function buildStationBox(s, mp){
+  var _tmp   = mp&&mp.tempC!=null  ? mp.tempC  : null;
+  var _rh    = mp&&mp.rh!=null     ? mp.rh     : (window.__knmiData&&s.id==='TNCB'?window.__knmiData.rh:null);
+  var _wkt   = mp&&mp.windKt!=null ? mp.windKt : (mp&&mp.windSpd!=null?mp.windSpd:null);
+  var _wdir  = mp&&mp.windDir!=null? mp.windDir: null;
+  var _wcard = _wdir!=null ? ['N','NE','E','SE','S','SW','W','NW'][Math.round((_wdir%360)/45)%8] : null;
+  // Feels like (Steadman if hot, wind chill if cold)
+  var _feels = null;
+  if(_tmp!=null && _rh!=null){
+    if(_tmp>=27 && _rh>=40){
+      _feels = -8.78469475556+1.61139411*_tmp+2.33854883889*_rh
+               -0.14611605*_tmp*_rh-0.012308094*_tmp*_tmp
+               -0.0164248277778*_rh*_rh+0.002211732*_tmp*_tmp*_rh
+               +0.00072546*_tmp*_rh*_rh-0.000003582*_tmp*_tmp*_rh*_rh;
+      _feels=Math.round(_feels*10)/10;
+    } else { _feels=_tmp; }
+  } else if(_tmp!=null && _wkt!=null && _tmp<10){
+    _feels=Math.round((13.12+0.6215*_tmp-11.37*Math.pow(_wkt*1.852,0.16)+0.3965*_tmp*Math.pow(_wkt*1.852,0.16))*10)/10;
+  } else if(_tmp!=null){ _feels=_tmp; }
+
+  // Wave height — from __knmiData or __monLastData marine (Curacao/Bonaire only)
+  var _wave = null;
+  if((s.id==='TNCC'||s.id==='TNCB') && typeof __monLastData==='object' && __monLastData && __monLastData.seaTemp!=null){
+    // approximate from sea state — not ideal but best available without per-station marine API
+  }
+
+  // Rain — from KNMI 10-min (ABC) or omCurrent
+  var _rain = null;
+  if(window.__knmiData && window.__knmiData.precip_10m!=null && (s.id==='TNCB'||s.id==='TNCC')) _rain=window.__knmiData.precip_10m;
+  else if(window.__omCurrent && window.__omCurrent.rain!=null) _rain=window.__omCurrent.rain;
+  else if(window.__omCurrent && window.__omCurrent.precipitation!=null) _rain=window.__omCurrent.precipitation;
+
+  // Dust — from __monDust (ABC only, best effort for others)
+  var _dust = (window.__monDust && (s.id==='TNCB'||s.id==='TNCC'||s.id==='TNCA')) ? window.__monDust : null;
+  var _dustLbl = _dust ? (_dust.level||'—') : '—';
+  var _dustCol = _dust ? (_dust.level==='High'?'#f87171':_dust.level==='Moderate'?'#fbbf24':'#4ade80') : '#94a3b8';
+
+  // UV index — from omCurrent
+  var _uv = (window.__omCurrent && window.__omCurrent.uv_index!=null) ? window.__omCurrent.uv_index : null;
+  var _uvCol = _uv==null?'#94a3b8':_uv>=8?'#f87171':_uv>=6?'#fbbf24':_uv>=3?'#facc15':'#4ade80';
+
+  // Wind colour
+  var _wcol = _wkt!=null?(_wkt>=25?'#f87171':_wkt>=17?'#fbbf24':'#22d3ee'):'#94a3b8';
+
+  var rows = '';
+  // Feels like
+  rows += '<div class="cmap-sbox-row"><span class="cmap-sbox-lbl">Feels like</span>'+
+    '<span class="cmap-sbox-val" style="color:'+((_feels!=null&&_feels>=32)?'#f87171':_feels!=null&&_feels>=28?'#fbbf24':'#e2e8f0')+'">'+
+    (_feels!=null?_feels.toFixed(1)+'°':'—')+'</span></div>';
+  // Wind
+  rows += '<div class="cmap-sbox-row"><span class="cmap-sbox-lbl">Wind</span>'+
+    '<span class="cmap-sbox-val" style="color:'+_wcol+'">'+
+    (_wkt!=null?_wkt+' kt':'')+(_wcard?' '+_wcard:'')+'</span></div>';
+  // Rain
+  rows += '<div class="cmap-sbox-row"><span class="cmap-sbox-lbl">☔ Rain</span>'+
+    '<span class="cmap-sbox-val" style="color:'+(_rain!=null&&_rain>1?'#60a5fa':'#94a3b8')+'">'+
+    (_rain!=null?_rain.toFixed(1)+' mm':'—')+'</span></div>';
+  // Dust
+  rows += '<div class="cmap-sbox-row"><span class="cmap-sbox-lbl">🌫 Dust</span>'+
+    '<span class="cmap-sbox-val" style="color:'+_dustCol+'">'+_dustLbl+'</span></div>';
+  // UV
+  rows += '<div class="cmap-sbox-row"><span class="cmap-sbox-lbl">☀ UV</span>'+
+    '<span class="cmap-sbox-val" style="color:'+_uvCol+'">'+(_uv!=null?_uv.toFixed(1):'—')+'</span></div>';
+
+  var hdCol = '#22d3ee';
+  return '<div class="cmap-sbox">'+
+    '<div class="cmap-sbox-hd" style="color:'+hdCol+'">'+s.flag+' '+s.name+'</div>'+
+    rows+'</div>';
+}
+
 function renderCondMap(){
   if(!condMap || !__condMapReady) return;
   // Station condition markers
@@ -7219,12 +7335,14 @@ function renderCondMap(){
       }
       if(__condMapLayers.stations){
         var visTxt = (mp&&mp.visM!=null&&!isNaN(mp.visM)) ? (mp.visM/1000).toFixed(1)+'km' : '';
+        var boxHtml = buildStationBox(s, mp);
         var iconHtml = '<div class="cmap-marker">'+
+          (__condMapLayers.info ? boxHtml : '')+
           '<div class="cmap-icon-wrap">'+wxIconStyled(iconKey,34)+'</div>'+
           '<div class="cmap-temp">'+s.flag+' '+temp+'</div>'+
           (visTxt?'<div class="cmap-vis">\u{1F441} '+visTxt+'</div>':'')+
           '</div>';
-        var divIcon = L.divIcon({html:iconHtml, className:'', iconAnchor:[17,38]});
+        var divIcon = L.divIcon({html:iconHtml, className:'', iconAnchor:[17,(__condMapLayers.info?170:38)]});
         var marker = L.marker([dispLat,dispLon], {icon:divIcon});
         var _dew = mp&&mp.dewC!=null ? mp.dewC.toFixed(1)+'°C' : '—';
         var _rh  = mp&&mp.rh!=null   ? Math.round(mp.rh)+'%'   : '—';
@@ -7244,55 +7362,54 @@ function renderCondMap(){
         var wcol = windSpd>=25 ? '#ff4f4f' : windSpd>=15 ? '#ff8a3d' : windSpd>=8 ? '#fbbf24' : '#22d3ee';
         // Dart points the way the wind blows TO (downwind = dir+180). SVG arrow drawn pointing up; rotate by that bearing.
         var rot = (windDir + 180) % 360;
+        // Feels-like (Steadman) from station METAR temp+RH
+        var _ft=null;
+        if(mp&&mp.tempC!=null){
+          var _t=mp.tempC;
+          // Humidity: station RH → KNMI RH → island avg RH
+          var _h=(mp.rh!=null)?mp.rh:(window.__knmiData&&window.__knmiData.rh!=null)?window.__knmiData.rh:(window.__islandAvgHum!=null)?window.__islandAvgHum:null;
+          if(_h!=null&&_t>=27&&_h>=40){_ft=-8.78469475556+1.61139411*_t+2.33854883889*_h-0.14611605*_t*_h-0.012308094*_t*_t-0.0164248277778*_h*_h+0.002211732*_t*_t*_h+0.00072546*_t*_h*_h-0.000003582*_t*_t*_h*_h;}
+          else _ft=_t;
+        }
+        // Octas from METAR cloud codes (max layer): FEW=2 SCT=4 BKN=6 OVC=8
+        var _ok=null;
+        try{
+          if(s.id==='TNCC'&&window.__synopPCur&&window.__synopPCur.cloud_oktas!=null){_ok=window.__synopPCur.cloud_oktas;}
+          else if(s.id==='TNCB'&&window.__knmiData&&window.__knmiData.cloud_octa!=null){_ok=window.__knmiData.cloud_octa;}
+          if(_ok==null){ var _raw2=mState[s.id]&&mState[s.id].lastRaw||'';
+            if(/OVC/.test(_raw2))_ok=8; else if(/BKN/.test(_raw2))_ok=6; else if(/SCT/.test(_raw2))_ok=4; else if(/FEW/.test(_raw2))_ok=2; else if(/\b(SKC|CLR|NSC|CAVOK)\b/.test(_raw2))_ok=0; }
+        }catch(e){}
+        // Octa pie circle SVG (n/8 fill)
+        var _okSvg='';
+        if(_ok!=null){
+          var _frac=_ok/8, _r=8, _cx=10, _cy=10;
+          if(_frac<=0){_okSvg='<circle cx="'+_cx+'" cy="'+_cy+'" r="'+_r+'" fill="none" stroke="#cbd5e1" stroke-width="1.6"/>';}
+          else if(_frac>=1){_okSvg='<circle cx="'+_cx+'" cy="'+_cy+'" r="'+_r+'" fill="#cbd5e1" stroke="#cbd5e1" stroke-width="1.6"/>';}
+          else{var _ang=_frac*2*Math.PI,_x=_cx+_r*Math.sin(_ang),_y=_cy-_r*Math.cos(_ang),_lg=_frac>0.5?1:0;
+            _okSvg='<circle cx="'+_cx+'" cy="'+_cy+'" r="'+_r+'" fill="none" stroke="#cbd5e1" stroke-width="1.6"/>'+
+              '<path d="M '+_cx+' '+_cy+' L '+_cx+' '+(_cy-_r)+' A '+_r+' '+_r+' 0 '+_lg+' 1 '+_x.toFixed(2)+' '+_y.toFixed(2)+' Z" fill="#cbd5e1"/>';}
+        }
+        var _hdr='';
+        if(_ft!=null||_okSvg){
+          _hdr='<div style="display:flex;align-items:center;gap:5px;justify-content:center;margin-bottom:2px;">'+
+            (_ft!=null?'<span style="font-family:monospace;font-size:12px;font-weight:700;color:#fff;background:rgba(5,15,28,0.85);border:1px solid rgba(255,255,255,0.35);padding:0 5px;border-radius:5px;white-space:nowrap;">'+_ft.toFixed(0)+'\u00b0</span>':'')+
+            (_okSvg?'<svg width="20" height="20" viewBox="0 0 20 20" style="background:rgba(5,15,28,0.85);border-radius:50%;" >'+_okSvg+'</svg>':'')+
+            '</div>';
+        }
         var vaneHtml =
-          '<div style="position:relative;width:46px;height:46px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.85));">'+
+          '<div style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.85));">'+
+            _hdr+
+            '<div style="position:relative;width:46px;height:46px;">'+
             '<svg width="46" height="46" viewBox="0 0 46 46" style="transform:rotate('+rot+'deg);">'+
               '<polygon points="23,4 31,30 23,24 15,30" fill="'+wcol+'" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>'+
             '</svg>'+
             '<div style="position:absolute;left:50%;top:100%;transform:translate(-50%,-2px);font-family:monospace;font-size:12px;font-weight:700;color:#fff;background:'+wcol+';padding:0 4px;border-radius:4px;white-space:nowrap;">'+windSpd+'kt</div>'+
-          '</div>';
-        var vaneIcon = L.divIcon({html:vaneHtml, className:'', iconSize:[42,54], iconAnchor:[21,21]});
-        L.marker([dispLat, dispLon - 0.42], {icon:vaneIcon, interactive:false}).addTo(condMarkerLayer);
+          '</div></div>';
+        var vaneIcon = L.divIcon({html:vaneHtml, className:'', iconSize:[46,80], iconAnchor:[23,46]});
+        L.marker([lat + 0.12, lon], {icon:vaneIcon, interactive:false}).addTo(condMarkerLayer);
       }
     });
 
-    // ── Extra stations: Barbados, Trinidad & Tobago, Puerto Rico ──
-    var EXTRA_STNS = [
-      {id:'TBPB', name:'Barbados',     lat:13.075, lon:-59.492, flag:'🇧🇧'},
-      {id:'TTPP', name:'Trinidad',     lat:10.595, lon:-61.337, flag:'🇹🇹'},
-      {id:'TJSJ', name:'Puerto Rico',  lat:18.439, lon:-66.002, flag:'🇵🇷'},
-    ];
-    EXTRA_STNS.forEach(function(s){
-      var mp2 = null;
-      try{ if(typeof mState!=='undefined' && mState[s.id] && mState[s.id].lastRaw) mp2=parseMetar(mState[s.id].lastRaw); }catch(e){}
-      var eWkt  = mp2&&mp2.windKt!=null  ? mp2.windKt  : null;
-      var eTmp  = mp2&&mp2.tempC!=null   ? mp2.tempC.toFixed(1) : null;
-      var eVis  = mp2&&mp2.visM!=null    ? (mp2.visM/1000).toFixed(1) : null;
-      var eWdir = mp2&&mp2.windDir!=null ? mp2.windDir : null;
-      var eCol  = eWkt!=null ? (eWkt>=25?'#f87171':eWkt>=17?'#fbbf24':'#22d3ee') : '#94a3b8';
-      var eHtml = '<div style="background:rgba(5,15,28,0.9);border:1.5px solid '+eCol+';border-radius:8px;'+
-        'padding:3px 8px;font-family:monospace;font-size:12px;font-weight:700;color:'+eCol+';'+
-        'white-space:nowrap;box-shadow:0 0 8px '+eCol+'44;line-height:1.3;">'+
-        s.flag+' '+s.name+(eTmp?' <span style="color:#fff">'+eTmp+'°</span>':'')+
-        (eWkt?' <span style="color:'+eCol+'">'+eWkt+'kt</span>':'')+'</div>';
-      var eIco = L.divIcon({className:'',iconSize:[0,0],html:eHtml});
-      L.marker([s.lat,s.lon],{icon:eIco,zIndexOffset:800}).addTo(condMarkerLayer)
-        .bindPopup('<b>'+s.flag+' '+s.name+'</b><br>'+
-          (eTmp?'Temp: '+eTmp+'°C<br>':'')+
-          (eWkt?'Wind: '+eWkt+'kt'+(eWdir?(' @ '+eWdir+'°'):'')+'<br>':'')+
-          (eVis?'Vis: '+eVis+' km<br>':'')+
-          (mp2&&mp2.wxDesc?'WX: '+mp2.wxDesc+'<br>':'')+
-          (!mp2?'<span style="color:#94a3b8;font-size:11px">METAR not loaded yet</span>':''));
-      // Add wind vane for extra stations if wind layer on
-      if(__condMapLayers.wind && eWdir!=null && eWkt!=null){
-        var eVaneSize = Math.max(22, Math.min(44, 22 + eWkt));
-        var eArrow = typeof windRoseSVG==='function'
-          ? windRoseSVG({deg:eWdir,speedKt:eWkt,size:eVaneSize})
-          : '<svg width="'+eVaneSize+'" height="'+eVaneSize+'"></svg>';
-        var eVIcon = L.divIcon({className:'',iconSize:[eVaneSize,eVaneSize],html:eArrow,iconAnchor:[eVaneSize/2,eVaneSize/2]});
-        L.marker([s.lat,s.lon-0.3],{icon:eVIcon,interactive:false}).addTo(condMarkerLayer);
-      }
-    });
   }
   // Rain layer (may still be loading from API; guarded)
   if(condRainLayer){
@@ -7509,6 +7626,8 @@ async function loadKnmiData(force){
     if(typeof renderMonitor === 'function'){
       try { renderMonitor(__monLastData || {}); } catch(e){}
     }
+    try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
+    try{ CSTRIP_ICAOS.forEach(function(ic){ if(mState[ic]&&mState[ic].lastRaw) updateCstrip(ic, parseMetar(mState[ic].lastRaw)); }); }catch(e){}
 
     // Map the KNMI labels → display tiles (label substring match, unit, value transform)
     var FIELDS = [
@@ -7692,7 +7811,7 @@ function renderStationsAverage(){
   }
   var avgTemp  = avg(temps);
   var avgWind  = avg(windSpds);
-  var avgHum   = avg(hums);
+  var avgHum   = avg(hums); window.__islandAvgHum = avgHum;
   var avgHeat  = avg(heats);
   var totalRain= rains.length ? rains.reduce(function(a,b){return a+b;},0) : null;
   var COMP=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];

@@ -6698,7 +6698,9 @@ function windRoseSVG(opts){
   var uid=++_wrUID, cx=size/2, cy=size/2, R=size*0.42;
   var toRad=function(d){return d*Math.PI/180;};
   var isCalm=speedKt<3, isVar=deg===999;
-  var pointDeg=isCalm||isVar?0:(deg+180)%360;
+  // Aviation convention: wind is reported FROM a bearing, so the shaft/arrowhead
+  // points at that bearing (090 = air moving from east to west).
+  var pointDeg=isCalm||isVar?0:deg%360;
   var shaftLen=isCalm?0:Math.min(R*0.88,R*0.18+speedKt*R*0.026);
   var ticks=Array.from({length:16},function(_,i){
     var a=toRad(i*22.5-90),isCard=i%4===0,isOrd=i%2===0;
@@ -7409,8 +7411,9 @@ function renderCondMap(){
       if(__condMapLayers.wind && windDir!=null && windSpd!=null){
         // Colour by speed (calm→strong)
         var wcol = windSpd>=25 ? '#ff4f4f' : windSpd>=15 ? '#ff8a3d' : windSpd>=8 ? '#fbbf24' : '#22d3ee';
-        // Dart points the way the wind blows TO (downwind = dir+180). SVG arrow drawn pointing up; rotate by that bearing.
-        var rot = (windDir + 180) % 360;
+        // Aviation convention: dart apex marks the bearing the wind blows FROM.
+        // SVG arrow drawn pointing up; rotating by windDir puts the apex at that bearing.
+        var rot = windDir % 360;
         // Feels-like (Steadman) from station METAR temp+RH
         var _ft=null;
         if(mp&&mp.tempC!=null){
@@ -7540,7 +7543,8 @@ function renderCondMap(){
     if(m){
       var wh = m.wave_height, wd = m.wave_direction, wp = m.wave_period;
       var sh = m.swell_wave_height, sd = m.swell_wave_direction, sp = m.swell_wave_period;
-      // Swell direction arrow (points the way swell travels TO)
+      // Swell direction arrow — same FROM convention as the wind visuals: the ↓ glyph
+      // starts at bearing 180, so rotating by sd+180 makes it point at the source bearing.
       var arrowRot = (sd!=null) ? (sd + 180) % 360 : 0;
       var seaCol = (wh!=null && wh>=2.5) ? '#ff8a3d' : (wh!=null && wh>=1.5) ? '#fbbf24' : '#38bdf8';
       var html = '<div style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.8));">'+

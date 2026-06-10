@@ -13,6 +13,14 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23020c16%22/%3E%3Ccircle cx=%22256%22 cy=%22230%22 r=%2270%22 fill=%22%23fbbf24%22/%3E%3Cellipse cx=%22290%22 cy=%22300%22 rx=%2295%22 ry=%2250%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Warm up the data origins hit right at startup -->
+<link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
+<link rel="preconnect" href="https://api.allorigins.win" crossorigin>
+<link rel="dns-prefetch" href="https://air-quality-api.open-meteo.com">
+<link rel="dns-prefetch" href="https://marine-api.open-meteo.com">
+<link rel="dns-prefetch" href="https://tgftp.nws.noaa.gov">
+<link rel="dns-prefetch" href="https://r.jina.ai">
+<link rel="dns-prefetch" href="https://server.arcgisonline.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500&display=swap"></noscript>
 <link rel="preload" as="style" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" onload="this.onload=null;this.rel='stylesheet'">
@@ -2541,25 +2549,41 @@ async function robustGet(url){
     }
     // Hedged fallback: proxies start as soon as the direct fetch fails, or after
     // 1.5 s if it is still pending — not eagerly, to spare the free proxy services.
-    let proxiesStarted = false;
+    // Fail fast: once every started path has failed (and none is still queued),
+    // resolve {ok:false} immediately instead of waiting out the 9 s cap.
+    let proxiesStarted = false, outstanding = 0, jinaQueued = false;
+    function track(p){
+      outstanding++;
+      p.then(v => { outstanding--; if(v) finish(v); else maybeFail(); });
+    }
+    function maybeFail(){
+      if(!settled && proxiesStarted && !jinaQueued && outstanding === 0) finish({ok:false});
+    }
     function startProxies(){
       if(settled || proxiesStarted) return;
       proxiesStarted = true;
-      tryAllOrigins().then(v => { if(v) finish(v); });
-      setTimeout(() => { if(!settled) tryJina().then(v => { if(v) finish(v); }); }, 800);
+      track(tryAllOrigins());
+      jinaQueued = true;
+      setTimeout(() => {
+        jinaQueued = false;
+        if(!settled) track(tryJina()); else maybeFail();
+      }, 800);
     }
     // Page scrapes (KNMI, Ogimet) never send CORS headers, so the direct fetch
     // always fails — skip it and go straight to the proxies to save the round trip.
     if(/knmidc\.org|ogimet\.com/.test(url)){
       startProxies();
     } else {
-      tryDirect().then(v => { if(v) finish(v); else startProxies(); });
+      track(tryDirect().then(v => { if(!v) startProxies(); return v; }));
       setTimeout(startProxies, 1500);
     }
     setTimeout(() => finish({ok:false}), 9000);
   });
 }
 
+// Coalesce concurrent requests for the same URL (several features fetch the
+// KNMI / Ogimet pages at startup) — they all await the single live fetch.
+const __inflight = new Map();
 async function fetchURL(url, tries = 1, opts = {}){
   if(!opts.forceFresh){
     const cached = __fetchCache.get(url);
@@ -2567,19 +2591,26 @@ async function fetchURL(url, tries = 1, opts = {}){
     if(cached && Date.now() - cached.t < _ttl){
       return cached.data;
     }
+    const pending = __inflight.get(url);
+    if(pending) return pending;
   }
-  for(let i = 0; i < tries; i++){
-    const o = await robustGet(url);
-    if(o.ok || o.perm){
-      if(o.ok){ __fetchCache.set(url, {t: Date.now(), data: o}); persistCache(url, o); window.__lastFetchOK = Date.now(); }
-      return o;
+  const work = (async () => {
+    for(let i = 0; i < tries; i++){
+      const o = await robustGet(url);
+      if(o.ok || o.perm){
+        if(o.ok){ __fetchCache.set(url, {t: Date.now(), data: o}); persistCache(url, o); window.__lastFetchOK = Date.now(); }
+        return o;
+      }
+      if(i < tries - 1) await new Promise(r => setTimeout(r, 300));
     }
-    if(i < tries - 1) await new Promise(r => setTimeout(r, 300));
-  }
-  // All live attempts failed — fall back to last persisted copy (offline / cold start)
-  const persisted = readPersisted(url);
-  if(persisted){ __fetchCache.set(url, {t: Date.now() - FETCH_CACHE_TTL + 5000, data: persisted}); return persisted; }
-  return {ok:false};
+    // All live attempts failed — fall back to last persisted copy (offline / cold start)
+    const persisted = readPersisted(url);
+    if(persisted){ __fetchCache.set(url, {t: Date.now() - FETCH_CACHE_TTL + 5000, data: persisted}); return persisted; }
+    return {ok:false};
+  })();
+  if(!opts.forceFresh) __inflight.set(url, work);
+  try { return await work; }
+  finally { if(__inflight.get(url) === work) __inflight.delete(url); }
 }
 window.__clearFetchCache = () => __fetchCache.clear();
 window.__fetchCacheStats = () => {
@@ -4319,7 +4350,8 @@ function renderWxCard(key, P){
 
   // ── Air quality (Open-Meteo air quality API, stored in extra.aq) ─────────
   const aq = extra.aq || {};
-  function aqColor(v, thresholds){ // [green, yellow, orange, red]
+  function aqColor(v, thresholds){ // [green, yellow, orange, red]; grey when no data
+    if(v == null) return '#64748b';
     const [g,y,o] = thresholds;
     return v<=g?'#2ec97a':v<=y?'#fbbf24':v<=o?'#f59e0b':'#ef4444';
   }
@@ -4422,12 +4454,12 @@ function renderWxCard(key, P){
         <div class="wdb-aq-body">
           <div class="wdb-aq-gauge">${aqSvg}<div class="wdb-aq-msg">${aqi!=null&&aqi<=50?'Air is clean and healthy':aqi!=null?'Check air conditions':'No AQ data'}</div></div>
           <div class="wdb-aq-grid">
-            ${aqRow(aqColor(pm10||0,[54,154,254])  , pm10, 'PM10')}
-            ${aqRow(aqColor(o3  ||0,[100,160,200]) , o3,   'O3')}
-            ${aqRow(aqColor(so2 ||0,[20,80,250])   , so2,  'SO2')}
-            ${aqRow(aqColor(pm25||0,[12,35,55])    , pm25, 'PM2.5')}
-            ${aqRow(aqColor(co  ||0,[4000,10000,30000]), co, 'CO')}
-            ${aqRow(aqColor(no2 ||0,[40,100,200])  , no2,  'NO2')}
+            ${aqRow(aqColor(pm10,[54,154,254])  , pm10, 'PM10')}
+            ${aqRow(aqColor(o3  ,[100,160,200]) , o3,   'O3')}
+            ${aqRow(aqColor(so2 ,[20,80,250])   , so2,  'SO2')}
+            ${aqRow(aqColor(pm25,[12,35,55])    , pm25, 'PM2.5')}
+            ${aqRow(aqColor(co  ,[4000,10000,30000]), co, 'CO')}
+            ${aqRow(aqColor(no2 ,[40,100,200])  , no2,  'NO2')}
           </div>
         </div>
       </div>

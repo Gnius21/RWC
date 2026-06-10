@@ -2545,12 +2545,17 @@ async function robustGet(url){
       masterAc.abort();
       resolve(v || {ok:false});
     }
-    tryDirect().then(v => { if(v) finish(v); });
-    setTimeout(() => {
-      if(settled) return;
+    // Hedged fallback: proxies start as soon as the direct fetch fails, or after
+    // 1.5 s if it is still pending — not eagerly, to spare the free proxy services.
+    let proxiesStarted = false;
+    function startProxies(){
+      if(settled || proxiesStarted) return;
+      proxiesStarted = true;
       tryAllOrigins().then(v => { if(v) finish(v); });
-      tryJina().then(v => { if(v) finish(v); });
-    }, 400);
+      setTimeout(() => { if(!settled) tryJina().then(v => { if(v) finish(v); }); }, 800);
+    }
+    tryDirect().then(v => { if(v) finish(v); else startProxies(); });
+    setTimeout(startProxies, 1500);
     setTimeout(() => finish({ok:false}), 9000);
   });
 }
@@ -2674,7 +2679,9 @@ function parseMetar(raw){
   const windStr  = wbTok ? (wbTok + (varTok ? ' '+varTok : '')) : '--';
   const visToks = tok.filter(x => /^\d{4}$/.test(x) || x==='9999' || x==='CAVOK');
   const visM = visToks.length ? (visToks[0]==='9999'||visToks[0]==='CAVOK' ? 9999 : parseInt(visToks[0],10)) : NaN;
-  const wxToks = tok.filter(x => /^[+-]?(?:VC)?(?:TS|TSRA|TSSN|DZ|RA|SN|GR|GS|SG|IC|PL|SHRA|SHSN|SHGR|FG|BR|HZ|FU|DU|SA|VA|SQ|PO|FC|VCTS|VCSH|VCFG)\b/.test(x));
+  // Letters-only guard: these tokens are interpolated into innerHTML/title, and the
+  // feed can arrive via third-party proxies — never let markup characters through.
+  const wxToks = tok.filter(x => /^[+-]?[A-Z]{2,8}$/.test(x) && /^[+-]?(?:VC)?(?:TS|TSRA|TSSN|DZ|RA|SN|GR|GS|SG|IC|PL|SHRA|SHSN|SHGR|FG|BR|HZ|FU|DU|SA|VA|SQ|PO|FC|VCTS|VCSH|VCFG)\b/.test(x));
   const cldToks = (clean.match(/(FEW|SCT|BKN|OVC)\d{3}(CB|TCU)?/gi) || []);
   const tdTok = tok.find(x => /^M?\d{2}\/M?\d{2}$/.test(x)) || '';
   let tempC=null,dewC=null;
@@ -2748,7 +2755,7 @@ function miniRose(dir, spd){
   // AVIATION CONVENTION: arrowhead at the FROM bearing, shaft points inward to hub.
   // The arrow graphic below is drawn pointing UP (toward 0°/N) with the head at top.
   // Rotating by `dir` places the head at the FROM bearing on the rose rim.
-  const rot = (dir + 180) % 360;  // point downwind (toward where wind blows TO)
+  const rot = dir % 360;
 
   return `<svg width="92" height="92" viewBox="0 0 100 100" class="wrose-svg">
     <defs>
@@ -2993,12 +3000,12 @@ function updateCstrip(icao, p){
 }
 
 function renderMetarCard(icao, rawLine){
+  const p = parseMetar(rawLine);
   // Update the header conditions strip regardless of whether the METAR card is on-screen
-  try { updateCstrip(icao, parseMetar(rawLine)); } catch(e){}
+  try { updateCstrip(icao, p); } catch(e){}
   const card = document.querySelector(`.mcard[data-icao="${icao}"]`);
   if(!card) return false;
   const st = mState[icao];
-  const p = parseMetar(rawLine);
 
   if(st.lastRaw && st.lastRaw !== rawLine) st.pastRaw = st.lastRaw;
   const prevTime = st.lastTime;
@@ -3097,10 +3104,11 @@ function renderMetarCard(icao, rawLine){
   const ceiling = getCeiling();
   let flightRules = 'VFR', frColor = 'var(--grn)';
   if(!isNaN(p.visM) || ceiling < Infinity){
-    const visft = isNaN(p.visM) ? Infinity : p.visM * 3.28084;
-    if(visft < 1600 || ceiling < 500)       { flightRules='LIFR'; frColor='var(--pur)'; }
-    else if(visft < 4800 || ceiling < 1000) { flightRules='IFR';  frColor='var(--red)'; }
-    else if(visft < 8000 || ceiling < 3000) { flightRules='MVFR'; frColor='var(--ylw)'; }
+    // Visibility thresholds are in metres (1600/4800/8000 m ≈ 1/3/5 SM); ceiling in feet.
+    const vis = isNaN(p.visM) ? Infinity : p.visM;
+    if(vis < 1600 || ceiling < 500)       { flightRules='LIFR'; frColor='var(--pur)'; }
+    else if(vis < 4800 || ceiling < 1000) { flightRules='IFR';  frColor='var(--red)'; }
+    else if(vis < 8000 || ceiling < 3000) { flightRules='MVFR'; frColor='var(--ylw)'; }
   }
   const frEl = card.querySelector('.mfr-badge');
   if(frEl){ frEl.textContent=flightRules; frEl.style.color=frColor; frEl.style.borderColor=frColor+'88'; }
@@ -3193,7 +3201,7 @@ async function refreshAllMetars(){
 function wxIconMed(p){
   if(!p) return '';
   const now = new Date();
-  const localHour = (now.getUTCHours() - 4 + 24) % 24;
+  const localHour = ((now.getUTCHours() + now.getUTCMinutes()/60) - 4 + 24) % 24;
   const isNight = localHour < 6 || localHour >= 18.5;
   const s = 36, id = 'wm'+Math.random().toString(36).slice(2,5);
   const wxStr = (p.wxToks||[]).join(' ');
@@ -3297,7 +3305,7 @@ function parseTafSeg(seg){
   const vt=tok.filter(x=>/^\d{4}$/.test(x)||x==='9999'||/^P\d+SM$/.test(x));
   const vis=vt[0]||'--';
   const visN=vis==='9999'||/^P/.test(vis)?9999:(parseInt(vis,10)||NaN);
-  const wx=tok.filter(x=>/^[+-]?(?:VC)?(?:TS|TSRA|DZ|RA|SN|GR|SH\w*|FG|BR|HZ|SQ|PO)/.test(x)).join(' ')||'--';
+  const wx=tok.filter(x=>/^[+-]?[A-Z]{2,8}$/.test(x) && /^[+-]?(?:VC)?(?:TS|TSRA|DZ|RA|SN|GR|SH\w*|FG|BR|HZ|SQ|PO)/.test(x)).join(' ')||'--';
   const cm=seg.match(/((?:FEW|SCT|BKN|OVC)\d{3}(?:CB|TCU)?)/gi)||[];
   const cld=cm.join(' ')||'--';
   return{wind,windBase:wb,vis,visN,wx,cld};
@@ -3355,7 +3363,7 @@ function tafSegSeverity(seg){
   const lowVis  = !isNaN(seg.visN) && seg.visN<=5000;
   const wxSig   = /TS|TSRA|VCTS|\+/i.test(seg.wx);
   const hasCB   = /CB|TCU/i.test(seg.cld);
-  if(wxSig || hasCB || (hasGust && /G[3-9]\dKT/.test(seg.windBase))) return 'crit';
+  if(wxSig || hasCB || (hasGust && /G(?:[3-9]\d|\d{3})KT/.test(seg.windBase))) return 'crit';
   if(hasGust || lowVis || seg.wx !== '--') return 'wrn';
   return '';
 }
@@ -3452,9 +3460,13 @@ function decodeSynopText(rawText){
   const hm = flat.match(/\b(S[IM][A-Z]{2}\d{2})\s+([A-Z]{4})\s+(\d{6})\b/);
   const bulletinType = hm ? hm[1] : null;
   const bulletinTime = hm ? `${hm[3].slice(0,2)} ${hm[3].slice(2,4)}:${hm[3].slice(4,6)}Z` : null;
-  if(/\bNIL\b/.test(flat)) return {bulletinTime, bulletinType, nil:true, reports:[], raw:text};
   const aaxx = flat.match(/AAXX\s+(\d{5})/);
-  if(!aaxx) return {bulletinTime, bulletinType, reports:[], raw:text};
+  // Whole bulletin is NIL only when there is no AAXX data section at all;
+  // individual "78990 NIL=" station reports are skipped per-report below.
+  if(!aaxx){
+    if(/\bNIL\b/.test(flat)) return {bulletinTime, bulletinType, nil:true, reports:[], raw:text};
+    return {bulletinTime, bulletinType, reports:[], raw:text};
+  }
   const DDHHiw   = aaxx[1];
   const iw       = parseInt(DDHHiw[4], 10);
   const knotsMode = iw >= 3;
@@ -3467,6 +3479,7 @@ function decodeSynopText(rawText){
     if(!/^\d{5}$/.test(toks[0])) return;
     const stn  = toks[0];
     const rest = toks.slice(1);
+    if(rest.length === 0 || rest[0] === 'NIL') return; // station reported NIL — skip
     const r    = {stn, raw:rs, P:{}};
     let idx = 0;
     // iRiXhVV group (always first after station ID per WMO FM-12):
@@ -4083,7 +4096,7 @@ function wxTrend(history, param){
 
 function wxHeroIcon(P){
   const now = new Date();
-  const utcHour = now.getUTCHours();
+  const utcHour = now.getUTCHours() + now.getUTCMinutes()/60;
   const localHour = (utcHour - 4 + 24) % 24;
   const isNight = localHour < 6 || localHour >= 18.5;
   const heavyRain = P.precip_mm > 5 || (P.ww !== undefined && P.ww >= 60 && P.ww < 80);
@@ -4237,7 +4250,7 @@ function renderWxCard(key, P){
   let forecastStrip = '';
   if(fc && fc.length){
     forecastStrip = fc.slice(0,7).map((d,i)=>{
-      const dt  = new Date(d.date); dt.setHours(12);
+      const dt  = new Date(d.date + 'T12:00:00'); // local noon: avoids UTC-midnight day shift
       const day = i===0?'Today':DAYS[dt.getDay()];
       const t   = d.temp_max!=null ? d.temp_max.toFixed(1) : '\u2014';
       const ico = wxIconStyled(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
@@ -4260,7 +4273,7 @@ function renderWxCard(key, P){
         const x = padL + (i/(arr.length-1))*(W-padL-padR);
         const v = d.temp_max!=null?d.temp_max:null;
         const y = v!=null ? padT + (1-(v-mn)/(mx-mn))*(H-padT-padB) : null;
-        const dt= new Date(d.date); dt.setHours(12);
+        const dt= new Date(d.date + 'T12:00:00');
         return {x, y, v, day:i===0?'Today':DAYS[dt.getDay()]};
       });
       const linePts = pts.filter(p=>p.y!=null);
@@ -4293,7 +4306,7 @@ function renderWxCard(key, P){
   let rainBars = '';
   if(fc && fc.length){
     rainBars = fc.slice(0,7).map((d,i)=>{
-      const dt  = new Date(d.date); dt.setHours(12);
+      const dt  = new Date(d.date + 'T12:00:00');
       const day = i===0?'Today':DAYS[dt.getDay()];
       const pct = d.precip_prob!=null ? Math.round(d.precip_prob) : 0;
       return `<div class="wdb-rain-row">
@@ -4314,7 +4327,7 @@ function renderWxCard(key, P){
   const pm25  = aq.pm25  != null ? Math.round(aq.pm25)  : null;
   const o3    = aq.o3    != null ? Math.round(aq.o3)    : null;
   const so2   = aq.so2   != null ? Math.round(aq.so2)   : null;
-  const co    = aq.co    != null ? Math.round(aq.co/10) : null; // ppb->rough
+  const co    = aq.co    != null ? Math.round(aq.co)    : null; // µg/m³ (Open-Meteo native unit)
   const no2   = aq.no2   != null ? Math.round(aq.no2)   : null;
   const aqi   = aq.aqi   != null ? Math.round(aq.aqi)   : null;
   const aqiLbl= aqi==null?'N/A':aqi<=50?'Good':aqi<=100?'Moderate':aqi<=150?'Unhealthy for sensitive':aqi<=200?'Unhealthy':'Very Unhealthy';
@@ -4327,7 +4340,7 @@ function renderWxCard(key, P){
     const a0=-135*Math.PI/180, a1=(ang)*Math.PI/180;
     const x1=cx+r*Math.cos(a0), y1=cy+r*Math.sin(a0);
     const x2=cx+r*Math.cos(a1), y2=cy+r*Math.sin(a1);
-    const large=pct>0.5?1:0;
+    const large=(pct*270)>180?1:0;
     return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
   }
   const aqSvg = `<svg viewBox="0 0 120 120" style="width:120px;height:120px;">
@@ -4413,7 +4426,7 @@ function renderWxCard(key, P){
             ${aqRow(aqColor(o3  ||0,[100,160,200]) , o3,   'O3')}
             ${aqRow(aqColor(so2 ||0,[20,80,250])   , so2,  'SO2')}
             ${aqRow(aqColor(pm25||0,[12,35,55])    , pm25, 'PM2.5')}
-            ${aqRow(aqColor(co  ||0,[400,900,1200]), co,   'CO')}
+            ${aqRow(aqColor(co  ||0,[4000,10000,30000]), co, 'CO')}
             ${aqRow(aqColor(no2 ||0,[40,100,200])  , no2,  'NO2')}
           </div>
         </div>
@@ -4458,7 +4471,7 @@ function switchWxKey(key){
 function wxWindBlob(dir, dirName){
   // soft rounded "blob" pointer like Google weather; arrow points FROM source (aviation)
   const has = typeof dir === 'number' && isFinite(dir);
-  const rot = has ? (dir + 180) % 360 : 0;  // point downwind
+  const rot = has ? dir % 360 : 0;
   return `<svg viewBox="0 0 80 80" style="width:100%;height:100%;">
     <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(140,190,235,0.25)" stroke-width="1.2" stroke-dasharray="2 4"/>
     <text x="40" y="13" text-anchor="middle" font-family="Barlow,sans-serif" font-size="9" font-weight="700" fill="#bcd6ef">${has?dirName:'\u2014'}</text>
@@ -4658,7 +4671,7 @@ function monitorWindCompass(dir, spd){
   // AVIATION CONVENTION: the triangle's apex marks the FROM bearing.
   // The triangle below is drawn apex-up (toward N); rotate by `dir` so the apex
   // points at the bearing the wind comes FROM.
-  const rot = (dir + 180) % 360;  // point downwind (toward where wind blows TO)
+  const rot = dir % 360;
   const gid = 'mwc' + Math.random().toString(36).slice(2,7);
   return `<svg viewBox="0 0 160 160" class="wrose-mon">
     <defs>
@@ -5003,10 +5016,10 @@ function renderMonitor(data){
     else { sdesc='Cool'; scol='#0369a1'; }
     byId('monSeaDesc').textContent = sdesc;
     byId('monSeaDesc').style.color = scol;
-    // Gauge: map 22-32°C to 0-1
+    // Gauge: map 22-32°C to 0-100% (buildArcGauge prints value/max in the centre)
     const spct = Math.max(0, Math.min(1, (seaTemp - 22) / 10));
     byId('monSeaGauge').innerHTML = buildArcGauge({
-      value: spct, max: 1, color: scol, bgColor: 'rgba(255,255,255,0.06)'
+      value: Math.round(spct*100), max: 100, color: scol, bgColor: 'rgba(255,255,255,0.06)'
     });
   } else {
     byId('monSeaVal').innerHTML = '\u2014 <span class="mon-unit">\u00b0C</span>';
@@ -5558,7 +5571,7 @@ function _gauCompass(dir, spd, size=190){
   const dirTxt = dir!=null?_MON_COMPASS16[Math.round(dir/22.5)%16]:'VRB';
   let needle='';
   if(dir!=null){
-    const rot=(dir+180)%360;  // point downwind
+    const rot=dir%360;  // teal tip at the FROM bearing (aviation)
     needle=`<g transform="translate(${cx},${cy}) rotate(${rot})" style="transition:transform .8s cubic-bezier(.22,.61,.36,1);">
       <polygon points="0,${(-r+8).toFixed(0)} -7,-6 0,0 7,-6" fill="#2dd4bf" stroke="#2dd4bf" stroke-width="0.5"/>
       <polygon points="0,${(r-14).toFixed(0)} -5,4 0,0 5,4" fill="rgba(255,255,255,0.35)"/>
@@ -5863,9 +5876,8 @@ function pwGauge(value, max, color){
   var vx=cx+r*Math.cos(a1), vy=cy-r*Math.sin(Math.PI-a1);
   // background arc
   var bg='M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 0 1 '+xe.toFixed(1)+' '+ye.toFixed(1);
-  // value arc
-  var large = pct>0.5?1:0;
-  var val='M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 '+large+' 1 '+vx.toFixed(1)+' '+vy.toFixed(1);
+  // value arc — spans at most 180°, so the large-arc flag must stay 0
+  var val='M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 0 1 '+vx.toFixed(1)+' '+vy.toFixed(1);
   return '<defs><linearGradient id="pwg'+color.replace("#","")+'" x1="0" y1="0" x2="1" y2="0">'
     +'<stop offset="0" stop-color="'+color+'" stop-opacity="0.6"/><stop offset="1" stop-color="'+color+'"/></linearGradient></defs>'
     +'<path d="'+bg+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14" stroke-linecap="round"/>'
@@ -6018,7 +6030,8 @@ function _hhSpark(field, color, fillColor){
   }
   d+=' L'+coords[coords.length-1][0].toFixed(1)+' '+coords[coords.length-1][1].toFixed(1);
   var area=d+' L'+W+' '+H+' L0 '+H+' Z';
-  var gid='hhsp'+field;
+  // unique per instance: the same field is sparked in several cards with different colours
+  var gid='hhsp'+field+Math.random().toString(36).slice(2,6);
   return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
     +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+(fillColor||color)+'" stop-opacity="0.35"/><stop offset="1" stop-color="'+(fillColor||color)+'" stop-opacity="0.02"/></linearGradient></defs>'
     +'<path d="'+area+'" fill="url(#'+gid+')"/>'
@@ -6227,7 +6240,7 @@ function renderGraphicsView(data){
 
   host.innerHTML = `
   <div class="gfx-wrap">
-    <div class="gfx-srcbadge" style="font-family:var(--mono);font-size:12px;letter-spacing:.5px;padding:2px 0 8px;color:${knmiSrc?'#2ec97a':'var(--muted)'};">${knmiSrc?'\\u25CF LIVE \\u00b7 KNMI Bonaire'+(k.time?' \\u00b7 '+k.time:''):'\\u25CB SYNOP / model data'}</div>
+    <div class="gfx-srcbadge" style="font-family:var(--mono);font-size:12px;letter-spacing:.5px;padding:2px 0 8px;color:${knmiSrc?'#2ec97a':'var(--muted)'};">${knmiSrc?'● LIVE · KNMI Bonaire'+(k.time?' · '+k.time:''):'○ SYNOP / model data'}</div>
     <div class="gfx-tilegrid">${tiles}</div>
     <div class="gfx-cards">
       <div class="gfx-card wide">

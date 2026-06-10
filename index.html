@@ -505,6 +505,8 @@ tr:last-child td{border-bottom:none;}
 .mon-islt-hi{font-family:var(--cond);font-size:13px;font-weight:700;color:#f87171;}
 .mon-islt-lo{font-family:var(--cond);font-size:13px;font-weight:700;color:#93c5fd;}
 .mon-islt-src{font-family:var(--cond);font-size:13px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+.mon-islt-hum{font-family:var(--cond);font-size:14px;font-weight:700;color:#7bc4f5;margin-top:2px;}
+.mon-islt-hum-lbl{font-size:13px;font-weight:600;color:var(--muted);}
 .mon-temp::before{background:linear-gradient(90deg,#ff8a3d,#f59e0b,transparent);}
 .mon-sun::before{background:linear-gradient(90deg,#fbbf24,#ff8a3d,#a78bfa,transparent);}
 .mon-tile:hover{border-color:var(--bdrb);box-shadow:0 4px 22px rgba(77,184,255,0.10);}
@@ -541,9 +543,14 @@ tr:last-child td{border-bottom:none;}
 .mon-wind-dir-line{font-family:var(--mono);font-size:13px;color:var(--acc);font-weight:700;letter-spacing:.5px;margin-top:2px;}
 .mon-wind-bft{margin-top:auto;padding-top:8px;border-top:1px solid rgba(77,184,255,0.15);font-family:var(--cond);font-size:14px;font-weight:900;color:#cce4ff;letter-spacing:.8px;text-align:center;text-transform:uppercase;}
 .mon-hum-body{display:flex;align-items:stretch;gap:16px;flex:1;min-height:0;}
-.mon-hum-bars{display:flex;align-items:flex-end;gap:5px;flex:1;min-width:0;padding:6px 0;}
+.mon-hum-bars{display:flex;align-items:stretch;gap:6px;flex:1;min-width:0;padding:6px 0;}
 .mon-hum-bar{flex:1;min-width:8px;border-radius:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;}
 .mon-hum-bar-fill{width:100%;background:linear-gradient(180deg,#7bc4f5,#1e6dd6);border-radius:5px;transition:height .7s cubic-bezier(0.22,0.61,0.36,1);box-shadow:0 0 8px rgba(77,184,255,0.5),inset 0 1px 0 rgba(255,255,255,0.15);}
+/* 6-hour humidity forecast columns (value on top, bar, hour below) */
+.mon-humfc-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.mon-humfc-col .mon-hum-bar{flex:1;width:100%;}
+.mon-humfc-val{font-family:var(--cond);font-size:13px;font-weight:800;color:#cce4ff;line-height:1;}
+.mon-humfc-hr{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1;}
 .mon-hum-stats{flex-shrink:0;width:88px;display:flex;flex-direction:column;justify-content:center;gap:1px;}
 .mon-hum-val{font-family:var(--cond);font-weight:900;font-size:clamp(28px,3.5vw,36px);line-height:1;color:#fff;letter-spacing:-0.5px;}
 .mon-hum-unit{font-family:var(--cond);font-size:14px;font-weight:600;color:var(--muted);margin-left:1px;}
@@ -1988,16 +1995,9 @@ html,body{max-width:100%;overflow-x:hidden;}
         <div class="mon-wind-bft" id="monWindBft">&mdash;</div>
       </div>
       <div class="mon-tile mon-hum">
-        <div class="mon-tile-hd"><span class="mon-tile-ttl">Humidity</span></div>
+        <div class="mon-tile-hd"><span class="mon-tile-ttl">Humidity &middot; 6 h Forecast</span><span class="mon-tile-sub">Cura&ccedil;ao</span></div>
         <div class="mon-hum-body">
           <div class="mon-hum-bars" id="monHumBars"></div>
-          <div class="mon-hum-stats">
-            <div class="mon-hum-val"><span id="monHumPct">&mdash;</span><span class="mon-hum-unit">%</span></div>
-            <div class="mon-hum-lbl" id="monHumLabel">&mdash;</div>
-            <div class="mon-hum-spacer"></div>
-            <div class="mon-hum-dew"><span id="monDewVal">&mdash;</span><span class="mon-hum-unit">&deg;</span></div>
-            <div class="mon-hum-lbl">dew point</div>
-          </div>
         </div>
       </div>
 
@@ -2014,6 +2014,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <span class="mon-islt-hi">▲ <span id="monIsltMax">&mdash;</span>°</span>
             <span class="mon-islt-lo">▼ <span id="monIsltMin">&mdash;</span>°</span>
           </div>
+          <div class="mon-islt-hum">&#128167; <span id="monIsltHum">&mdash;</span>% <span class="mon-islt-hum-lbl" id="monIsltHumLbl"></span> &middot; dew <span id="monIsltDew">&mdash;</span>°</div>
           <div class="mon-islt-src" id="monIsltSrc"></div>
         </div>
       </div>
@@ -2543,8 +2544,14 @@ async function robustGet(url){
       tryAllOrigins().then(v => { if(v) finish(v); });
       setTimeout(() => { if(!settled) tryJina().then(v => { if(v) finish(v); }); }, 800);
     }
-    tryDirect().then(v => { if(v) finish(v); else startProxies(); });
-    setTimeout(startProxies, 1500);
+    // Page scrapes (KNMI, Ogimet) never send CORS headers, so the direct fetch
+    // always fails — skip it and go straight to the proxies to save the round trip.
+    if(/knmidc\.org|ogimet\.com/.test(url)){
+      startProxies();
+    } else {
+      tryDirect().then(v => { if(v) finish(v); else startProxies(); });
+      setTimeout(startProxies, 1500);
+    }
     setTimeout(() => finish({ok:false}), 9000);
   });
 }
@@ -4775,6 +4782,48 @@ function calcFeelsMonitor(tempC, rh){
   const e = rh/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC));
   return Math.round((tempC + 0.348 * e - 0.7 * 0 - 4.25) * 10) / 10;
 }
+/* ── 6-hour Curaçao humidity forecast (Humidity tile) ── */
+var __humFcCache = null;
+function renderHumidityForecast(hours){
+  var el = byId('monHumBars');
+  if(!el) return;
+  if(!hours || !hours.length){
+    el.innerHTML = '<div style="margin:auto;font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:1px;">Forecast unavailable</div>';
+    return;
+  }
+  el.innerHTML = hours.map(function(x){
+    var rh = x.rh != null ? Math.round(x.rh) : null;
+    return '<div class="mon-humfc-col">' +
+      '<div class="mon-humfc-val">' + (rh != null ? rh + '%' : '—') + '</div>' +
+      '<div class="mon-hum-bar"><div class="mon-hum-bar-fill" style="height:' + (rh != null ? rh : 0) + '%;"></div></div>' +
+      '<div class="mon-humfc-hr">' + String(x.h).padStart(2,'0') + 'h</div>' +
+    '</div>';
+  }).join('');
+}
+async function updateHumidityForecast(){
+  try {
+    if(__humFcCache && Date.now() - __humFcCache.t < 1800000){ renderHumidityForecast(__humFcCache.hours); return; }
+    // Curaçao (Hato) — Open-Meteo hourly RH, local island time
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=12.19&longitude=-68.96&hourly=relative_humidity_2m&forecast_days=2&timezone=auto';
+    var ctrl = new AbortController();
+    var tm = setTimeout(function(){ ctrl.abort(); }, 4000);
+    var res = await fetch(url, {signal: ctrl.signal, cache:'default'});
+    clearTimeout(tm);
+    if(!res.ok){ renderHumidityForecast(null); return; }
+    var j = await res.json();
+    if(!j.hourly || !j.hourly.time){ renderHumidityForecast(null); return; }
+    var now = new Date();
+    var idx = j.hourly.time.findIndex(function(ts){ return new Date(ts) > now; });
+    if(idx < 0) idx = 0;
+    var hours = [];
+    for(var i = idx; i < Math.min(idx + 6, j.hourly.time.length); i++){
+      hours.push({h: parseInt(j.hourly.time[i].split('T')[1].slice(0,2), 10), rh: j.hourly.relative_humidity_2m[i]});
+    }
+    __humFcCache = {t: Date.now(), hours: hours};
+    renderHumidityForecast(hours);
+  } catch(e){ renderHumidityForecast(__humFcCache ? __humFcCache.hours : null); }
+}
+
 /* Multi-signal Saharan Dust Index (0-100), fusing visibility, SYNOP codes, PM10.
    KNMI insight: low visibility = dust ONLY when air is dry; high humidity = haze/fog instead.
    Signals (weighted): KNMI/SYNOP visibility 45%, PM10 aerosol 35%, SYNOP present-weather dust codes 20%. */
@@ -5165,29 +5214,24 @@ function renderMonitor(data){
   }
   var _rh  = (_k && _k.rh   != null) ? _k.rh   : (synopP && synopP.rh   != null ? synopP.rh   : null);
   var _dew = (_k && _k.dew_c != null) ? _k.dew_c : (synopP && synopP.dew_c != null ? synopP.dew_c : null);
-  if(_rh != null){
-    byId('monHumPct').textContent = Math.round(_rh);
-    let lbl = 'Comfortable';
-    if(_rh >= 80) lbl = 'Very Humid';
-    else if(_rh >= 65) lbl = 'Humid';
-    else if(_rh < 40) lbl = 'Dry';
-    byId('monHumLabel').textContent = lbl;
-    byId('monDewVal').textContent = _dew != null ? Math.round(_dew) : '\u2014';
-    const bars = byId('monHumBars');
-    const filled = Math.round((_rh / 100) * 8);
-    let html = '';
-    for(let i = 0; i < 8; i++){
-      const isFilled = i < filled;
-      const h = isFilled ? Math.min(100, 25 + (i+1) * 9) : 18;
-      html += `<div class="mon-hum-bar"><div class="mon-hum-bar-fill" style="height:${h}%;${isFilled?'':'opacity:.25;'}"></div></div>`;
+  // Current humidity + dew point live in the Island Avg Temp tile
+  (function(){
+    var ih = byId('monIsltHum'), idw = byId('monIsltDew'), il = byId('monIsltHumLbl');
+    if(ih) ih.textContent = _rh != null ? Math.round(_rh) : '\u2014';
+    if(idw) idw.textContent = _dew != null ? Math.round(_dew) : '\u2014';
+    if(il){
+      var lbl = '';
+      if(_rh != null){
+        lbl = 'Comfortable';
+        if(_rh >= 80) lbl = 'Very Humid';
+        else if(_rh >= 65) lbl = 'Humid';
+        else if(_rh < 40) lbl = 'Dry';
+      }
+      il.textContent = lbl;
     }
-    bars.innerHTML = html;
-  } else {
-    byId('monHumPct').textContent = '\u2014';
-    byId('monHumLabel').textContent = '\u2014';
-    byId('monDewVal').textContent = '\u2014';
-    byId('monHumBars').innerHTML = Array(8).fill('<div class="mon-hum-bar"></div>').join('');
-  }
+  })();
+  // The Humidity tile shows the next 6 hours for Cura\u00e7ao (cached 30 min)
+  updateHumidityForecast();
   var _temp = (_k && _k.temp_c != null) ? _k.temp_c : (synopP && synopP.temp_c != null ? synopP.temp_c : null);
   if(_temp != null){
     byId('monTemp').innerHTML = _temp.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';
@@ -7622,7 +7666,7 @@ function parseKnmiBonaire(raw){
 
 
 /* Convert parsed KNMI page fields into normalized numeric values for other views. */
-function knmiToNormalized(parsed){
+function knmiToNormalized(parsed, ts){
   if(!parsed) return null;
   function find(sub){ for(var k in parsed){ if(k.indexOf(sub)>=0) return parsed[k]; } return null; }
   function num(rec){ if(!rec||rec.value==null) return null; var n=parseFloat(rec.value); return isFinite(n)?n:null; }
@@ -7643,18 +7687,90 @@ function knmiToNormalized(parsed){
     vis_m:    visM,
     slp:      num(find('Pressure')),
     time:     parsed.time || null,
-    ts:       Date.now()
+    ts:       ts || Date.now()   // pass the persisted timestamp for cached data
   };
   window.__knmiData = n;
-  window.__knmiLoadedAt = Date.now();
+  window.__knmiLoadedAt = n.ts;
   return n;
+}
+
+/* Build the KNMI tab tile grid from a parsed page; returns null if nothing usable. */
+function buildKnmiGridHtml(parsed){
+  var FIELDS = [
+    {match:'Temperature (',      lbl:'Temperature', unit:'°C'},
+    {match:'Dewpoint',           lbl:'Dew Point',   unit:'°C'},
+    {match:'Relative humidity',  lbl:'Humidity',    unit:'%'},
+    {match:'Winddirection',      lbl:'Wind Dir',    unit:'', dirExtra:true},
+    {match:'Windspeed',          lbl:'Wind Speed',  unit:'kt', msToKt:true},
+    {match:'Gusts',              lbl:'Gusts',       unit:'kt', msToKt:true},
+    {match:'Cloud cover',        lbl:'Cloud Cover', unit:'octa'},
+    {match:'Radiation',          lbl:'Solar Rad',   unit:'W/m²'},
+    {match:'Visibility',         lbl:'Visibility',  unit:'km', mToKm:true},
+    {match:'Precipitation',      lbl:'Precip',      unit:'mm/10m'},
+    {match:'Pressure',           lbl:'Pressure',    unit:'hPa'}
+  ];
+  function findKey(sub){
+    for(var k in parsed){ if(k.indexOf(sub)>=0) return k; }
+    return null;
+  }
+  var html = '<div class="knmi-station">\u{1F1E7}\u{1F1F6} Bonaire (KNMI)' +
+    (parsed.time ? ' · ' + parsed.time : '') + '</div>';
+  var shown = 0;
+  FIELDS.forEach(function(f){
+    var key = findKey(f.match);
+    if(!key) return;
+    var rec = parsed[key];
+    if(!rec || rec.value===undefined || rec.value==='') return;
+    var disp = rec.value, unit = f.unit;
+    var num = parseFloat(rec.value);
+    if(f.msToKt && isFinite(num)) disp = Math.round(num * 1.94384);
+    else if(f.mToKm && isFinite(num)) disp = (num/1000).toFixed(2);
+    if(f.dirExtra){
+      // Wind dir shows sector + degrees: value is the sector letter, extra is the degrees
+      disp = rec.value + (rec.extra ? ' ' + rec.extra + '°' : '');
+      unit = '';
+    }
+    html += '<div class="knmi-tile"><div class="knmi-tile-lbl">' + f.lbl + '</div>' +
+            '<div class="knmi-tile-val">' + disp + (unit?' <small>'+unit+'</small>':'') + '</div></div>';
+    shown++;
+  });
+  return shown ? html : null;
+}
+
+/* Propagate fresh KNMI numbers into the views that consume them. */
+function propagateKnmi(){
+  if(typeof renderMonitor === 'function'){
+    try { renderMonitor(__monLastData || {}); } catch(e){}
+  }
+  try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
+  try{ CSTRIP_ICAOS.forEach(function(ic){ if(mState[ic]&&mState[ic].lastRaw) updateCstrip(ic, parseMetar(mState[ic].lastRaw)); }); }catch(e){}
 }
 
 async function loadKnmiData(force){
   var statusEl = byId('knmiStatus'), gridEl = byId('knmiGrid');
   if(!statusEl || !gridEl) return;
   statusEl.className = 'knmi-status';
-  statusEl.textContent = 'Loading live KNMI Bonaire observations\u2026';
+  statusEl.textContent = 'Loading live KNMI Bonaire observations…';
+
+  // FAST FIRST PAINT: show the last persisted page (≤6 h old) immediately so the
+  // KNMI tab and the Current pane aren't blank while the slow proxy fetch runs.
+  if(!force && !window.__knmiData){
+    try {
+      var stale = readPersisted(KNMI_URL);
+      if(stale && stale.text){
+        var sParsed = parseKnmiBonaire(stale.text);
+        var sFields = sParsed ? Object.keys(sParsed).filter(function(k){return k!=='time';}).length : 0;
+        if(sParsed && sFields >= 3){
+          knmiToNormalized(sParsed, stale.cachedAt);
+          propagateKnmi();
+          var sHtml = buildKnmiGridHtml(sParsed);
+          if(sHtml) gridEl.innerHTML = sHtml;
+          statusEl.textContent = 'Showing cached data · refreshing…';
+        }
+      }
+    } catch(e){}
+  }
+
   try {
     var resp = await fetchURL(KNMI_URL, force ? 2 : 1, force ? {forceFresh:true} : {});
     if(!resp || !resp.text) throw new Error('no response from page (proxy may be down)');
@@ -7662,62 +7778,27 @@ async function loadKnmiData(force){
     var nFields = parsed ? Object.keys(parsed).filter(function(k){return k!=='time';}).length : 0;
     if(!parsed || nFields === 0) throw new Error('page loaded but no data rows found');
 
-    // Stash normalized numeric values so other views (e.g. Graphics) can use live KNMI data.
-    knmiToNormalized(parsed);
+    // Stash normalized numeric values so other views (e.g. Graphics) can use live
+    // KNMI data, then re-render the panes that consume them.
+    knmiToNormalized(parsed, resp.stale ? resp.cachedAt : null);
+    propagateKnmi();
 
-    // Re-render Current pane immediately with fresh KNMI data
-    if(typeof renderMonitor === 'function'){
-      try { renderMonitor(__monLastData || {}); } catch(e){}
-    }
-    try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
-    try{ CSTRIP_ICAOS.forEach(function(ic){ if(mState[ic]&&mState[ic].lastRaw) updateCstrip(ic, parseMetar(mState[ic].lastRaw)); }); }catch(e){}
-
-    // Map the KNMI labels → display tiles (label substring match, unit, value transform)
-    var FIELDS = [
-      {match:'Temperature (',      lbl:'Temperature', unit:'\u00b0C'},
-      {match:'Dewpoint',           lbl:'Dew Point',   unit:'\u00b0C'},
-      {match:'Relative humidity',  lbl:'Humidity',    unit:'%'},
-      {match:'Winddirection',      lbl:'Wind Dir',    unit:'', dirExtra:true},
-      {match:'Windspeed',          lbl:'Wind Speed',  unit:'kt', msToKt:true},
-      {match:'Gusts',              lbl:'Gusts',       unit:'kt', msToKt:true},
-      {match:'Cloud cover',        lbl:'Cloud Cover', unit:'octa'},
-      {match:'Radiation',          lbl:'Solar Rad',   unit:'W/m\u00b2'},
-      {match:'Visibility',         lbl:'Visibility',  unit:'km', mToKm:true},
-      {match:'Precipitation',      lbl:'Precip',      unit:'mm/10m'},
-      {match:'Pressure',           lbl:'Pressure',    unit:'hPa'}
-    ];
-    function findKey(sub){
-      for(var k in parsed){ if(k.indexOf(sub)>=0) return k; }
-      return null;
-    }
-    var html = '<div class="knmi-station">\u{1F1E7}\u{1F1F6} Bonaire (KNMI)' +
-      (parsed.time ? ' \u00b7 ' + parsed.time : '') + '</div>';
-    var shown = 0;
-    FIELDS.forEach(function(f){
-      var key = findKey(f.match);
-      if(!key) return;
-      var rec = parsed[key];
-      if(!rec || rec.value===undefined || rec.value==='') return;
-      var disp = rec.value, unit = f.unit;
-      var num = parseFloat(rec.value);
-      if(f.msToKt && isFinite(num)) disp = Math.round(num * 1.94384);
-      else if(f.mToKm && isFinite(num)) disp = (num/1000).toFixed(2);
-      if(f.dirExtra){
-        // Wind dir shows sector + degrees: value is the sector letter, extra is the degrees
-        disp = rec.value + (rec.extra ? ' ' + rec.extra + '\u00b0' : '');
-        unit = '';
-      }
-      html += '<div class="knmi-tile"><div class="knmi-tile-lbl">' + f.lbl + '</div>' +
-              '<div class="knmi-tile-val">' + disp + (unit?' <small>'+unit+'</small>':'') + '</div></div>';
-      shown++;
-    });
-    if(!shown) throw new Error('no fields parsed (page format may have changed)');
+    var html = buildKnmiGridHtml(parsed);
+    if(!html) throw new Error('no fields parsed (page format may have changed)');
     gridEl.innerHTML = html;
     statusEl.className = 'knmi-status ok';
-    statusEl.textContent = '\u2713 Live from KNMI Bonaire \u00b7 ' + new Date().toLocaleTimeString();
+    statusEl.textContent = resp.stale
+      ? '⚠ Cached KNMI data (offline) · ' + new Date(resp.cachedAt).toLocaleTimeString()
+      : '✓ Live from KNMI Bonaire · ' + new Date().toLocaleTimeString();
   } catch(err){
-    statusEl.className = 'knmi-status err';
     var msg = String(err.message||err);
+    if(window.__knmiData){
+      // Cached data is already on screen — keep it, just flag the failed refresh.
+      statusEl.className = 'knmi-status';
+      statusEl.textContent = '\u26a0 Refresh failed \u00b7 showing cached data (' + msg + ')';
+      return;
+    }
+    statusEl.className = 'knmi-status err';
     statusEl.textContent = '\u26a0 Could not load KNMI Bonaire page. ' +
       (/fetch|network|CORS/i.test(msg) ? 'The page may be blocking cross-origin access. ' : '') + '(' + msg + ')';
     gridEl.innerHTML = '';

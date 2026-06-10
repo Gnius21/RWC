@@ -546,11 +546,13 @@ tr:last-child td{border-bottom:none;}
 .mon-hum-bars{display:flex;align-items:stretch;gap:6px;flex:1;min-width:0;padding:6px 0;}
 .mon-hum-bar{flex:1;min-width:8px;border-radius:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;}
 .mon-hum-bar-fill{width:100%;background:linear-gradient(180deg,#7bc4f5,#1e6dd6);border-radius:5px;transition:height .7s cubic-bezier(0.22,0.61,0.36,1);box-shadow:0 0 8px rgba(77,184,255,0.5),inset 0 1px 0 rgba(255,255,255,0.15);}
-/* 6-hour humidity forecast columns (value on top, bar, hour below) */
-.mon-humfc-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.mon-humfc-col .mon-hum-bar{flex:1;width:100%;}
-.mon-humfc-val{font-family:var(--cond);font-size:13px;font-weight:800;color:#cce4ff;line-height:1;}
-.mon-humfc-hr{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1;}
+/* 6-hour Curaçao weather forecast columns (hour, feels-like, rain, dust) */
+.mon-wxfc-leg{flex:none;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:flex-start;padding-right:2px;}
+.mon-wxfc-l{font-family:var(--cond);font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.4px;line-height:1.25;text-transform:uppercase;}
+.mon-wxfc-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center;}
+.mon-wxfc-hr{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.25;}
+.mon-wxfc-v{font-family:var(--cond);font-size:15px;font-weight:800;line-height:1.25;white-space:nowrap;text-align:center;}
+.mon-wxfc-v small{font-size:11.5px;font-weight:600;opacity:.85;}
 .mon-hum-stats{flex-shrink:0;width:88px;display:flex;flex-direction:column;justify-content:center;gap:1px;}
 .mon-hum-val{font-family:var(--cond);font-weight:900;font-size:clamp(28px,3.5vw,36px);line-height:1;color:#fff;letter-spacing:-0.5px;}
 .mon-hum-unit{font-family:var(--cond);font-size:14px;font-weight:600;color:var(--muted);margin-left:1px;}
@@ -1995,7 +1997,7 @@ html,body{max-width:100%;overflow-x:hidden;}
         <div class="mon-wind-bft" id="monWindBft">&mdash;</div>
       </div>
       <div class="mon-tile mon-hum">
-        <div class="mon-tile-hd"><span class="mon-tile-ttl">Humidity &middot; 6 h Forecast</span><span class="mon-tile-sub">Cura&ccedil;ao</span></div>
+        <div class="mon-tile-hd"><span class="mon-tile-ttl">Forecast &middot; Next 6 h</span><span class="mon-tile-sub">Cura&ccedil;ao</span></div>
         <div class="mon-hum-body">
           <div class="mon-hum-bars" id="monHumBars"></div>
         </div>
@@ -4782,46 +4784,77 @@ function calcFeelsMonitor(tempC, rh){
   const e = rh/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC));
   return Math.round((tempC + 0.348 * e - 0.7 * 0 - 4.25) * 10) / 10;
 }
-/* ── 6-hour Curaçao humidity forecast (Humidity tile) ── */
-var __humFcCache = null;
-function renderHumidityForecast(hours){
+/* ── 6-hour Curaçao weather forecast tile: feels-like, rain, dust ── */
+var __wxFcCache = null;
+function renderWxTileForecast(hours){
   var el = byId('monHumBars');
   if(!el) return;
   if(!hours || !hours.length){
     el.innerHTML = '<div style="margin:auto;font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:1px;">Forecast unavailable</div>';
     return;
   }
-  el.innerHTML = hours.map(function(x){
-    var rh = x.rh != null ? Math.round(x.rh) : null;
-    return '<div class="mon-humfc-col">' +
-      '<div class="mon-humfc-val">' + (rh != null ? rh + '%' : '—') + '</div>' +
-      '<div class="mon-hum-bar"><div class="mon-hum-bar-fill" style="height:' + (rh != null ? rh : 0) + '%;"></div></div>' +
-      '<div class="mon-humfc-hr">' + String(x.h).padStart(2,'0') + 'h</div>' +
+  var legend = '<div class="mon-wxfc-leg">' +
+    '<div class="mon-wxfc-l">&nbsp;</div>' +
+    '<div class="mon-wxfc-l">Feels</div>' +
+    '<div class="mon-wxfc-l">Rain</div>' +
+    '<div class="mon-wxfc-l">Dust</div>' +
+  '</div>';
+  el.innerHTML = legend + hours.map(function(x){
+    var feels = x.feels != null ? Math.round(x.feels) : null;
+    var fCol = feels == null ? 'var(--muted)' : feels >= 38 ? '#ff4f4f' : feels >= 34 ? '#ff8a3d' : feels >= 30 ? '#f59e0b' : '#2ec97a';
+    var pop = x.pop != null ? Math.round(x.pop) : null;
+    var mm = x.precip != null ? x.precip : 0;
+    var rCol = (pop != null && pop >= 60) || mm >= 1 ? '#4db8ff' : (pop != null && pop >= 30) ? '#7bc4f5' : 'rgba(140,180,220,0.65)';
+    var dust = x.dust != null ? Math.round(x.dust) : null;
+    var dCol = dust == null ? 'var(--muted)' : dust >= 150 ? '#ff4f4f' : dust >= 75 ? '#ff8a3d' : dust >= 25 ? '#f59e0b' : '#2ec97a';
+    return '<div class="mon-wxfc-col">' +
+      '<div class="mon-wxfc-hr">' + String(x.h).padStart(2,'0') + 'h</div>' +
+      '<div class="mon-wxfc-v" style="color:' + fCol + '">' + (feels != null ? feels + '°' : '—') + '</div>' +
+      '<div class="mon-wxfc-v" style="color:' + rCol + '">' + (pop != null ? pop + '%' : '—') + (mm >= 0.1 ? ' <small>' + mm.toFixed(1) + '</small>' : '') + '</div>' +
+      '<div class="mon-wxfc-v" style="color:' + dCol + '">' + (dust != null ? dust : '—') + '</div>' +
     '</div>';
   }).join('');
 }
-async function updateHumidityForecast(){
+async function updateWxTileForecast(){
   try {
-    if(__humFcCache && Date.now() - __humFcCache.t < 1800000){ renderHumidityForecast(__humFcCache.hours); return; }
-    // Curaçao (Hato) — Open-Meteo hourly RH, local island time
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=12.19&longitude=-68.96&hourly=relative_humidity_2m&forecast_days=2&timezone=auto';
-    var ctrl = new AbortController();
-    var tm = setTimeout(function(){ ctrl.abort(); }, 4000);
-    var res = await fetch(url, {signal: ctrl.signal, cache:'default'});
-    clearTimeout(tm);
-    if(!res.ok){ renderHumidityForecast(null); return; }
-    var j = await res.json();
-    if(!j.hourly || !j.hourly.time){ renderHumidityForecast(null); return; }
+    if(__wxFcCache && Date.now() - __wxFcCache.t < 1800000){ renderWxTileForecast(__wxFcCache.hours); return; }
+    // Curaçao (Hato), local island time. Weather + CAMS dust come from two
+    // Open-Meteo endpoints; dust is optional (tile still renders without it).
+    function tFetch(url){
+      var ctrl = new AbortController();
+      var tm = setTimeout(function(){ ctrl.abort(); }, 4000);
+      return fetch(url, {signal: ctrl.signal, cache:'default'})
+        .then(function(r){ clearTimeout(tm); return r.ok ? r.json() : null; })
+        .catch(function(){ clearTimeout(tm); return null; });
+    }
+    var rs = await Promise.all([
+      tFetch('https://api.open-meteo.com/v1/forecast?latitude=12.19&longitude=-68.96&hourly=apparent_temperature,precipitation,precipitation_probability&forecast_days=2&timezone=auto'),
+      tFetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=12.19&longitude=-68.96&hourly=dust&forecast_days=2&timezone=auto')
+    ]);
+    var wx = rs[0], aq = rs[1];
+    if(!wx || !wx.hourly || !wx.hourly.time){ renderWxTileForecast(__wxFcCache ? __wxFcCache.hours : null); return; }
+    // Dust lookup by timestamp (both endpoints use the same local timezone)
+    var dustByTime = {};
+    if(aq && aq.hourly && aq.hourly.time && aq.hourly.dust){
+      aq.hourly.time.forEach(function(ts, i){ dustByTime[ts] = aq.hourly.dust[i]; });
+    }
     var now = new Date();
-    var idx = j.hourly.time.findIndex(function(ts){ return new Date(ts) > now; });
+    var idx = wx.hourly.time.findIndex(function(ts){ return new Date(ts) > now; });
     if(idx < 0) idx = 0;
     var hours = [];
-    for(var i = idx; i < Math.min(idx + 6, j.hourly.time.length); i++){
-      hours.push({h: parseInt(j.hourly.time[i].split('T')[1].slice(0,2), 10), rh: j.hourly.relative_humidity_2m[i]});
+    for(var i = idx; i < Math.min(idx + 6, wx.hourly.time.length); i++){
+      var ts = wx.hourly.time[i];
+      hours.push({
+        h: parseInt(ts.split('T')[1].slice(0,2), 10),
+        feels: wx.hourly.apparent_temperature ? wx.hourly.apparent_temperature[i] : null,
+        precip: wx.hourly.precipitation ? wx.hourly.precipitation[i] : null,
+        pop: wx.hourly.precipitation_probability ? wx.hourly.precipitation_probability[i] : null,
+        dust: dustByTime[ts] != null ? dustByTime[ts] : null
+      });
     }
-    __humFcCache = {t: Date.now(), hours: hours};
-    renderHumidityForecast(hours);
-  } catch(e){ renderHumidityForecast(__humFcCache ? __humFcCache.hours : null); }
+    __wxFcCache = {t: Date.now(), hours: hours};
+    renderWxTileForecast(hours);
+  } catch(e){ renderWxTileForecast(__wxFcCache ? __wxFcCache.hours : null); }
 }
 
 /* Multi-signal Saharan Dust Index (0-100), fusing visibility, SYNOP codes, PM10.
@@ -5230,8 +5263,8 @@ function renderMonitor(data){
       il.textContent = lbl;
     }
   })();
-  // The Humidity tile shows the next 6 hours for Cura\u00e7ao (cached 30 min)
-  updateHumidityForecast();
+  // The forecast tile shows the next 6 h for Cura\u00e7ao: feels-like, rain, dust (cached 30 min)
+  updateWxTileForecast();
   var _temp = (_k && _k.temp_c != null) ? _k.temp_c : (synopP && synopP.temp_c != null ? synopP.temp_c : null);
   if(_temp != null){
     byId('monTemp').innerHTML = _temp.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';

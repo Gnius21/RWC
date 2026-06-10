@@ -79,17 +79,21 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .lbadge-d{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 5px var(--grn);animation:pok 2s infinite;}
 
 /* TABS */
-.tabs{width:100%;max-width:1420px;display:flex;gap:4px;padding:6px;border-radius:var(--rl);background:linear-gradient(180deg,rgba(5,18,34,0.75),rgba(3,12,24,0.65));border:1px solid var(--bdr);backdrop-filter:blur(12px);}
-.tab{flex:1;padding:10px 12px;border:none;background:transparent;color:var(--muted);font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:all .22s;display:inline-flex;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden;outline:none;}
+.tabs{width:100%;max-width:1420px;display:flex;gap:5px;padding:7px;border-radius:var(--rl);background:linear-gradient(180deg,rgba(5,18,34,0.75),rgba(3,12,24,0.65));border:1px solid var(--bdr);backdrop-filter:blur(12px);}
+.tab{flex:1;padding:14px 14px;min-height:50px;border:none;background:transparent;color:var(--muted);font-family:var(--cond);font-weight:800;font-size:14px;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer;border-radius:10px;transition:all .22s cubic-bezier(.34,1.2,.64,1);display:inline-flex;align-items:center;justify-content:center;gap:7px;position:relative;overflow:hidden;outline:none;}
 .tab:focus-visible{background:rgba(77,184,255,0.1);box-shadow:inset 0 0 0 2px var(--acc);}
-.tab:hover{color:var(--acc);background:rgba(77,184,255,0.05);}
-.tab.active{color:#fff;background:linear-gradient(180deg,rgba(26,111,255,0.95),rgba(10,80,200,0.95));box-shadow:0 5px 16px rgba(26,111,255,0.4),0 0 0 1px rgba(77,184,255,0.45),inset 0 1px 0 rgba(255,255,255,0.18);animation:tabp 2.8s ease-in-out infinite;}
+.tab:hover{color:var(--acc);background:rgba(77,184,255,0.08);transform:translateY(-2px);box-shadow:0 6px 16px rgba(26,111,255,0.22),inset 0 0 0 1px rgba(77,184,255,0.25);}
+.tab:active{transform:translateY(0) scale(0.97);}
+.tab.active{color:#fff;background:linear-gradient(180deg,rgba(26,111,255,0.95),rgba(10,80,200,0.95));box-shadow:0 6px 20px rgba(26,111,255,0.45),0 0 0 1px rgba(77,184,255,0.5),inset 0 1px 0 rgba(255,255,255,0.18);animation:tabp 2.8s ease-in-out infinite;}
 :root.night .tab.active{background:linear-gradient(180deg,rgba(170,80,0,0.95),rgba(110,50,0,0.95));box-shadow:0 5px 16px rgba(160,80,0,0.45),0 0 0 1px rgba(200,120,0,0.5),inset 0 1px 0 rgba(255,200,100,0.18);}
-@keyframes tabp{0%,100%{filter:brightness(1);}50%{filter:brightness(1.08);}}
+@keyframes tabp{0%,100%{filter:brightness(1);}50%{filter:brightness(1.1);}}
 .tab.active::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);transform:translateX(-100%);animation:tshim 3.5s ease-in-out infinite;pointer-events:none;}
 @keyframes tshim{0%{transform:translateX(-100%);}70%,100%{transform:translateX(100%);}}
-.tab-i{font-size:13px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);}
-.tab.active .tab-i{transform:scale(1.18) rotate(-3deg);}
+.tab.active::after{content:'';position:absolute;left:18%;right:18%;bottom:4px;height:2px;border-radius:2px;background:rgba(255,255,255,0.55);box-shadow:0 0 8px rgba(255,255,255,0.6);}
+.tab-i{font-size:16px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);}
+.tab:hover .tab-i{transform:scale(1.25) rotate(-8deg);}
+.tab.active .tab-i{animation:tabIconBob 2.2s ease-in-out infinite;}
+@keyframes tabIconBob{0%,100%{transform:scale(1.2) translateY(0);}50%{transform:scale(1.2) translateY(-2.5px);}}
 .tbadge{font-family:var(--mono);font-size:13px;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,0.25);color:rgba(255,255,255,0.5);}
 .tab.active .tbadge{background:rgba(255,255,255,0.18);color:#fff;}
 .tpanel{animation:pin .32s cubic-bezier(.16,1,.3,1) both;}
@@ -858,7 +862,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .fnote{font-family:var(--sans);font-size:13px;color:rgba(106,138,170,0.45);}
 @media(max-width:960px){
   .topbar{gap:8px;}
-  .tab{padding:10px 5px;font-size:13px;letter-spacing:.8px;min-height:40px;}
+  .tab{padding:12px 6px;font-size:13px;letter-spacing:.9px;min-height:46px;}
   .clks{gap:8px;}
   .clk-t{font-size:18px;}
   .adsb-wrap{height:360px;}
@@ -871,8 +875,8 @@ body.tab-hidden *{animation-play-state:paused !important;}
   .clk-sep{height:20px;}
   .clk-d{display:none;}
   .tabs{gap:3px;padding:5px;}
-  .tab{padding:11px 4px;min-height:44px;gap:4px;}
-  .tab-i{font-size:14px;}
+  .tab{padding:13px 5px;min-height:48px;gap:5px;}
+  .tab-i{font-size:16px;}
   .tabs .tbadge{display:none;}
   .ctrl{align-items:stretch;width:100%;}
   .brow{justify-content:space-between;width:100%;}
@@ -6414,10 +6418,10 @@ function _cloudG(cx, cy, sc, variant, extra){
 // The picker still works: re-selecting a style saves under the new key.
 let __iconStyle = (function(){
   try {
-    // Bumped to v3: ensure everyone lands on the animated 'default' style once.
+    // Bumped to v4: ensure everyone lands on the animated 'default' style once.
     // (The picker still works afterwards — choosing outline/realistic persists normally.)
-    if(!localStorage.getItem('rwc-icon-style-v3')){
-      localStorage.setItem('rwc-icon-style-v3','1');
+    if(!localStorage.getItem('rwc-icon-style-v4')){
+      localStorage.setItem('rwc-icon-style-v4','1');
       localStorage.setItem('rwc-icon-style','default');
       return 'default';
     }

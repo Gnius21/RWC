@@ -5159,7 +5159,7 @@ function renderMonitor(data){
   if(_wDir != null && _wKt != null){
     windEl.innerHTML = monitorWindCompass(_wDir, _wKt);
     byId('monWindSpd').textContent = _wKt;
-    if(_wGust == null && _wKt >= 15) _wGust = Math.round(_wKt * 1.5);
+    // Show gusts only when actually reported (KNMI/SYNOP) \u2014 never an estimate.
     byId('monWindGust').textContent = _wGust != null ? _wGust : '\u2014';
     const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
     const compass = COMPASS[Math.round(_wDir/22.5)%16];

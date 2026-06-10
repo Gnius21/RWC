@@ -2010,8 +2010,8 @@ html,body{max-width:100%;overflow-x:hidden;}
           <div>
             <span class="mon-islt-main" id="monIsltTemp">&mdash;</span><span class="mon-islt-deg">°</span>
           </div>
-          <div class="mon-islt-lbl">Curaçao · avg all stations</div>
-          <div class="mon-islt-feels">Feels like <span id="monIsltFeels">&mdash;</span>°</div>
+          <div class="mon-islt-lbl">Feels like · Curaçao avg all stations</div>
+          <div class="mon-islt-feels">Actual <span id="monIsltFeels">&mdash;</span>°</div>
           <div class="mon-islt-range">
             <span class="mon-islt-hi">▲ <span id="monIsltMax">&mdash;</span>°</span>
             <span class="mon-islt-lo">▼ <span id="monIsltMin">&mdash;</span>°</span>
@@ -4784,7 +4784,7 @@ function calcFeelsMonitor(tempC, rh){
   const e = rh/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC));
   return Math.round((tempC + 0.348 * e - 0.7 * 0 - 4.25) * 10) / 10;
 }
-/* ── 6-hour Curaçao weather forecast tile: feels-like, rain, dust ── */
+/* ── 6-hour Curaçao weather forecast tile: feels-like, rain, wind, dust ── */
 var __wxFcCache = null;
 function renderWxTileForecast(hours){
   var el = byId('monHumBars');
@@ -4797,6 +4797,7 @@ function renderWxTileForecast(hours){
     '<div class="mon-wxfc-l">&nbsp;</div>' +
     '<div class="mon-wxfc-l">Feels</div>' +
     '<div class="mon-wxfc-l">Rain</div>' +
+    '<div class="mon-wxfc-l">Wind</div>' +
     '<div class="mon-wxfc-l">Dust</div>' +
   '</div>';
   el.innerHTML = legend + hours.map(function(x){
@@ -4807,10 +4808,13 @@ function renderWxTileForecast(hours){
     var rCol = (pop != null && pop >= 60) || mm >= 1 ? '#4db8ff' : (pop != null && pop >= 30) ? '#7bc4f5' : 'rgba(140,180,220,0.65)';
     var dust = x.dust != null ? Math.round(x.dust) : null;
     var dCol = dust == null ? 'var(--muted)' : dust >= 150 ? '#ff4f4f' : dust >= 75 ? '#ff8a3d' : dust >= 25 ? '#f59e0b' : '#2ec97a';
+    var wind = x.wind != null ? Math.round(x.wind) : null;
+    var wCol = wind == null ? 'var(--muted)' : wind >= 34 ? '#ff4f4f' : wind >= 25 ? '#ff8a3d' : wind >= 17 ? '#f59e0b' : '#2ec97a';
     return '<div class="mon-wxfc-col">' +
       '<div class="mon-wxfc-hr">' + String(x.h).padStart(2,'0') + 'h</div>' +
       '<div class="mon-wxfc-v" style="color:' + fCol + '">' + (feels != null ? feels + '°' : '—') + '</div>' +
       '<div class="mon-wxfc-v" style="color:' + rCol + '">' + (pop != null ? pop + '%' : '—') + (mm >= 0.1 ? ' <small>' + mm.toFixed(1) + '</small>' : '') + '</div>' +
+      '<div class="mon-wxfc-v" style="color:' + wCol + '">' + (wind != null ? wind + '<small>kt</small>' : '—') + '</div>' +
       '<div class="mon-wxfc-v" style="color:' + dCol + '">' + (dust != null ? dust : '—') + '</div>' +
     '</div>';
   }).join('');
@@ -4828,7 +4832,7 @@ async function updateWxTileForecast(){
         .catch(function(){ clearTimeout(tm); return null; });
     }
     var rs = await Promise.all([
-      tFetch('https://api.open-meteo.com/v1/forecast?latitude=12.19&longitude=-68.96&hourly=apparent_temperature,precipitation,precipitation_probability&forecast_days=2&timezone=auto'),
+      tFetch('https://api.open-meteo.com/v1/forecast?latitude=12.19&longitude=-68.96&hourly=apparent_temperature,precipitation,precipitation_probability,wind_speed_10m&wind_speed_unit=kn&forecast_days=2&timezone=auto'),
       tFetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=12.19&longitude=-68.96&hourly=dust&forecast_days=2&timezone=auto')
     ]);
     var wx = rs[0], aq = rs[1];
@@ -4849,6 +4853,7 @@ async function updateWxTileForecast(){
         feels: wx.hourly.apparent_temperature ? wx.hourly.apparent_temperature[i] : null,
         precip: wx.hourly.precipitation ? wx.hourly.precipitation[i] : null,
         pop: wx.hourly.precipitation_probability ? wx.hourly.precipitation_probability[i] : null,
+        wind: wx.hourly.wind_speed_10m ? wx.hourly.wind_speed_10m[i] : null,
         dust: dustByTime[ts] != null ? dustByTime[ts] : null
       });
     }
@@ -8020,7 +8025,6 @@ function renderStationsAverage(){
   var iMx = document.getElementById('monIsltMax');
   var iMn = document.getElementById('monIsltMin');
   var iSrc= document.getElementById('monIsltSrc');
-  if(iT) iT.textContent = cuAvgTemp !== null ? cuAvgTemp.toFixed(1) : '\u2014';
   // Feels like: Steadman heat index from avg temp + avg humidity
   var feelsVal = null;
   var _rh = avgHum !== null ? avgHum : (window.__knmiData && window.__knmiData.rh != null ? window.__knmiData.rh : null);
@@ -8035,7 +8039,9 @@ function renderStationsAverage(){
                  - 0.000003582*_tmpF*_tmpF*_rh*_rh;
     } else { feelsVal = _tmpF; }
   }
-  if(iF) iF.textContent = feelsVal !== null ? feelsVal.toFixed(1) : '\u2014';
+  // Feels-like is the headline number; the measured average is the sub-line.
+  if(iT) iT.textContent = feelsVal !== null ? feelsVal.toFixed(1) : (cuAvgTemp !== null ? cuAvgTemp.toFixed(1) : '\u2014');
+  if(iF) iF.textContent = cuAvgTemp !== null ? cuAvgTemp.toFixed(1) : '\u2014';
   if(iMx) iMx.textContent = __isltTempMax !== null ? __isltTempMax.toFixed(1) : '\u2014';
   if(iMn) iMn.textContent = __isltTempMin !== null ? __isltTempMin.toFixed(1) : '\u2014';
   var _srcParts = [];

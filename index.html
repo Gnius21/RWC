@@ -2741,10 +2741,10 @@ function miniRose(dir, spd){
   const minLen = 12, maxLen = 30;
   const len = s !== null ? Math.min(maxLen, Math.max(minLen, minLen + (s / 40) * (maxLen - minLen))) : 20;
 
-  // AVIATION CONVENTION: arrowhead at the FROM bearing, shaft points inward to hub.
-  // The arrow graphic below is drawn pointing UP (toward 0°/N) with the head at top.
-  // Rotating by `dir` places the head at the FROM bearing on the rose rim.
-  const rot = dir % 360;
+  // Wind is reported FROM a bearing; the arrow flies WITH the air. A 090 wind
+  // (from the east) therefore points toward the west. The graphic is drawn
+  // pointing UP (head at top), so rotate by dir+180 to point downwind.
+  const rot = (dir + 180) % 360;
 
   return `<svg width="92" height="92" viewBox="0 0 100 100" class="wrose-svg">
     <defs>
@@ -4458,9 +4458,10 @@ function switchWxKey(key){
 
 /* ── Weather-card SVG helpers ── */
 function wxWindBlob(dir, dirName){
-  // soft rounded "blob" pointer like Google weather; arrow points FROM source (aviation)
+  // soft rounded "blob" pointer like Google weather; wind is reported FROM a
+  // bearing, the blob flies WITH the air (090 wind → points west)
   const has = typeof dir === 'number' && isFinite(dir);
-  const rot = has ? dir % 360 : 0;
+  const rot = has ? (dir + 180) % 360 : 0;
   return `<svg viewBox="0 0 80 80" style="width:100%;height:100%;">
     <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(140,190,235,0.25)" stroke-width="1.2" stroke-dasharray="2 4"/>
     <text x="40" y="13" text-anchor="middle" font-family="Barlow,sans-serif" font-size="9" font-weight="700" fill="#bcd6ef">${has?dirName:'\u2014'}</text>
@@ -4657,10 +4658,10 @@ function monitorWindCompass(dir, spd){
   else if(s <= 21) col = '#f59e0b';
   else if(s <= 33) col = '#ff8a3d';
   else             col = '#ff4f4f';
-  // AVIATION CONVENTION: the triangle's apex marks the FROM bearing.
-  // The triangle below is drawn apex-up (toward N); rotate by `dir` so the apex
-  // points at the bearing the wind comes FROM.
-  const rot = dir % 360;
+  // Wind is reported FROM a bearing; the triangle flies WITH the air, so a
+  // 090 wind (from the east) points toward the west. Drawn apex-up; rotate
+  // by dir+180 to point downwind.
+  const rot = (dir + 180) % 360;
   const gid = 'mwc' + Math.random().toString(36).slice(2,7);
   return `<svg viewBox="0 0 160 160" class="wrose-mon">
     <defs>
@@ -5560,7 +5561,7 @@ function _gauCompass(dir, spd, size=190){
   const dirTxt = dir!=null?_MON_COMPASS16[Math.round(dir/22.5)%16]:'VRB';
   let needle='';
   if(dir!=null){
-    const rot=dir%360;  // teal tip at the FROM bearing (aviation)
+    const rot=(dir+180)%360;  // needle flies with the air: 090 wind points west
     needle=`<g transform="translate(${cx},${cy}) rotate(${rot})" style="transition:transform .8s cubic-bezier(.22,.61,.36,1);">
       <polygon points="0,${(-r+8).toFixed(0)} -7,-6 0,0 7,-6" fill="#2dd4bf" stroke="#2dd4bf" stroke-width="0.5"/>
       <polygon points="0,${(r-14).toFixed(0)} -5,4 0,0 5,4" fill="rgba(255,255,255,0.35)"/>
@@ -6687,9 +6688,8 @@ function windRoseSVG(opts){
   var uid=++_wrUID, cx=size/2, cy=size/2, R=size*0.42;
   var toRad=function(d){return d*Math.PI/180;};
   var isCalm=speedKt<3, isVar=deg===999;
-  // Aviation convention: wind is reported FROM a bearing, so the shaft/arrowhead
-  // points at that bearing (090 = air moving from east to west).
-  var pointDeg=isCalm||isVar?0:deg%360;
+  // Wind reported FROM `deg`; shaft/arrowhead fly WITH the air (090 → points west).
+  var pointDeg=isCalm||isVar?0:(deg+180)%360;
   var shaftLen=isCalm?0:Math.min(R*0.88,R*0.18+speedKt*R*0.026);
   var ticks=Array.from({length:16},function(_,i){
     var a=toRad(i*22.5-90),isCard=i%4===0,isOrd=i%2===0;
@@ -7400,9 +7400,9 @@ function renderCondMap(){
       if(__condMapLayers.wind && windDir!=null && windSpd!=null){
         // Colour by speed (calm→strong)
         var wcol = windSpd>=25 ? '#ff4f4f' : windSpd>=15 ? '#ff8a3d' : windSpd>=8 ? '#fbbf24' : '#22d3ee';
-        // Aviation convention: dart apex marks the bearing the wind blows FROM.
-        // SVG arrow drawn pointing up; rotating by windDir puts the apex at that bearing.
-        var rot = windDir % 360;
+        // Wind reported FROM windDir; the dart flies WITH the air (090 wind →
+        // dart points west). Drawn apex-up; rotate by windDir+180.
+        var rot = (windDir + 180) % 360;
         // Feels-like (Steadman) from station METAR temp+RH
         var _ft=null;
         if(mp&&mp.tempC!=null){
@@ -7532,9 +7532,9 @@ function renderCondMap(){
     if(m){
       var wh = m.wave_height, wd = m.wave_direction, wp = m.wave_period;
       var sh = m.swell_wave_height, sd = m.swell_wave_direction, sp = m.swell_wave_period;
-      // Swell direction arrow — same FROM convention as the wind visuals: the ↓ glyph
-      // starts at bearing 180, so rotating by sd+180 makes it point at the source bearing.
-      var arrowRot = (sd!=null) ? (sd + 180) % 360 : 0;
+      // Swell direction arrow — like the wind visuals, it travels WITH the flow:
+      // the ↓ glyph starts at bearing 180, so rotating by sd points it downstream.
+      var arrowRot = (sd!=null) ? sd % 360 : 0;
       var seaCol = (wh!=null && wh>=2.5) ? '#ff8a3d' : (wh!=null && wh>=1.5) ? '#fbbf24' : '#38bdf8';
       var html = '<div style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.8));">'+
         '<div style="font-size:24px;line-height:1;">\u{1F30A}</div>'+

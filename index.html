@@ -1656,6 +1656,8 @@ html,body{max-width:100%;overflow-x:hidden;}
 /* IR cloud tiles: screen-blend so dark "clear sky" pixels vanish over the
    satellite basemap and only the bright clouds remain (Windy-style). */
 .cond-ir-tiles{mix-blend-mode:screen;}
+/* Rain movement / outlook badge on the conditions map */
+.cmap-raininfo{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.3px;color:#cfe9ff;background:rgba(5,18,34,0.88);border:1px solid rgba(77,184,255,0.35);border-radius:8px;padding:5px 10px;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,0.4);}
 /* ── Station info box on condition map ── */
 .cond-map-body .leaflet-container{background:#0b2e5e;}
 .cmap-sbox{
@@ -3287,13 +3289,28 @@ async function fetchMetar(icao){
   return false;
 }
 async function refreshAllMetars(){
-  // CheckWX first (one batched JSON call, cached 60 s); NOAA tgftp per station as fallback.
-  const cw = await fetchCheckwx('metar', STATIONS);
+  // CheckWX first (one batched JSON call incl. the map-only stations, cached
+  // 60 s); NOAA tgftp per station as fallback.
+  const cw = await fetchCheckwx('metar', STATIONS.concat(CMAP_EXTRA_ICAOS));
   await Promise.all(STATIONS.map(async icao => {
     if(cw && cw[icao]){
       try { renderMetarCard(icao, cw[icao]); return; } catch(e){}
     }
     await fetchMetar(icao);
+  }));
+  // Map-only extras (San Juan / Barbados / Trinidad): stash raw METARs for the
+  // conditions map only — they never appear in the Aviation tab.
+  await Promise.all(CMAP_EXTRA_ICAOS.map(async icao => {
+    if(cw && cw[icao]){ window.__cmapMetars[icao] = cw[icao]; return; }
+    try {
+      const o = await fetchURL(METAR_URL(icao));
+      if(o.ok){
+        const lines = o.text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+        for(let i = lines.length-1; i >= 0; i--){
+          if(lines[i].startsWith(icao) || /\b\d{6}Z\b/.test(lines[i])){ window.__cmapMetars[icao] = lines[i]; break; }
+        }
+      }
+    } catch(e){}
   }));
   try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
   const el=byId('metar-ts'); if(el) el.textContent='Last updated: '+nowStamp();
@@ -7279,20 +7296,27 @@ var CMAP_STNS = [
   {id:'TNCC', name:'Cura\u00e7ao', flag:'\u{1F1E8}\u{1F1FC}', lat:12.19, lon:-68.96, dLat:0.75, dLon:0.05},
   {id:'TNCB', name:'Bonaire',  flag:'\u{1F1E7}\u{1F1F6}', lat:12.13, lon:-68.27, dLat:0.30, dLon:0.65},
   {id:'TNCM', name:'St Maarten', flag:'\u{1F1F8}\u{1F1FD}', lat:18.04, lon:-63.11, dLat:0.0, dLon:0.0},
-  {id:'SVMI', name:'Caracas', flag:'\u{1F1FB}\u{1F1EA}', lat:10.60, lon:-66.99, dLat:0.0, dLon:0.0}
+  {id:'SVMI', name:'Caracas', flag:'\u{1F1FB}\u{1F1EA}', lat:10.60, lon:-66.99, dLat:0.0, dLon:0.0},
+  {id:'TJSJ', name:'San Juan', flag:'\u{1F1F5}\u{1F1F7}', lat:18.44, lon:-66.00, dLat:0.0, dLon:0.0},
+  {id:'TBPB', name:'Barbados', flag:'\u{1F1E7}\u{1F1E7}', lat:13.07, lon:-59.49, dLat:0.0, dLon:0.0},
+  {id:'TTPP', name:'Trinidad', flag:'\u{1F1F9}\u{1F1F9}', lat:10.60, lon:-61.34, dLat:0.0, dLon:0.0}
 ];
+// Map-only stations: their METARs ride along in the CheckWX batch (with a NOAA
+// fallback) but are never rendered in the Aviation/METAR tabs.
+var CMAP_EXTRA_ICAOS = ['TJSJ','TBPB','TTPP'];
+window.__cmapMetars = {};
 
 function initCondMap(){
   if(condMap || typeof L==='undefined') return;
-  // Locked view matching the uploaded framing: ABC islands + eastern Caribbean.
-  var VIEW_BOUNDS = [[9.5,-71.5],[19.0,-61.0]];   // ABC region
+  // Locked view: ABC islands + eastern Caribbean out to Barbados / San Juan.
+  var VIEW_BOUNDS = [[9.0,-72.0],[19.5,-58.5]];
   condMap = L.map('condMap', {
     zoomControl:true, attributionControl:true,
     maxBounds: VIEW_BOUNDS,           // cannot pan outside this region
     maxBoundsViscosity: 1.0,          // hard edge
     minZoom: 6, maxZoom: 9
   }).fitBounds([[10.0,-70.8],[13.2,-67.5]]);
-  condMap.setMaxBounds([[9.5,-71.5],[19.0,-61.0]]);
+  condMap.setMaxBounds(VIEW_BOUNDS);
   // Real-colour satellite basemap (Windy-style: blue sea, green islands)
   // with a transparent place-name layer on top so the towns stay readable.
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -7301,10 +7325,20 @@ function initCondMap(){
     {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB', pane:'overlayPane', opacity:0.9}).addTo(condMap);
   condMarkerLayer = L.layerGroup().addTo(condMap);
 
+  // Rain status badge (bottom-left): cell movement direction + short-term outlook
+  var rainCtl = L.control({position:'bottomleft'});
+  rainCtl.onAdd = function(){
+    var d = L.DomUtil.create('div','cmap-raininfo');
+    d.id = 'cmapRainInfo';
+    d.style.display = 'none';
+    return d;
+  };
+  rainCtl.addTo(condMap);
+
   // ── STORM CONE: NOAA NHC tropical weather (forecast cone + track). Auto-empty when no storms. ──
   condStormLayer = L.tileLayer.wms('https://mapservices.weather.noaa.gov/tropical/services/tropical/NHC_tropical_weather/MapServer/WMSServer', {
     layers: '4,6,7,8', format: 'image/png', transparent: true, opacity: 0.85,
-    version: '1.3.0', attribution: 'NOAA NHC', bounds: [[9.5,-71.5],[19.0,-61.0]]
+    version: '1.3.0', attribution: 'NOAA NHC', bounds: [[9.0,-72.0],[19.5,-58.5]]
   });
 
   // ── SATELLITE: NOAA GMGSI longwave infrared (free, no key) — covers the Caribbean ──
@@ -7313,7 +7347,7 @@ function initCondMap(){
     layers: 'global_longwave_imagery_mosaic', format: 'image/png', transparent: true,
     opacity: 0.85, className: 'cond-ir-tiles', version: '1.3.0',
     attribution: 'NOAA GMGSI Longwave IR', maxZoom: 12,
-    bounds: [[9.5,-71.5],[19.0,-61.0]]
+    bounds: [[9.0,-72.0],[19.5,-58.5]]
   });
 
   // ── RAIN + LIVE INFRARED SATELLITE: RainViewer (free, no key) — same API ──
@@ -7444,21 +7478,20 @@ function parseNdbc(txt){
 }
 
 async function loadBuoys(){
-  if(__buoyCache) return __buoyCache;
+  // 10-min cache; an empty result is NOT cached so a transient failure retries.
+  if(__buoyCache && Date.now() - __buoyCache.t < 600000) return __buoyCache.list;
   var out = [];
   await Promise.all(NDBC_BUOYS.map(async function(b){
     try{
-      var ctrl = new AbortController();
-      var t = setTimeout(function(){ ctrl.abort(); }, 4000);
-      var res = await fetch('https://www.ndbc.noaa.gov/data/realtime2/' + b.id + '.txt', {signal:ctrl.signal, cache:'default'});
-      clearTimeout(t);
-      if(!res.ok) return;
-      var txt = await res.text();
-      var p = parseNdbc(txt);
+      // NDBC blocks cross-origin requests — go through fetchURL so the
+      // proxy fallback (and the persisted cache) can serve the file.
+      var o = await fetchURL('https://www.ndbc.noaa.gov/data/realtime2/' + b.id + '.txt');
+      if(!o.ok || !o.text) return;
+      var p = parseNdbc(o.text);
       if(p) out.push(Object.assign({}, b, {data:p, dist:knDist(12.15,-69.0,b.lat,b.lon)}));
     }catch(e){}
   }));
-  __buoyCache = out;
+  if(out.length) __buoyCache = {t: Date.now(), list: out};
   return out;
 }
 
@@ -7477,7 +7510,7 @@ function renderBuoys(){
     }
     buoys.forEach(function(b){
       // Only render buoys within the locked map region
-      if(b.lat < 9.5 || b.lat > 19.0 || b.lon < -71.5 || b.lon > -61.0) return;
+      if(b.lat < 9.0 || b.lat > 19.5 || b.lon < -72.0 || b.lon > -58.5) return;
       var d = b.data;
       var wvht = d.wvht!=null ? d.wvht.toFixed(1)+'m' : '\u2014';
       var html = '<div style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.85));">'+
@@ -7580,7 +7613,11 @@ function renderCondMap(){
       var lat=s.lat, lon=s.lon;
       // Try to get weather from mState (METAR)
       var mp = null;
-      try{ if(typeof mState!=='undefined' && mState[s.id] && mState[s.id].lastRaw) mp=parseMetar(mState[s.id].lastRaw); }catch(e){}
+      try{
+        var _mraw = (typeof mState!=='undefined' && mState[s.id] && mState[s.id].lastRaw)
+          ? mState[s.id].lastRaw : (window.__cmapMetars && window.__cmapMetars[s.id]) || null;
+        if(_mraw) mp=parseMetar(_mraw);
+      }catch(e){}
       var temp = mp&&mp.tempC!=null ? Math.round(mp.tempC)+'°' : '—';
       var windDir = mp&&mp.windDir!=null ? mp.windDir : null;
       var windSpd = mp&&mp.windSpd!=null ? mp.windSpd : null;
@@ -7646,7 +7683,7 @@ function renderCondMap(){
         try{
           if(s.id==='TNCC'&&window.__synopPCur&&window.__synopPCur.cloud_oktas!=null){_ok=window.__synopPCur.cloud_oktas;}
           else if(s.id==='TNCB'&&window.__knmiData&&window.__knmiData.cloud_octa!=null){_ok=window.__knmiData.cloud_octa;}
-          if(_ok==null){ var _raw2=mState[s.id]&&mState[s.id].lastRaw||'';
+          if(_ok==null){ var _raw2=(mState[s.id]&&mState[s.id].lastRaw)||(window.__cmapMetars&&window.__cmapMetars[s.id])||'';
             if(/OVC/.test(_raw2))_ok=8; else if(/BKN/.test(_raw2))_ok=6; else if(/SCT/.test(_raw2))_ok=4; else if(/FEW/.test(_raw2))_ok=2; else if(/\b(SKC|CLR|NSC|CAVOK)\b/.test(_raw2))_ok=0; }
         }catch(e){}
         // Octa pie circle SVG (n/8 fill)
@@ -7784,6 +7821,45 @@ function renderCondMap(){
   }
   // Live NDBC buoys
   renderBuoys();
+  // ── Rain movement + short-term outlook badge ──
+  // Cells ride the steering flow, so the movement bearing is downwind of the
+  // live wind (KNMI → SYNOP → TNCC METAR). Outlook reuses the cached 6-hour
+  // Curaçao forecast from the Monitor tile.
+  (function(){
+    var el = document.getElementById('cmapRainInfo');
+    if(!el) return;
+    var om = window.__omCurrent || null;
+    var rainNow = !!(om && ((om.rain != null && om.rain > 0) || (om.precipitation != null && om.precipitation > 0)));
+    var dir = (window.__knmiData && window.__knmiData.wind_dir != null) ? window.__knmiData.wind_dir
+            : (window.__synopPCur && window.__synopPCur.wind_dir != null) ? window.__synopPCur.wind_dir : null;
+    if(dir == null){
+      try { var mpc = (mState.TNCC && mState.TNCC.lastRaw) ? parseMetar(mState.TNCC.lastRaw) : null;
+            if(mpc && mpc.windDir != null) dir = mpc.windDir; } catch(e){}
+    }
+    var COMP = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    var moveTo = dir != null ? Math.round(dir + 180) % 360 : null;
+    var arrow = moveTo != null
+      ? ' <span style="display:inline-block;transform:rotate(' + moveTo + 'deg);">↑</span> ' + COMP[Math.round(moveTo/22.5)%16]
+      : '';
+    var nextRain = null;
+    try {
+      if(__wxFcCache && __wxFcCache.hours){
+        for(var i = 0; i < __wxFcCache.hours.length; i++){
+          var h = __wxFcCache.hours[i];
+          if((h.precip != null && h.precip >= 0.1) || (h.pop != null && h.pop >= 60)){ nextRain = h; break; }
+        }
+      }
+    } catch(e){}
+    var html = '';
+    if(rainNow){
+      html = '\u{1F327} Raining now' + (arrow ? ' · cells moving' + arrow : '');
+    } else if(nextRain){
+      html = '\u{1F327} Rain expected ~' + String(nextRain.h).padStart(2,'0') + 'h' +
+        (nextRain.pop != null ? ' (' + Math.round(nextRain.pop) + '%)' : '') +
+        (arrow ? ' · moving' + arrow : '');
+    }
+    if(html){ el.innerHTML = html; el.style.display = ''; } else { el.style.display = 'none'; }
+  })();
   // Update map timestamp
   var _ts = document.getElementById('condMapTs');
   if(_ts) _ts.textContent = '· ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) + ' UTC';

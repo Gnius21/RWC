@@ -5244,8 +5244,13 @@ function renderMonitor(data){
   (function(){
     var rv = byId('monRadVal'), rd = byId('monRadDesc'), rg = byId('monRadGauge');
     if(!rv) return;
-    var rad = (window.__knmiData && window.__knmiData.radiation != null) ? window.__knmiData.radiation
-            : (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation : null;
+    // Radiation changes minute-to-minute: trust KNMI only when its reading is
+    // fresh (<30 min); otherwise use Open-Meteo, which is available instantly.
+    var _kFresh = window.__knmiData && window.__knmiData.radiation != null &&
+                  window.__knmiData.ts && (Date.now() - window.__knmiData.ts < 1800000);
+    var rad = _kFresh ? window.__knmiData.radiation
+            : (omCurrent && omCurrent.shortwave_radiation != null) ? omCurrent.shortwave_radiation
+            : (window.__knmiData && window.__knmiData.radiation != null) ? window.__knmiData.radiation : null;
     if(rad != null && isFinite(rad)){
       rv.innerHTML = Math.round(rad) + ' <span class="mon-unit">W/m\u00b2</span>';
       var rlbl, rcol;
@@ -7817,18 +7822,22 @@ function parseKnmiBonaire(raw){
 
   // FALLBACK: tag-stripped text (e.g. Jina markdown). Pull "Label ... number".
   var text = html.replace(/<[^>]+>/g,' ').replace(/&deg;/g,'\u00b0').replace(/&nbsp;/g,' ').replace(/\s+/g,' ');
+  // Each regex skips an optional parenthesised unit BEFORE capturing, so a
+  // missing value can never pick digits out of the unit itself ("W/m2" \u2192 2,
+  // "mm/10 min" \u2192 10). The short non-digit gap (\u226412 chars) allows table pipes
+  // and colons but cannot reach the next row's number.
   var pairs = [
     ['Winddirection','Winddirection (Sector/deg)', /Winddirection[^A-Za-z]*\(?Sector\/deg\)?\s*([NESW]{1,3})\s*\(?\s*(\d{1,3})/i, true],
-    ['Windspeed','Windspeed (m/s)', /Windspeed[^0-9-]*([\d.]+)/i],
-    ['Gusts','Gusts (m/s)', /Gusts[^0-9-]*([\d.]+)/i],
-    ['Cloud','Cloud cover (Octa / %)', /Cloud cover[^0-9-]*([\d.]+)/i],
-    ['Radiation','Radiation (W/m2)', /Radiation[^0-9-]*([\d.]+)/i],
-    ['Precipitation','Precipitation (mm/10 min)', /Precipitation[^0-9-]*([\d.]+)/i],
-    ['Relative','Relative humidity (%)', /Relative humidity[^0-9-]*([\d.]+)/i],
-    ['Temperature','Temperature (\u00b0C)', /Temperature[^0-9-]*(-?[\d.]+)/i],
-    ['Dewpoint','Dewpoint temperature (\u00b0C)', /Dewpoint[^0-9-]*(-?[\d.]+)/i],
-    ['Visibility','Visibility (m)', /Visibility[^0-9-]*([\d.]+)/i],
-    ['Pressure','Pressure (hPa)', /Pressure[^0-9-]*([\d.]+)/i]
+    ['Windspeed','Windspeed (m/s)', /Windspeed\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Gusts','Gusts (m/s)', /Gusts\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Cloud','Cloud cover (Octa / %)', /Cloud cover\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Radiation','Radiation (W/m2)', /Radiation\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Precipitation','Precipitation (mm/10 min)', /Precipitation\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Relative','Relative humidity (%)', /Relative humidity\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Temperature','Temperature (\u00b0C)', /Temperature\s*(?:\([^)]*\))?[^\d(-]{0,12}(-?[\d.]+)/i],
+    ['Dewpoint','Dewpoint temperature (\u00b0C)', /Dewpoint(?:\s+temperature)?\s*(?:\([^)]*\))?[^\d(-]{0,12}(-?[\d.]+)/i],
+    ['Visibility','Visibility (m)', /Visibility\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i],
+    ['Pressure','Pressure (hPa)', /Pressure\s*(?:\([^)]*\))?[^\d(-]{0,12}([\d.]+)/i]
   ];
   pairs.forEach(function(p){
     var mm = text.match(p[2]);

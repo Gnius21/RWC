@@ -19,6 +19,8 @@
 <link rel="dns-prefetch" href="https://air-quality-api.open-meteo.com">
 <link rel="dns-prefetch" href="https://marine-api.open-meteo.com">
 <link rel="dns-prefetch" href="https://tgftp.nws.noaa.gov">
+<link rel="dns-prefetch" href="https://api.checkwx.com">
+<link rel="dns-prefetch" href="https://api.weatherapi.com">
 <link rel="dns-prefetch" href="https://r.jina.ai">
 <link rel="dns-prefetch" href="https://server.arcgisonline.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -2425,6 +2427,11 @@ const METAR_URL = i => `https://tgftp.nws.noaa.gov/data/observations/metar/stati
 const TAF_URL   = i => `https://tgftp.nws.noaa.gov/data/forecasts/taf/stations/${i}.TXT`;
 const KNMI_URL  = 'https://www.knmidc.org/weather/bonaire/?Current';
 const API_BASE  = 'https://curacao-weather-api.generast.workers.dev/';
+/* Keyed APIs (free tiers; keys are public by nature in this client-side app):
+   CheckWX = primary METAR/TAF JSON source (NOAA tgftp remains the fallback).
+   WeatherAPI = fallback current conditions for the island weather cards. */
+const CHECKWX_KEY    = 'fb135a94c0574db4b26082b70705b4af';
+const WEATHERAPI_KEY = 'fef2a58ed5fa4b2ea08221244260405';
 
 /* ─── UTILS ─── */
 const byId = id => document.getElementById(id);
@@ -2614,7 +2621,67 @@ async function fetchURL(url, tries = 1, opts = {}){
   finally { if(__inflight.get(url) === work) __inflight.delete(url); }
 }
 window.__clearFetchCache = () => __fetchCache.clear();
-window.__fetchCacheStats = () => {
+
+/* ─── CheckWX: batched METAR/TAF in one JSON call (CORS-friendly, keyed).
+   Cached so the 30 s METAR loop costs at most one API call per minute.
+   Returns {ICAO: rawString} or null — callers fall back to NOAA tgftp. ─── */
+const __cwxCache = new Map();
+async function fetchCheckwx(kind, icaos){
+  const ttl = kind === 'metar' ? 60000 : 300000;
+  const hit = __cwxCache.get(kind);
+  if(hit && Date.now() - hit.t < ttl) return hit.map;
+  try {
+    const ctrl = new AbortController();
+    const tm = setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch('https://api.checkwx.com/' + kind + '/' + icaos.join(','),
+      {headers: {'X-API-Key': CHECKWX_KEY}, signal: ctrl.signal});
+    clearTimeout(tm);
+    if(!r.ok) return null;
+    const j = await r.json();
+    if(!j || !j.data || !j.data.length) return null;
+    const map = {};
+    j.data.forEach(raw => {
+      if(typeof raw !== 'string') return;
+      // Strip report-type prefixes so parsers see "ICAO ddhhmmZ …"
+      const clean = raw.replace(/^(?:METAR|SPECI|TAF)\s+(?:AMD\s+|COR\s+)?/i, '').trim();
+      const m = clean.match(/^([A-Z]{4})\b/);
+      if(m) map[m[1]] = clean;
+    });
+    if(!Object.keys(map).length) return null;
+    __cwxCache.set(kind, {t: Date.now(), map});
+    window.__lastFetchOK = Date.now();
+    return map;
+  } catch(e){ return null; }
+}
+
+/* ─── WeatherAPI: current conditions fallback for the island weather cards.
+   Used only when the SYNOP path yields nothing; KNMI data keeps priority. ─── */
+async function fetchWeatherApiCurrent(lat, lon){
+  try {
+    const ctrl = new AbortController();
+    const tm = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch('https://api.weatherapi.com/v1/current.json?key=' + WEATHERAPI_KEY + '&q=' + lat + ',' + lon,
+      {signal: ctrl.signal});
+    clearTimeout(tm);
+    if(!r.ok) return null;
+    const j = await r.json();
+    const c = j && j.current;
+    if(!c || c.temp_c == null) return null;
+    return {
+      temp_c: c.temp_c,
+      dew_c: c.dewpoint_c != null ? c.dewpoint_c : null,
+      rh: c.humidity != null ? c.humidity : null,
+      wind_kt: c.wind_kph != null ? Math.round(c.wind_kph / 1.852) : null,
+      wind_dir: c.wind_degree != null ? c.wind_degree : null,
+      slp: c.pressure_mb != null ? c.pressure_mb : null,
+      vis_m: c.vis_km != null ? Math.round(c.vis_km * 1000) : null,
+      cloud_oktas: c.cloud != null ? Math.round(c.cloud / 100 * 8) : null,
+      precip_mm: c.precip_mm != null ? c.precip_mm : null,
+      time: (j.location && j.location.localtime ? j.location.localtime.split(' ')[1] + ' local' : nowStamp()),
+      src: 'weatherapi'
+    };
+  } catch(e){ return null; }
+}window.__fetchCacheStats = () => {
   const now = Date.now();
   const items = [...__fetchCache.entries()].map(([u, v]) => ({
     url: u.slice(0, 80),
@@ -3220,7 +3287,14 @@ async function fetchMetar(icao){
   return false;
 }
 async function refreshAllMetars(){
-  await Promise.all(STATIONS.map(fetchMetar));
+  // CheckWX first (one batched JSON call, cached 60 s); NOAA tgftp per station as fallback.
+  const cw = await fetchCheckwx('metar', STATIONS);
+  await Promise.all(STATIONS.map(async icao => {
+    if(cw && cw[icao]){
+      try { renderMetarCard(icao, cw[icao]); return; } catch(e){}
+    }
+    await fetchMetar(icao);
+  }));
   try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
   const el=byId('metar-ts'); if(el) el.textContent='Last updated: '+nowStamp();
   // FIX #5: simplified — no redundant double-check
@@ -3453,7 +3527,20 @@ async function loadTAF(icao){
   const o=await fetchURL(TAF_URL(icao));
   if(o.ok){renderTAF(icao,o.text);const el=byId('taf-ts');if(el)el.textContent='TAF: '+nowStamp();}
 }
-async function loadAllTAFs(){ await Promise.all(TAF_ICAOS.map(loadTAF)); }
+async function loadAllTAFs(){
+  // CheckWX first (one batched JSON call); NOAA tgftp per station as fallback.
+  const cw = await fetchCheckwx('taf', TAF_ICAOS);
+  await Promise.all(TAF_ICAOS.map(async icao => {
+    if(cw && cw[icao]){
+      try {
+        renderTAF(icao, cw[icao]);
+        const el = byId('taf-ts'); if(el) el.textContent = 'TAF: ' + nowStamp();
+        return;
+      } catch(e){}
+    }
+    await loadTAF(icao);
+  }));
+}
 
 /* ─── SYNOP DECODE (WMO FM-12) ─── */
 const WW = {
@@ -4625,23 +4712,33 @@ function parseVisToMeters(visStr){
   return undefined;
 }
 async function fetchWeatherAruba(){
+  let P = null;
   try {
     const o = await fetchURL('https://tgftp.nws.noaa.gov/data/raw/sm/smnu50.tnca..txt');
-    if(!o.ok) throw new Error('fetch failed');
-    const P = extractWxFromSynop(o.text, '78762');
-    renderWxCard('aruba', P || {empty:true});
-  } catch(e){ renderWxCard('aruba', {empty:true}); }
+    if(o.ok) P = extractWxFromSynop(o.text, '78762');
+  } catch(e){}
+  // WeatherAPI fallback fills gaps when SYNOP yields nothing; SYNOP values win.
+  if(!P || P.temp_c == null){
+    const wa = await fetchWeatherApiCurrent(12.50, -70.01);
+    if(wa) P = Object.assign(wa, P || {});
+  }
+  renderWxCard('aruba', P || {empty:true});
 }
 async function fetchWeatherCuracao(){
+  let P = null, scraped = null;
   try {
     const o = await fetchURL('https://www.ogimet.com/ultimos_synops2.php?estado=Cura&fmt=html&Enviar=Ver');
-    if(!o.ok) throw new Error('fetch failed');
-    const scraped = scrapeOgimetSynop(o.text);
-    if(!scraped) throw new Error('no data');
-    const P = extractWxFromSynop(scraped, '78988');
-    renderWxCard('curacao', P || {empty:true});
-    return scraped;
-  } catch(e){ renderWxCard('curacao', {empty:true}); return null; }
+    if(o.ok){
+      scraped = scrapeOgimetSynop(o.text);
+      if(scraped) P = extractWxFromSynop(scraped, '78988');
+    }
+  } catch(e){}
+  if(!P || P.temp_c == null){
+    const wa = await fetchWeatherApiCurrent(12.19, -68.96);
+    if(wa) P = Object.assign(wa, P || {});
+  }
+  renderWxCard('curacao', P || {empty:true});
+  return scraped;
 }
 async function fetchWeatherBonaire(){
   try {
@@ -4655,6 +4752,11 @@ async function fetchWeatherBonaire(){
         if(scraped){ const synP = extractWxFromSynop(scraped, '78990'); if(synP) P = synP; }
       }
     } catch(e){}
+    // WeatherAPI fallback when SYNOP has nothing; KNMI visibility still wins below.
+    if(P.temp_c == null){
+      const wa = await fetchWeatherApiCurrent(12.13, -68.27);
+      if(wa) P = Object.assign(wa, P);
+    }
     if(visM != null) P.vis_m = visM;
     if(!P.time) P.time = nowStamp();
     renderWxCard('bonaire', Object.keys(P).length ? P : {empty:true});

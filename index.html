@@ -802,9 +802,10 @@ tr:last-child td{border-bottom:none;}
 .fc-detail-stats span{color:var(--muted);letter-spacing:.5px;}
 .fc-detail-stats b{color:#fff;font-weight:800;}
 body.tab-hidden *{animation-play-state:paused !important;}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important;}
-}
+/* NOTE: the global prefers-reduced-motion kill switch was removed on purpose —
+   it froze every weather-icon animation for anyone with Reduce Motion enabled
+   (the iOS default for many users). The targeted reduce block above still tames
+   the heavy forecast-card entry animations. */
 .fc-day-card{position:relative;}
 .fc-day-card.is-today{border-color:rgba(77,184,255,0.5);background:linear-gradient(180deg,rgba(26,111,255,0.13),rgba(167,139,250,0.06),var(--card));box-shadow:0 0 26px rgba(77,184,255,0.12),inset 0 1px 0 rgba(77,184,255,0.15);}
 .fc-day-card.is-today::before{height:3px;background:linear-gradient(90deg,#4db8ff,#a78bfa,#56c596,transparent);}

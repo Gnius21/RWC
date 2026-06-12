@@ -1658,6 +1658,42 @@ html,body{max-width:100%;overflow-x:hidden;}
 .cond-ir-tiles{mix-blend-mode:screen;}
 /* Rain movement / outlook badge on the conditions map */
 .cmap-raininfo{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.3px;color:#cfe9ff;background:rgba(5,18,34,0.88);border:1px solid rgba(77,184,255,0.35);border-radius:8px;padding:5px 10px;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,0.4);}
+
+/* ═══ CLIMATE TAB ═══ */
+.clim-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.clim-ttl{font-family:var(--cond);font-size:18px;font-weight:900;letter-spacing:1px;color:var(--txt);text-transform:uppercase;}
+.clim-switch{display:flex;gap:6px;}
+.clim-feat{position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 18px;border-radius:14px;border:1px solid var(--bdr);background:linear-gradient(135deg,rgba(26,111,255,0.14),rgba(167,139,250,0.07) 55%,rgba(8,18,32,0.9));margin-bottom:10px;overflow:hidden;}
+.clim-feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a78bfa,#4db8ff,transparent);}
+.clim-feat-ico{flex:0 0 auto;}
+.clim-feat-main{flex:1;min-width:200px;}
+.clim-feat-sup{font-family:var(--cond);font-size:13px;letter-spacing:2px;color:#a78bfa;text-transform:uppercase;font-weight:700;}
+.clim-feat-date{font-family:var(--cond);font-size:24px;font-weight:900;color:#fff;letter-spacing:.5px;margin:2px 0;}
+.clim-feat-desc{font-family:var(--cond);font-size:14px;color:var(--muted);}
+.clim-feat-stats{display:flex;gap:16px;flex-wrap:wrap;}
+.clim-feat-stat{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.clim-feat-v{font-family:var(--cond);font-size:22px;font-weight:900;color:#fff;}
+.clim-feat-l{font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;}
+.clim-feat-cmp{width:100%;font-family:var(--cond);font-size:13px;font-weight:700;color:#fdba74;}
+.clim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:900px){.clim-grid{grid-template-columns:1fr;}}
+.clim-card{padding:14px 16px;border-radius:14px;border:1px solid var(--bdr);background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.005) 60%),rgba(8,18,32,0.85);}
+.clim-card-hd{font-family:var(--cond);font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
+.clim-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;}
+.clim-table th{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);text-align:right;padding:4px 8px;border-bottom:1px solid var(--bdr);}
+.clim-table th:first-child,.clim-table td:first-child{text-align:left;}
+.clim-table td{padding:5px 8px;text-align:right;color:var(--txt);border-bottom:1px solid rgba(77,184,255,0.07);white-space:nowrap;}
+.clim-table tr:last-child td{border-bottom:none;}
+.clim-table .dim{color:var(--muted);}
+.clim-rec{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid rgba(77,184,255,0.07);}
+.clim-rec:last-child{border-bottom:none;}
+.clim-rec-l{font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:.4px;}
+.clim-rec-v{font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;white-space:nowrap;}
+.clim-rec-d{font-family:var(--cond);font-size:13px;color:var(--muted);}
+.clim-chart-wrap{margin-bottom:10px;}
+.clim-chart-lbl{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:2px 0 5px;}
+.clim-chart{width:100%;height:190px;display:block;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(77,184,255,0.08);}
+.clim-src{font-family:var(--cond);font-size:13px;color:var(--muted);opacity:.75;margin-top:8px;}
 /* ── Station info box on condition map ── */
 .cond-map-body .leaflet-container{background:#0b2e5e;}
 .cmap-sbox{
@@ -1797,6 +1833,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="forecast"><span class="tab-i">&#127782;</span>Forecast</button>
   <button class="tab" data-tab="mapping"><span class="tab-i">&#127752;</span>Mapping</button>
+  <button class="tab" data-tab="climate"><span class="tab-i">&#128200;</span>Climate</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>Live ATC</button>
 </nav>
 
@@ -2332,6 +2369,19 @@ html,body{max-width:100%;overflow-x:hidden;}
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="tab-climate" class="tpanel hidden">
+    <div class="clim-hd">
+      <div class="clim-ttl">&#128200; Climate &mdash; Cura&ccedil;ao Historical Record</div>
+      <div class="clim-switch">
+        <button class="mon-style-btn active" data-climview="table"><span class="mon-style-btn-ic">&#128203;</span>Tables</button>
+        <button class="mon-style-btn" data-climview="graphs"><span class="mon-style-btn-ic">&#128200;</span>Graphs</button>
+      </div>
+    </div>
+    <div class="sbar" style="margin:6px 0 10px;"><span id="climStatus">Loading climate archive&hellip;</span></div>
+    <div id="climFeatured"></div>
+    <div id="climBody"></div>
   </div>
 
   <div id="tab-atc" class="tpanel hidden">
@@ -3987,13 +4037,249 @@ function applyTest(){
 function startTest(){if(testInt)clearInterval(testInt);applyTest();testInt=setInterval(applyTest,4000);}
 function stopTest(){if(testInt){clearInterval(testInt);testInt=null;}}
 
+/* ═══ CLIMATE TAB — Curaçao historical record (Open-Meteo ERA5 archive) ═══ */
+let climateTabOpened = false, __climView = 'table', __climData = null;
+const CLIM_DAILY = 'temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,weather_code';
+function _climD(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+async function _climFetch(url){
+  try {
+    const ctrl = new AbortController();
+    const tm = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(url, {signal: ctrl.signal, cache:'default'});
+    clearTimeout(tm);
+    return r.ok ? await r.json() : null;
+  } catch(e){ return null; }
+}
+function _climPick(daily, i){
+  const g = k => (daily[k] && daily[k][i] != null) ? daily[k][i] : null;
+  return {
+    tmax: g('temperature_2m_max'), tmin: g('temperature_2m_min'), tmean: g('temperature_2m_mean'),
+    rain: g('precipitation_sum'), wmax: g('wind_speed_10m_max'), gmax: g('wind_gusts_10m_max'),
+    code: g('weather_code')
+  };
+}
+async function loadClimate(force){
+  const status = byId('climStatus');
+  const dayKey = 'rwc-climate-' + _climD(new Date());
+  if(!force){
+    if(__climData){ renderClimate(); return; }
+    try { const c = JSON.parse(localStorage.getItem(dayKey) || 'null'); if(c && c.days){ __climData = c; renderClimate(); return; } } catch(e){}
+  }
+  if(status) status.textContent = 'Loading ERA5 reanalysis archive…';
+  const now = new Date();
+  const base = 'https://archive-api.open-meteo.com/v1/archive?latitude=12.19&longitude=-68.96&daily=' + CLIM_DAILY + '&timezone=auto&wind_speed_unit=kn';
+  // "On this day" N years ago — 30 (featured), 20, 10, 1
+  const dayCalls = [30,20,10,1].map(n => {
+    const d = new Date(now); d.setFullYear(now.getFullYear() - n);
+    const ds = _climD(d);
+    return _climFetch(base + '&start_date=' + ds + '&end_date=' + ds)
+      .then(j => ({n: n, date: ds, d: (j && j.daily && j.daily.time && j.daily.time.length) ? _climPick(j.daily, 0) : null}));
+  });
+  // Rolling 12-month daily record (ERA5 lags ~6 days behind realtime)
+  const end = new Date(now); end.setDate(end.getDate() - 6);
+  const start = new Date(end); start.setFullYear(end.getFullYear() - 1);
+  const yearCall = _climFetch(base + '&start_date=' + _climD(start) + '&end_date=' + _climD(end));
+  const res = await Promise.all([Promise.all(dayCalls), yearCall]);
+  const days = res[0], yearJ = res[1];
+  if(!days.some(x => x.d) && !(yearJ && yearJ.daily)){
+    if(status) status.textContent = '⚠ Climate archive unreachable — will retry when you reopen this tab.';
+    climateTabOpened = false;
+    return;
+  }
+  __climData = {days: days, year: (yearJ && yearJ.daily) ? yearJ.daily : null, t: Date.now()};
+  try {
+    Object.keys(localStorage).forEach(k => { if(k.indexOf('rwc-climate-') === 0 && k !== dayKey) localStorage.removeItem(k); });
+    localStorage.setItem(dayKey, JSON.stringify(__climData));
+  } catch(e){}
+  renderClimate();
+}
+function _climFmtDate(ds){
+  try { return new Date(ds + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', day:'numeric', month:'long', year:'numeric'}); }
+  catch(e){ return ds; }
+}
+function _climExtreme(daily, key, cmp){
+  let idx = -1, val = null;
+  (daily[key] || []).forEach((v, i) => {
+    if(v == null) return;
+    if(val == null || (cmp === 'max' ? v > val : v < val)){ val = v; idx = i; }
+  });
+  return idx >= 0 ? {v: val, date: daily.time[idx]} : null;
+}
+function _climLineChart(times, series, opts){
+  // series: [{vals, color, fill, w}] — null-safe daily line chart with month ticks
+  const W = 640, H = 190, padL = 34, padR = 8, padT = 10, padB = 20;
+  const o = opts || {};
+  let all = [];
+  series.forEach(s => s.vals.forEach(v => { if(v != null) all.push(v); }));
+  if(!all.length) return '<div class="clim-src">No data</div>';
+  let mn = o.yMin != null ? o.yMin : Math.min(...all), mx = o.yMax != null ? o.yMax : Math.max(...all);
+  if(mn === mx){ mn -= 1; mx += 1; }
+  const pad = (mx - mn) * 0.06; if(o.yMin == null) mn -= pad; if(o.yMax == null) mx += pad;
+  const n = times.length;
+  const X = i => padL + (i / Math.max(1, n - 1)) * (W - padL - padR);
+  const Y = v => padT + (1 - (v - mn) / (mx - mn)) * (H - padT - padB);
+  let grid = '', yl = '';
+  for(let g = 0; g <= 4; g++){
+    const vv = mn + (g / 4) * (mx - mn), yy = Y(vv);
+    grid += '<line x1="' + padL + '" y1="' + yy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + yy.toFixed(1) + '" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>';
+    yl += '<text x="' + (padL - 4) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(140,180,220,0.55)">' + vv.toFixed(0) + '</text>';
+  }
+  let ticks = '', lastM = '';
+  times.forEach((t, i) => {
+    const m = t.slice(0, 7);
+    if(m !== lastM){
+      lastM = m;
+      if(i > 0) ticks += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="rgba(140,180,220,0.55)">' + new Date(t + 'T12:00:00').toLocaleDateString('en-US', {month:'short'}) + '</text>';
+    }
+  });
+  let paths = '';
+  series.forEach(s => {
+    let d = '', started = false;
+    s.vals.forEach((v, i) => {
+      if(v == null){ started = false; return; }
+      d += (started ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' ';
+      started = true;
+    });
+    if(s.fill){
+      const pts = s.vals.map((v, i) => v != null ? X(i).toFixed(1) + ' ' + Y(v).toFixed(1) : null).filter(Boolean);
+      if(pts.length > 1) paths += '<path d="M' + pts[0].split(' ')[0] + ' ' + (H - padB) + ' L' + pts.join(' L') + ' L' + pts[pts.length-1].split(' ')[0] + ' ' + (H - padB) + ' Z" fill="' + s.color + '" opacity="0.13"/>';
+    }
+    paths += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.w || 1.4) + '" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
+  return '<svg class="clim-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' + grid + yl + ticks + paths + '</svg>';
+}
+function renderClimate(){
+  const status = byId('climStatus'), feat = byId('climFeatured'), body = byId('climBody');
+  if(!feat || !body || !__climData) return;
+  const COMP16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  if(status){
+    status.textContent = '✓ ERA5 reanalysis · Curaçao 12.19°N 68.96°W · Open-Meteo archive · loaded ' + new Date(__climData.t).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  }
+  // ── Featured: this day 30 years ago ──
+  const f30 = __climData.days.find(x => x.n === 30);
+  if(f30 && f30.d){
+    const d = f30.d;
+    const wmo = decodeWmoCode(d.code, false);
+    // compare with today's running max, when the Monitor has one
+    let cmp = '';
+    if(typeof __isltTempMax === 'number' && __isltTempMax != null && d.tmax != null){
+      const diff = __isltTempMax - d.tmax;
+      if(Math.abs(diff) >= 0.3) cmp = 'Today is running ' + Math.abs(diff).toFixed(1) + '° ' + (diff > 0 ? 'warmer' : 'cooler') + ' than this day 30 years ago.';
+      else cmp = 'Today is running almost identical to this day 30 years ago.';
+    }
+    feat.innerHTML =
+      '<div class="clim-feat">' +
+        '<div class="clim-feat-ico">' + buildWxIconSvg(wmo.icon, 84) + '</div>' +
+        '<div class="clim-feat-main">' +
+          '<div class="clim-feat-sup">★ On this day · 30 years ago</div>' +
+          '<div class="clim-feat-date">' + _climFmtDate(f30.date) + '</div>' +
+          '<div class="clim-feat-desc">' + wmo.desc + ' · Curaçao (ERA5)</div>' +
+        '</div>' +
+        '<div class="clim-feat-stats">' +
+          '<div class="clim-feat-stat"><span class="clim-feat-v" style="color:#ff8a3d;">' + (d.tmax != null ? d.tmax.toFixed(1) + '°' : '—') + '</span><span class="clim-feat-l">Max</span></div>' +
+          '<div class="clim-feat-stat"><span class="clim-feat-v" style="color:#4db8ff;">' + (d.tmin != null ? d.tmin.toFixed(1) + '°' : '—') + '</span><span class="clim-feat-l">Min</span></div>' +
+          '<div class="clim-feat-stat"><span class="clim-feat-v" style="color:#22d3ee;">' + (d.rain != null ? d.rain.toFixed(1) : '—') + '<small>mm</small></span><span class="clim-feat-l">Rain</span></div>' +
+          '<div class="clim-feat-stat"><span class="clim-feat-v" style="color:#a78bfa;">' + (d.wmax != null ? Math.round(d.wmax) : '—') + '<small>kt</small></span><span class="clim-feat-l">Wind max</span></div>' +
+        '</div>' +
+        (cmp ? '<div class="clim-feat-cmp">' + cmp + '</div>' : '') +
+      '</div>';
+  } else {
+    feat.innerHTML = '<div class="clim-feat"><div class="clim-feat-main"><div class="clim-feat-sup">On this day · 30 years ago</div><div class="clim-feat-desc">No archive data for this date.</div></div></div>';
+  }
+  // ── Body: table view or graphs view ──
+  document.querySelectorAll('[data-climview]').forEach(b => b.classList.toggle('active', b.dataset.climview === __climView));
+  const yr = __climData.year;
+  if(__climView === 'graphs'){
+    if(!yr || !yr.time){ body.innerHTML = '<div class="clim-card"><div class="clim-card-hd">Graphs</div><div class="clim-src">No 12-month series available.</div></div>'; return; }
+    // monthly rain totals
+    const mSums = {}, mOrder = [];
+    yr.time.forEach((t, i) => {
+      const m = t.slice(0, 7);
+      if(!(m in mSums)){ mSums[m] = 0; mOrder.push(m); }
+      if(yr.precipitation_sum && yr.precipitation_sum[i] != null) mSums[m] += yr.precipitation_sum[i];
+    });
+    const W = 640, H = 190, padL = 34, padR = 8, padT = 12, padB = 22;
+    const mx = Math.max(5, ...mOrder.map(m => mSums[m]));
+    const bw = (W - padL - padR) / mOrder.length;
+    let bars = '';
+    mOrder.forEach((m, i) => {
+      const h = (mSums[m] / mx) * (H - padT - padB);
+      const x = padL + i * bw, y = H - padB - h;
+      bars += '<rect x="' + (x + bw * 0.12).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw * 0.76).toFixed(1) + '" height="' + Math.max(1, h).toFixed(1) + '" rx="3" fill="#4db8ff" opacity="0.85"/>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 3).toFixed(1) + '" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="rgba(180,215,245,0.8)">' + Math.round(mSums[m]) + '</text>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 7) + '" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-size="9" fill="rgba(140,180,220,0.55)">' + new Date(m + '-15T12:00:00').toLocaleDateString('en-US', {month:'short'}) + '</text>';
+    });
+    body.innerHTML =
+      '<div class="clim-card">' +
+        '<div class="clim-chart-wrap"><div class="clim-chart-lbl">Daily temperature · last 12 months (°C — max / mean / min)</div>' +
+          _climLineChart(yr.time, [
+            {vals: yr.temperature_2m_max || [], color: '#ff8a3d', fill: true, w: 1.3},
+            {vals: yr.temperature_2m_mean || [], color: '#e2e8f0', w: 1.1},
+            {vals: yr.temperature_2m_min || [], color: '#4db8ff', w: 1.3}
+          ]) + '</div>' +
+        '<div class="clim-chart-wrap"><div class="clim-chart-lbl">Monthly rainfall totals · last 12 months (mm)</div>' +
+          '<svg class="clim-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' + bars + '</svg></div>' +
+        '<div class="clim-chart-wrap"><div class="clim-chart-lbl">Daily max wind · last 12 months (kt)</div>' +
+          _climLineChart(yr.time, [{vals: yr.wind_speed_10m_max || [], color: '#a78bfa', fill: true, w: 1.2}], {yMin: 0}) + '</div>' +
+        '<div class="clim-src">Source: ERA5 reanalysis via Open-Meteo archive · grid point 12.19°N 68.96°W · series lags realtime ~6 days</div>' +
+      '</div>';
+    return;
+  }
+  // table view
+  const rows = __climData.days.slice().sort((a, b) => b.n - a.n).map(x => {
+    const yLbl = x.n === 1 ? 'Last year' : x.n + ' years ago';
+    if(!x.d) return '<tr><td>' + yLbl + '</td><td class="dim">' + x.date + '</td><td colspan="5" class="dim">no data</td></tr>';
+    const w = decodeWmoCode(x.d.code, false);
+    return '<tr><td>' + yLbl + '</td><td class="dim">' + x.date + '</td>' +
+      '<td style="color:#ff8a3d;">' + (x.d.tmax != null ? x.d.tmax.toFixed(1) + '°' : '—') + '</td>' +
+      '<td style="color:#4db8ff;">' + (x.d.tmin != null ? x.d.tmin.toFixed(1) + '°' : '—') + '</td>' +
+      '<td>' + (x.d.rain != null ? x.d.rain.toFixed(1) : '—') + '</td>' +
+      '<td>' + (x.d.wmax != null ? Math.round(x.d.wmax) : '—') + '</td>' +
+      '<td class="dim">' + w.desc + '</td></tr>';
+  }).join('');
+  let recHtml = '<div class="clim-src">No 12-month series available.</div>';
+  if(yr && yr.time){
+    const hot = _climExtreme(yr, 'temperature_2m_max', 'max');
+    const cold = _climExtreme(yr, 'temperature_2m_min', 'min');
+    const wet = _climExtreme(yr, 'precipitation_sum', 'max');
+    const gust = _climExtreme(yr, 'wind_gusts_10m_max', 'max');
+    const totRain = (yr.precipitation_sum || []).reduce((a, b) => a + (b || 0), 0);
+    const rainDays = (yr.precipitation_sum || []).filter(v => v != null && v >= 1).length;
+    const hotDays = (yr.temperature_2m_max || []).filter(v => v != null && v >= 32).length;
+    const means = (yr.temperature_2m_mean || []).filter(v => v != null);
+    const meanT = means.length ? means.reduce((a, b) => a + b, 0) / means.length : null;
+    const rec = (l, v, d) => '<div class="clim-rec"><span class="clim-rec-l">' + l + '</span><span><span class="clim-rec-v">' + v + '</span>' + (d ? ' <span class="clim-rec-d">' + d + '</span>' : '') + '</span></div>';
+    recHtml =
+      rec('Hottest day', hot ? hot.v.toFixed(1) + ' °C' : '—', hot ? hot.date : '') +
+      rec('Coolest night', cold ? cold.v.toFixed(1) + ' °C' : '—', cold ? cold.date : '') +
+      rec('Wettest day', wet ? wet.v.toFixed(1) + ' mm' : '—', wet ? wet.date : '') +
+      rec('Strongest gust', gust ? Math.round(gust.v) + ' kt' : '—', gust ? gust.date : '') +
+      rec('Total rainfall', totRain.toFixed(0) + ' mm', '12 months') +
+      rec('Rain days (≥1 mm)', rainDays + ' days', '') +
+      rec('Hot days (≥32 °C)', hotDays + ' days', '') +
+      rec('Mean temperature', meanT != null ? meanT.toFixed(1) + ' °C' : '—', '');
+  }
+  body.innerHTML =
+    '<div class="clim-grid">' +
+      '<div class="clim-card"><div class="clim-card-hd">\u{1F4C5} On this day · across the decades</div>' +
+        '<table class="clim-table"><thead><tr><th>When</th><th>Date</th><th>Max</th><th>Min</th><th>Rain mm</th><th>Wind kt</th><th>Conditions</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</div>' +
+      '<div class="clim-card"><div class="clim-card-hd">\u{1F3C6} 12-month records · Curaçao</div>' + recHtml + '</div>' +
+    '</div>' +
+    '<div class="clim-src">Source: ERA5 reanalysis via Open-Meteo archive · grid point 12.19°N 68.96°W · cached daily on this device</div>';
+}
+document.querySelectorAll('[data-climview]').forEach(btn => {
+  btn.addEventListener('click', () => { __climView = btn.dataset.climview; renderClimate(); });
+});
+
 /* ─── TABS ─── */
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   monitor: byId('tab-monitor'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
-  weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc'), mapping: byId('tab-mapping')
+  weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc'), mapping: byId('tab-mapping'),
+  climate: byId('tab-climate')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -4049,6 +4335,10 @@ function switchTab(name){
       });
     }
   }
+  if(name==='climate'){
+    if(!climateTabOpened){ climateTabOpened = true; }
+    loadClimate(false);
+  }
 }
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 
@@ -4058,7 +4348,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'forecast','6':'atc','7':'mapping'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'forecast','6':'atc','7':'mapping','8':'climate'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }

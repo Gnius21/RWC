@@ -7574,7 +7574,7 @@ window.__fcDebug = () => __lastForecastData;
 
 /* ═══ CONDITIONS MAP (Leaflet, ABC Islands) ═══ */
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
-var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null;
+var condRainLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null;
 var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true, info:true};
 var __condMapReady = false;
 
@@ -7626,18 +7626,11 @@ function initCondMap(){
   rainCtl.addTo(condMap);
 
   // ── STORM CONE: NOAA NHC tropical weather (forecast cone + track). Auto-empty when no storms. ──
+  // No `bounds` option — avoids ArcGIS Server returning "Zoom level not supported" error tiles
+  // at scales outside the map service's configured range.
   condStormLayer = L.tileLayer.wms('https://mapservices.weather.noaa.gov/tropical/services/tropical/NHC_tropical_weather/MapServer/WMSServer', {
     layers: '4,6,7,8', format: 'image/png', transparent: true, opacity: 0.85,
-    version: '1.3.0', attribution: 'NOAA NHC', bounds: [[9.0,-72.0],[19.5,-58.5]]
-  });
-
-  // ── SATELLITE: NOAA GMGSI longwave infrared (free, no key) — covers the Caribbean ──
-  // Uses the global IR mosaic which includes the Western Hemisphere / Caribbean region.
-  condSatLayer = L.tileLayer.wms('https://nowcoast.noaa.gov/geoserver/satellite/wms', {
-    layers: 'global_longwave_imagery_mosaic', format: 'image/png', transparent: true,
-    opacity: 0.85, className: 'cond-ir-tiles', version: '1.3.0',
-    attribution: 'NOAA GMGSI Longwave IR', maxZoom: 12,
-    bounds: [[9.0,-72.0],[19.5,-58.5]]
+    version: '1.3.0', attribution: 'NOAA NHC', minZoom: 6, maxZoom: 9
   });
 
   // ── RAIN + LIVE INFRARED SATELLITE: RainViewer (free, no key) — same API ──
@@ -7661,9 +7654,7 @@ function initCondMap(){
         if(sframe && j.host){
           condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/0/0_0.png',
             {opacity:0.85, className:'cond-ir-tiles', maxZoom:12, attribution:'RainViewer IR', zIndex:200});
-          // If satellite layer is on, swap the WMS for the live IR
           if(__condMapLayers.satellite && condMap){
-            if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
             condSatLive.addTo(condMap);
           }
         }
@@ -8014,17 +8005,11 @@ function renderCondMap(){
     else if(condMap.hasLayer(condRainLayer)){ condMap.removeLayer(condRainLayer); }
   }
 
-  // Satellite — prefer LIVE RainViewer IR; fall back to NOAA GMGSI WMS if live not loaded yet
+  // Satellite — RainViewer live IR (loads within ~1 s of map init)
   if(__condMapLayers.satellite){
-    if(condSatLive){
-      condSatLive.addTo(condMap);
-      if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
-    } else if(condSatLayer){
-      condSatLayer.addTo(condMap);
-    }
+    if(condSatLive) condSatLive.addTo(condMap);
   } else {
     if(condSatLive && condMap.hasLayer(condSatLive)) condMap.removeLayer(condSatLive);
-    if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
   }
 
   // Storm cone (NHC) — only paints pixels when a storm is active, otherwise transparent

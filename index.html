@@ -700,7 +700,7 @@ tr:last-child td{border-bottom:none;}
 @keyframes cloudFloat{0%,100%{transform:translateX(0);}50%{transform:translateX(-2px);}}
 
 /* FORECAST */
-#tab-forecast{display:flex;flex-direction:column;gap:11px;}
+#wxViewForecast{display:flex;flex-direction:column;gap:11px;}
 .fcgrid{display:flex;flex-direction:column;gap:9px;}
 .fc-loading{padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;border-radius:var(--rl);background:var(--card);border:1px solid var(--bdr);}
 .fc-loading-spin{width:36px;height:36px;border-radius:50%;border:3px solid rgba(77,184,255,0.15);border-top-color:var(--acc);animation:fcSpin 0.9s linear infinite;}
@@ -963,6 +963,15 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .mon-style-btn-ic{font-size:13px;line-height:1;}
 .mon-view{animation:pin .3s cubic-bezier(.16,1,.3,1) both;}
 
+/* Weather tab view switcher */
+.wx-switcher{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.wx-switcher-lbl{font-family:var(--cond);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:2px;}
+.wx-style-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:4px;height:30px;}
+.wx-style-btn:hover{border-color:var(--bdrb);color:var(--acc);background:rgba(77,184,255,0.05);}
+.wx-style-btn.active{background:rgba(77,184,255,0.15);border-color:rgba(77,184,255,0.6);color:var(--acc);box-shadow:0 0 8px rgba(77,184,255,0.15);}
+.wx-style-btn-ic{font-size:12px;line-height:1;}
+.wx-view{animation:pin .3s cubic-bezier(.16,1,.3,1) both;}
+
 /* ─── SkySense view (Image 1) ─── */
 .sky-wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;align-items:start;}
 @media(max-width:1000px){.sky-wrap{grid-template-columns:1fr;}}
@@ -1162,7 +1171,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 
 
 /* ═══ MAPPING TAB ═══ */
-#tab-mapping{overflow-y:auto;}
+#tab-maps{overflow-y:auto;}
 .map-tab-wrap{display:flex;flex-direction:column;gap:10px;}
 .map-lock-btn{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.5px;padding:6px 13px;border-radius:20px;cursor:pointer;border:1px solid var(--bdrb);transition:all .2s;}
 .map-lock-btn.locked{background:rgba(46,201,130,0.15);border-color:rgba(46,201,130,0.5);color:#2ec97a;}
@@ -1861,10 +1870,8 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
-  <button class="tab" data-tab="forecast"><span class="tab-i">&#127782;</span>Forecast</button>
-  <button class="tab" data-tab="mapping"><span class="tab-i">&#127752;</span>Mapping</button>
-  <button class="tab" data-tab="climate"><span class="tab-i">&#128200;</span>Climate</button>
-  <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>Live ATC</button>
+  <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
+  <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
 </nav>
 
 <div class="content">
@@ -2276,11 +2283,18 @@ html,body{max-width:100%;overflow-x:hidden;}
 
   <!-- WEATHER -->
   <div id="tab-weather" class="tpanel hidden">
-    <div class="shdr">
-      <div class="stitle">Weather &mdash; ABC Islands</div>
-      <span id="wx-ts" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Loading&hellip;</span>
+    <div class="wx-switcher">
+      <span class="wx-switcher-lbl">View</span>
+      <button class="wx-style-btn active" data-wxstyle="current" onclick="switchWxView('current',this)"><span class="wx-style-btn-ic">&#127777;</span>Current</button>
+      <button class="wx-style-btn" data-wxstyle="forecast" onclick="switchWxView('forecast',this)"><span class="wx-style-btn-ic">&#127782;</span>Forecast</button>
+      <button class="wx-style-btn" data-wxstyle="climate" onclick="switchWxView('climate',this)"><span class="wx-style-btn-ic">&#128200;</span>Climate</button>
     </div>
-    <div class="wgrid">
+    <div class="wx-view" id="wxViewCurrent">
+      <div class="shdr">
+        <div class="stitle">Weather &mdash; ABC Islands</div>
+        <span id="wx-ts" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Loading&hellip;</span>
+      </div>
+      <div class="wgrid">
       <div class="wcard" data-wkey="aruba">
         <div class="whd">
           <div class="wname"><span class="wflag">&#127462;&#127484;</span> TNCA <span class="wfull">Aruba &middot; Queen Beatrix</span></div>
@@ -2307,10 +2321,30 @@ html,body{max-width:100%;overflow-x:hidden;}
       <span><span class="sdot"></span>Aruba/Cura&ccedil;ao from SYNOP &middot; Bonaire KNMI live &middot; auto-refresh 60s</span>
       <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.3);">trends from last 3 obs</span>
     </div>
+    </div>
+    <div class="wx-view" id="wxViewForecast" style="display:none;">
+      <div class="shdr">
+        <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
+        <span id="fcStatus" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &middot; GFS + ECMWF + ICON</span>
+      </div>
+      <div id="fcGrid" class="fcgrid"></div>
+      <div class="sbar" style="margin-top:4px;">
+        <span><span class="sdot"></span>Mesoscale models for ABC Islands &middot; Auto-reload 10 min</span>
+        <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.3);">&#128274; Tap to interact</span>
+      </div>
+    </div>
+    <div class="wx-view" id="wxViewClimate" style="display:none;">
+      <div class="shdr">
+        <div class="stitle">30-Year Climate Archive &mdash; ABC Islands</div>
+        <span id="climStatus">Loading climate archive&hellip;</span>
+      </div>
+      <div id="climFeatured"></div>
+      <div id="climBody"></div>
+    </div>
   </div>
 
-  <!-- FORECAST -->
-  <div id="tab-forecast" class="tpanel hidden">
+  <!-- FORECAST (moved into Weather tab) -->
+  <div id="tab-forecast" class="tpanel hidden" style="display:none!important;">
     <div class="shdr">
       <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
       <span id="fcStatus" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &middot; GFS + ECMWF + ICON</span>
@@ -2323,7 +2357,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   </div>
 
   <!-- ATC -->
-  <div id="tab-mapping" class="tpanel hidden">
+  <div id="tab-maps" class="tpanel hidden">
     <div class="map-tab-wrap">
       <div class="cond-map-wrap">
         <div class="cond-map-hd">
@@ -2402,7 +2436,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
-  <div id="tab-climate" class="tpanel hidden">
+  <div id="tab-climate" class="tpanel hidden" style="display:none!important;">
     <div class="clim-hd">
       <div class="clim-ttl">&#128200; Climate &mdash; Cura&ccedil;ao Historical Record</div>
       <div class="clim-switch">
@@ -2473,7 +2507,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 7</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Forecast &middot; ATC &middot; Mapping)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 6</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4309,8 +4343,7 @@ const panels = {
   monitor: byId('tab-monitor'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
-  weather: byId('tab-weather'), forecast: byId('tab-forecast'), atc: byId('tab-atc'), mapping: byId('tab-mapping'),
-  climate: byId('tab-climate')
+  weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -4343,9 +4376,6 @@ function switchTab(name){
   if(name==='weather'){
     if(!weatherTabOpened){ weatherTabOpened = true; updateWeatherTab(); }
   }
-  if(name==='forecast'){
-    if(!forecastTabOpened){ forecastTabOpened = true; updateForecast(); }
-  }
   if(name==='monitor'){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
     else { updateMonitor(); }
@@ -4356,21 +4386,29 @@ function switchTab(name){
     showAviationSub(anyActive ? anyActive.dataset.avsub : 'metar');
     if(!window.__ovwStarted){ window.__ovwStarted=true; startOverview(); }
   }
-  if(name==='mapping'){
+  if(name==='maps'){
     openCondMap();
     // Lazy-load iframes on first open (src set to about:blank until then)
-    if(!window.__mappingLoaded){
-      window.__mappingLoaded = true;
-      document.querySelectorAll('#tab-mapping .windy-frame').forEach(function(f){
+    if(!window.__mapsLoaded){
+      window.__mapsLoaded = true;
+      document.querySelectorAll('#tab-maps .windy-frame').forEach(function(f){
         if(f.dataset.src) f.src = f.dataset.src;
       });
     }
   }
-  if(name==='climate'){
-    if(!climateTabOpened){ climateTabOpened = true; }
-    loadClimate(false);
-  }
 }
+
+/* Weather tab view switcher (Forecast & Climate moved into Weather tab) */
+function switchWxView(view, btn){
+  if(btn) document.querySelectorAll('.wx-style-btn').forEach(b=>b.classList.toggle('active',b===btn));
+  document.querySelectorAll('.wx-view').forEach(v=>v.style.display='none');
+  const el = byId('wxView'+view.charAt(0).toUpperCase()+view.slice(1));
+  if(el) el.style.display = '';
+  if(view==='forecast' && !window.forecastTabOpened){ window.forecastTabOpened=true; updateForecast(); }
+  if(view==='climate' && !window.climateTabOpened){ window.climateTabOpened=true; loadClimate(false); }
+}
+window.switchWxView = switchWxView;
+
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 
 /* Keyboard shortcuts (FIX #6: Escape handling for the help-modal lives only in the
@@ -4379,7 +4417,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'forecast','6':'atc','7':'mapping','8':'climate'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -9057,7 +9095,7 @@ window.__mapLocked = true;
 function toggleMapLock(){
   window.__mapLocked = !window.__mapLocked;
   var btn = document.getElementById('mapLockToggle');
-  document.querySelectorAll('#tab-mapping .map-cell-shield').forEach(function(s){
+  document.querySelectorAll('#tab-maps .map-cell-shield').forEach(function(s){
     if(window.__mapLocked){ s.style.display=''; s.classList.remove('active'); }
     else { s.style.display='none'; }
   });

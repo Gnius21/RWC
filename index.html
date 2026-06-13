@@ -1759,6 +1759,11 @@ html,body{max-width:100%;overflow-x:hidden;}
 .cmap-marker{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
 .cmap-icon-wrap{width:36px;height:36px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7));}
 .cmap-temp{font-family:var(--cond);font-size:13px;font-weight:800;color:#fff;background:rgba(5,18,34,0.82);padding:1px 5px;border-radius:5px;white-space:nowrap;line-height:1.4;}
+.cmap-plane{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:auto;}
+.cmap-plane svg{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.85));}
+.cmap-plane-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.3px;color:#ffd479;background:rgba(5,18,34,0.78);padding:0 3px;border-radius:3px;white-space:nowrap;line-height:1.5;margin-top:1px;}
+.cmap-plane.ground svg{opacity:.55;}
+.cmap-plane.ground .cmap-plane-lbl{color:#9fb3c8;}
 .cmap-vis{font-family:var(--mono);font-size:13px;color:#cbd5e1;background:rgba(5,18,34,0.7);padding:0 4px;border-radius:4px;margin-top:1px;white-space:nowrap;}
 .cmap-popup{font-family:var(--cond);font-size:13px;line-height:1.6;min-width:130px;}
 .cmap-popup b{font-size:13px;color:var(--acc);}
@@ -2332,6 +2337,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)" title="Wave &amp; swell data">&#127754; Waves</button>
             <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)" title="NDBC ocean buoys">&#128679; Buoys</button>
             <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)" title="NOAA NHC storm cone">&#127786; Storm</button>
+            <button class="cmap-btn" data-layer="flights" onclick="condMapToggle('flights',this)" title="Live aircraft (ADS-B)">&#9992; Flights</button>
             <button class="cmap-btn active" data-layer="info" onclick="condMapToggle('info',this)" title="Toggle station info boxes">&#9432; Info</button>
             <button class="cmap-btn" id="cmapPlayBtn" onclick="condMapPlay(this)" title="Animate last hour of rain radar">&#9654; Play</button>
             <button class="cmap-btn cmap-btn-reset" onclick="condMapReset()" title="Reset map view to ABC islands">&#8635; Reset</button>
@@ -7600,7 +7606,8 @@ window.__fcDebug = () => __lastForecastData;
 /* ═══ CONDITIONS MAP (Leaflet, ABC Islands) ═══ */
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
 var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null;
-var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true, info:true};
+var condFlightLayer = null, __flightTimer = null, __flightBusy = false;
+var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true, flights:false, info:true};
 var __condMapReady = false;
 
 // ABC island lat/lons for the map bounds
@@ -7759,6 +7766,73 @@ function condMapPlay(btn){
   }, 600);
 }
 window.condMapPlay = condMapPlay;
+
+/* ── Live aircraft (ADS-B) ──────────────────────────────────────────────
+   Free, key-less community feeds (CORS-enabled). We query a single 250 nm
+   circle centred on the ABC chain and plot each contact as a heading-rotated
+   plane. Endpoints are tried in order so one outage doesn't kill the layer. */
+var FLIGHT_SRCS = [
+  'https://api.adsb.lol/v2/lat/12.4/lon/-68.4/dist/250',
+  'https://opendata.adsb.fi/api/v2/lat/12.4/lon/-68.4/dist/250',
+  'https://api.airplanes.live/v2/point/12.4/-68.4/250'
+];
+function planeSvg(col){
+  // Plane pointing NORTH (0°); caller rotates the wrapper by the track angle.
+  return '<svg width="26" height="26" viewBox="0 0 24 24" fill="'+col+'" stroke="rgba(0,0,0,0.55)" stroke-width="0.6">'+
+    '<path d="M12 2 L13.4 3.2 13.4 9.3 21.5 14 21.5 15.7 13.4 13.4 13.4 19.4 16 21 16 22.3 12 21.2 8 22.3 8 21 10.6 19.4 10.6 13.4 2.5 15.7 2.5 14 10.6 9.3 10.6 3.2 Z"/></svg>';
+}
+async function fetchCondFlights(){
+  if(__flightBusy || !condFlightLayer || !__condMapLayers.flights) return;
+  __flightBusy = true;
+  var data = null;
+  for(var i=0;i<FLIGHT_SRCS.length;i++){
+    try{
+      var ac = new AbortController();
+      var to = setTimeout(function(){ ac.abort(); }, 8000);
+      var r = await fetch(FLIGHT_SRCS[i], {signal:ac.signal, headers:{'Accept':'application/json'}});
+      clearTimeout(to);
+      if(!r.ok) continue;
+      var j = await r.json();
+      if(j && (j.ac || j.aircraft)){ data = j.ac || j.aircraft; break; }
+    }catch(e){}
+  }
+  __flightBusy = false;
+  if(!data || !condFlightLayer || !__condMapLayers.flights) return;
+  condFlightLayer.clearLayers();
+  // Closest-first, capped so a busy sky stays readable.
+  data = data.filter(function(a){ return a && a.lat!=null && a.lon!=null; }).slice(0, 140);
+  data.forEach(function(a){
+    var alt = a.alt_baro;
+    var onGround = (alt === 'ground');
+    var altFt = (typeof alt === 'number') ? alt : null;
+    var track = (a.track!=null) ? a.track : (a.true_heading!=null ? a.true_heading : 0);
+    // Colour by altitude band; ground traffic dimmed via CSS class.
+    var col = onGround ? '#9fb3c8'
+            : altFt==null ? '#ffd479'
+            : altFt >= 30000 ? '#7dd3fc'
+            : altFt >= 15000 ? '#ffd479'
+            : '#ff9e57';
+    var call = (a.flight || a.r || a.hex || '').trim();
+    var html = '<div class="cmap-plane'+(onGround?' ground':'')+'">'+
+      '<div style="transform:rotate('+track+'deg);width:26px;height:26px;">'+planeSvg(col)+'</div>'+
+      (call?'<div class="cmap-plane-lbl">'+call+'</div>':'')+'</div>';
+    var icon = L.divIcon({html:html, className:'', iconSize:[40,40], iconAnchor:[20,13]});
+    var mk = L.marker([a.lat, a.lon], {icon:icon, interactive:true, keyboard:false});
+    var altTxt = onGround ? 'On ground' : (altFt!=null ? altFt.toLocaleString()+' ft' : '—');
+    var spd = (a.gs!=null) ? Math.round(a.gs)+' kt' : '—';
+    var popup = '<div class="cmap-popup"><b>✈ '+(call||'Unknown')+'</b>'+
+      (a.t?' <span style="color:var(--muted)">'+a.t+'</span>':'')+'<br>'+
+      'Altitude: '+altTxt+'<br>'+
+      'Speed: '+spd+(track!=null?' · '+Math.round(track)+'°':'')+'<br>'+
+      (a.r?'Reg: '+a.r+'<br>':'')+
+      (a.hex?'<span style="color:var(--muted);font-size:11px">ICAO '+a.hex.toUpperCase()+'</span>':'')+'</div>';
+    mk.bindPopup(popup, {maxWidth:200});
+    mk.addTo(condFlightLayer);
+  });
+  var _ts = document.getElementById('condMapTs');
+  if(_ts && __condMapLayers.flights) _ts.textContent = '· '+data.length+' aircraft · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' UTC';
+}
+window.fetchCondFlights = fetchCondFlights;
 
 
 /* NDBC buoys — nearest reporting stations to the ABC islands.
@@ -8089,6 +8163,17 @@ function renderCondMap(){
   if(condStormLayer){
     if(__condMapLayers.storm){ condStormLayer.addTo(condMap); }
     else if(condMap.hasLayer(condStormLayer)){ condMap.removeLayer(condStormLayer); }
+  }
+
+  // Live aircraft (ADS-B) — poll a free community feed while the layer is on.
+  if(__condMapLayers.flights){
+    if(!condFlightLayer) condFlightLayer = L.layerGroup().addTo(condMap);
+    else if(!condMap.hasLayer(condFlightLayer)) condFlightLayer.addTo(condMap);
+    fetchCondFlights();               // immediate paint
+    if(!__flightTimer) __flightTimer = setInterval(fetchCondFlights, 15000);
+  } else {
+    if(__flightTimer){ clearInterval(__flightTimer); __flightTimer = null; }
+    if(condFlightLayer){ condFlightLayer.clearLayers(); if(condMap.hasLayer(condFlightLayer)) condMap.removeLayer(condFlightLayer); }
   }
 
   // Dust overlay — soft layered gradient blob over the ABC region (not a hard circle)

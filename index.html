@@ -1773,6 +1773,8 @@ html,body{max-width:100%;overflow-x:hidden;}
 @media(max-width:640px){.cond-map-body{height:320px;}}
 /* Station marker popups */
 .cmap-marker{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
+.cmap-marker.selected .cmap-icon-wrap{filter:drop-shadow(0 0 7px var(--acc)) drop-shadow(0 2px 6px rgba(0,0,0,0.7));}
+.cmap-marker.selected .cmap-temp{box-shadow:0 0 0 1px var(--bdrb),0 0 10px rgba(77,184,255,0.3);}
 .cmap-icon-wrap{width:36px;height:36px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7));}
 .cmap-temp{font-family:var(--cond);font-size:13px;font-weight:800;color:#fff;background:rgba(5,18,34,0.82);padding:1px 5px;border-radius:5px;white-space:nowrap;line-height:1.4;}
 .cmap-plane{display:flex;flex-direction:column;align-items:center;cursor:pointer;pointer-events:auto;}
@@ -2382,7 +2384,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <button class="cmap-btn" data-layer="buoys" onclick="condMapToggle('buoys',this)" title="NDBC ocean buoys">&#128679; Buoys</button>
             <button class="cmap-btn active" data-layer="storm" onclick="condMapToggle('storm',this)" title="NOAA NHC storm cone">&#127786; Storm</button>
             <button class="cmap-btn" data-layer="flights" onclick="condMapToggle('flights',this)" title="Live aircraft (ADS-B)">&#9992; Flights</button>
-            <button class="cmap-btn active" data-layer="info" onclick="condMapToggle('info',this)" title="Toggle station info boxes">&#9432; Info</button>
+            <button class="cmap-btn active" data-layer="info" onclick="condMapToggle('info',this)" title="Tap a station to show its full info box">&#9432; Info</button>
             <button class="cmap-btn" id="cmapPlayBtn" onclick="condMapPlay(this)" title="Animate last hour of rain radar">&#9654; Play</button>
             <button class="cmap-btn cmap-btn-reset" onclick="condMapReset()" title="Reset map view to ABC islands">&#8635; Reset</button>
           </div>
@@ -7658,6 +7660,7 @@ var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircl
 var condFlightLayer = null, __flightTimer = null, __flightBusy = false;
 var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:false, storm:true, flights:false, info:true};
 var __condMapReady = false;
+var __condSelectedStn = null;   // station whose full info box is currently shown (tap to select)
 
 // ABC island lat/lons for the map bounds
 var CMAP_STNS = [
@@ -7758,7 +7761,11 @@ function initCondMap(){
 
   __condMapReady = true;
   renderCondMap();
-  condMap.on('click', function(e){ condMap.closePopup(); });
+  condMap.on('click', function(e){
+    condMap.closePopup();
+    // Tapping empty map closes the open station info box.
+    if(__condSelectedStn){ __condSelectedStn = null; renderCondMap(); }
+  });
   // Auto-refresh rain + satellite tiles every 10 min
   setInterval(function(){
     if(!condMap) return;
@@ -7789,6 +7796,8 @@ function initCondMap(){
 function condMapToggle(layer, btn){
   __condMapLayers[layer] = !__condMapLayers[layer];
   if(btn) btn.classList.toggle('active', __condMapLayers[layer]);
+  // Turning stations or info off clears the selected station's box.
+  if((layer==='stations' || layer==='info') && !__condMapLayers[layer]) __condSelectedStn = null;
   renderCondMap();
 }
 window.condMapToggle = condMapToggle;
@@ -8111,26 +8120,40 @@ function renderCondMap(){
         L.circleMarker([lat,lon], {radius:2.5, color:'#7dd3fc', fillColor:'#7dd3fc', fillOpacity:0.9, weight:0, interactive:false}).addTo(condMarkerLayer);
       }
       if(__condMapLayers.stations){
+        // The big info box now shows for ONE station at a time — the one you tap.
+        // (Info toggle = master enable; selecting a station reveals its box.)
+        var isSel = (__condMapLayers.info && __condSelectedStn === s.id);
         var visTxt = (mp&&mp.visM!=null&&!isNaN(mp.visM)) ? (mp.visM/1000).toFixed(1)+'km' : '';
         var boxHtml = buildStationBox(s, mp);
-        var iconHtml = '<div class="cmap-marker">'+
-          (__condMapLayers.info ? boxHtml : '')+
+        var iconHtml = '<div class="cmap-marker'+(isSel?' selected':'')+'">'+
+          (isSel ? boxHtml : '')+
           '<div class="cmap-icon-wrap">'+wxIconStyled(iconKey,34)+'</div>'+
           '<div class="cmap-temp">'+s.flag+' '+temp+'</div>'+
           (visTxt?'<div class="cmap-vis">\u{1F441} '+visTxt+'</div>':'')+
           '</div>';
-        var divIcon = L.divIcon({html:iconHtml, className:'', iconAnchor:[17,(__condMapLayers.info?170:38)]});
-        var marker = L.marker([dispLat,dispLon], {icon:divIcon});
-        var _dew = mp&&mp.dewC!=null ? mp.dewC.toFixed(1)+'°C' : '—';
-        var _rh  = mp&&mp.rh!=null   ? Math.round(mp.rh)+'%'   : '—';
-        var popupHtml = '<div class="cmap-popup"><b>'+s.flag+' '+s.name+'</b><br>'+
-          '&#127777; Temp: '+(mp&&mp.tempC!=null?mp.tempC.toFixed(1)+'°C':'—')+
-          (mp&&mp.rh!=null?' &middot; RH: '+_rh:'')+'<br>'+
-          '&#128168; Wind: '+(windSpd!=null?windSpd+' kt':'—')+(windDir!=null?' @ '+windDir+'°':'')+'<br>'+
-          '&#128065; Vis: '+(mp&&mp.visM!=null?(mp.visM/1000).toFixed(1)+' km':'—')+'<br>'+
-          '&#127752; Dew: '+_dew+'<br>'+
-          (mp&&mp.wxToks&&mp.wxToks.length?'&#9928; WX: '+mp.wxToks.join(' ')+'<br>':'')+'</div>';
-        marker.bindPopup(popupHtml, {maxWidth:200});
+        var divIcon = L.divIcon({html:iconHtml, className:'', iconAnchor:[17,(isSel?170:38)]});
+        var marker = L.marker([dispLat,dispLon], {icon:divIcon, zIndexOffset:(isSel?1000:0)});
+        if(__condMapLayers.info){
+          // Tap toggles which station's full box is visible (tap again to close).
+          (function(sid){
+            marker.on('click', function(){
+              __condSelectedStn = (__condSelectedStn === sid) ? null : sid;
+              renderCondMap();
+            });
+          })(s.id);
+        } else {
+          // Info disabled → fall back to the lightweight tap popup.
+          var _dew = mp&&mp.dewC!=null ? mp.dewC.toFixed(1)+'°C' : '—';
+          var _rh  = mp&&mp.rh!=null   ? Math.round(mp.rh)+'%'   : '—';
+          var popupHtml = '<div class="cmap-popup"><b>'+s.flag+' '+s.name+'</b><br>'+
+            '&#127777; Temp: '+(mp&&mp.tempC!=null?mp.tempC.toFixed(1)+'°C':'—')+
+            (mp&&mp.rh!=null?' &middot; RH: '+_rh:'')+'<br>'+
+            '&#128168; Wind: '+(windSpd!=null?windSpd+' kt':'—')+(windDir!=null?' @ '+windDir+'°':'')+'<br>'+
+            '&#128065; Vis: '+(mp&&mp.visM!=null?(mp.visM/1000).toFixed(1)+' km':'—')+'<br>'+
+            '&#127752; Dew: '+_dew+'<br>'+
+            (mp&&mp.wxToks&&mp.wxToks.length?'&#9928; WX: '+mp.wxToks.join(' ')+'<br>':'')+'</div>';
+          marker.bindPopup(popupHtml, {maxWidth:200});
+        }
         marker.addTo(condMarkerLayer);
       }
       // Wind vane — bold filled dart pointing downwind, with a speed badge. Far more visible than the barb rose.

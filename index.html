@@ -292,7 +292,7 @@ tr:last-child td{border-bottom:none;}
 .stn-hdr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:linear-gradient(90deg,rgba(26,111,255,0.12),transparent);border-bottom:1px solid var(--bdr);}
 .stn-ttl{font-family:var(--cond);font-size:15px;font-weight:800;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;}
 .stn-sub{font-family:var(--cond);font-size:13px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
-.stn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:9px;padding:11px;}
+.stn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:11px;}
 
 .wind-rose{width:84px;height:84px;flex-shrink:0;}
 .srow{border-radius:var(--rl);border:1px solid var(--bdr);background:var(--card);position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
@@ -314,6 +314,18 @@ tr:last-child td{border-bottom:none;}
 .srow-row{display:flex;gap:5px;flex-wrap:wrap;align-items:stretch;}
 .srow .chip{flex:1;min-width:0;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.028);border:1px solid rgba(255,255,255,0.055);display:flex;flex-direction:column;gap:2px;}
 .wrose{width:88px;height:88px;flex-shrink:0;}
+/* Two station cards sit side by side. On a phone the cards get narrow, so the
+   wind rose stacks centered on top and the data chips stack full-width (1 per
+   row) — keeps every label/value readable instead of clipping. Verified at
+   390px and 768px with no overflow or clipped text. */
+@media(max-width:620px){
+  .stn-grid{gap:7px;padding:8px;}
+  .srow-body{padding:8px;}
+  .srow-body>.srow-row{flex-direction:column;align-items:stretch;gap:8px;}
+  .srow-body>.srow-row>div:first-child{align-self:center;}
+  .srow-body>.srow-row>div:last-child>.srow-row{flex-direction:column;gap:5px;}
+  .wrose-svg{width:66px;height:66px;}
+}
 .sumrow{display:flex;gap:5px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--bdr);background:rgba(0,0,0,0.18);}
 .pill{padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);font-family:var(--cond);font-size:13px;color:var(--muted);}
 .pill span{color:var(--acc);font-weight:700;}

@@ -86,6 +86,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .bg.spinning{display:inline-block;animation:bgSpin 0.8s linear infinite;background:rgba(46,201,122,0.12);border-color:rgba(46,201,122,0.4);color:var(--grn);}
 @keyframes bgSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .bg:hover{background:rgba(77,184,255,0.06);border-color:var(--bdrb);}
+.bg:focus-visible{outline:2px solid var(--acc);outline-offset:2px;}
 .lbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:13px;color:var(--grn);padding:2px 7px;border:1px solid rgba(46,201,122,0.25);border-radius:4px;background:rgba(46,201,122,0.06);}
 .lbadge-d{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 5px var(--grn);animation:pok 2s infinite;}
 
@@ -333,7 +334,7 @@ tr:last-child td{border-bottom:none;}
 .mapwrap{height:52vh;border-radius:9px;overflow:hidden;margin-top:10px;border:1px solid var(--bdr);}
 #map{width:100%;height:100%;}
 .msearch{padding:6px 10px;border-radius:7px;border:1px solid var(--bdr);background:rgba(255,255,255,0.03);color:var(--txt);font-family:var(--sans);font-size:13px;width:210px;outline:none;}
-.msearch:focus{border-color:var(--bdrb);}
+.msearch:focus{border-color:var(--bdrb);box-shadow:0 0 0 2px rgba(77,184,255,0.35);}
 .msearch::placeholder{color:var(--muted);}
 .mleg{background:rgba(5,16,30,0.94);padding:8px 10px;border-radius:7px;color:var(--txt);font-family:var(--cond);font-size:13px;border:1px solid var(--bdr);}
 .mleg .mr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
@@ -1805,11 +1806,11 @@ html,body{max-width:100%;overflow-x:hidden;}
       <div id="fresh-badge" class="fresh-badge" title="Time since last successful data fetch"><span class="fresh-dot"></span><span id="fresh-txt">--</span></div>
       <button id="refresh-btn" class="bg" aria-label="Refresh all data" title="Refresh all data (R)">&#8635;</button>
       <button id="help-btn" class="bg" aria-label="Keyboard shortcuts" title="Show keyboard shortcuts">?</button>
-      <button id="mute-btn" class="bg" aria-pressed="false" title="Mute alerts (M)">&#128266;</button>
-      <button id="test-btn" class="bg" title="Test mode (T)">&#9879;</button>
-      <button id="settings-btn" class="bg" title="Settings: Theme &amp; Icons (S)">⚙️</button>
-      <button id="pwa-install-btn" class="bg" style="display:none;" title="Install app">&#11015;</button>
-      <button id="night-btn" class="bg" aria-pressed="false" title="Toggle night mode (N)">&#127769;</button>
+      <button id="mute-btn" class="bg" aria-pressed="false" aria-label="Mute alerts" title="Mute alerts (M)">&#128266;</button>
+      <button id="test-btn" class="bg" aria-label="Toggle test mode" title="Test mode (T)">&#9879;</button>
+      <button id="settings-btn" class="bg" aria-label="Settings: theme and icons" title="Settings: Theme &amp; Icons (S)">⚙️</button>
+      <button id="pwa-install-btn" class="bg" style="display:none;" aria-label="Install app" title="Install app">&#11015;</button>
+      <button id="night-btn" class="bg" aria-pressed="false" aria-label="Toggle night mode" title="Toggle night mode (N)">&#127769;</button>
     </div>
   </div>
 </div>
@@ -3199,7 +3200,7 @@ function renderMetarCard(icao, rawLine){
   const bft = p.windSpd===null ? '' : p.windSpd<=1?'Bft 0 Calm':p.windSpd<=3?'Bft 1 Light air':p.windSpd<=6?'Bft 2 Light breeze':p.windSpd<=10?'Bft 3 Gentle breeze':p.windSpd<=16?'Bft 4 Moderate breeze':p.windSpd<=21?'Bft 5 Fresh breeze':p.windSpd<=27?'Bft 6 Strong breeze':p.windSpd<=33?'Bft 7 Near gale':p.windSpd<=40?'Bft 8 Gale':p.windSpd<=47?'Bft 9 Strong gale':p.windSpd<=55?'Bft 10 Storm':p.windSpd<=63?'Bft 11 Violent storm':'Bft 12 Hurricane';
   cf(card,'wind-rose').innerHTML = miniRose(p.windDir, p.windSpd);
   cf(card,'wind-rose').title = bft;
-  const COMPASS16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  // COMPASS16 is defined once at file scope \u2014 no need to re-allocate per render.
   let dirLabel = '\u2014';
   if(p.windDir !== null){
     const comp = COMPASS16[Math.round(p.windDir / 22.5) % 16];
@@ -5804,7 +5805,7 @@ function renderMonitor(data){
     const r1 = omCurrent.rain != null ? omCurrent.rain : omCurrent.precipitation;
     byId('monRain1h').textContent = (r1 != null ? r1.toFixed(1) : '0.0') + ' mm';
   } else { byId('monRain1h').textContent = '\u2014'; }
-  if(omDaily && omDaily.precipitation_sum && omDaily.precipitation_sum.length){
+  if(omDaily && omDaily.precipitation_sum && omDaily.precipitation_sum[0] != null){
     byId('monRain24h').textContent = omDaily.precipitation_sum[0].toFixed(1) + ' mm';
   } else { byId('monRain24h').textContent = '\u2014'; }
   byId('monLastUpd').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
@@ -7695,6 +7696,10 @@ function initCondMap(){
   // Auto-refresh rain + satellite tiles every 10 min
   setInterval(function(){
     if(!condMap) return;
+    // Skip the refresh when the map tab is hidden or the page is backgrounded —
+    // saves a fetch + parse every 10 min; tiles refresh on next tick when shown.
+    var _mt = byId('tab-mapping');
+    if((_mt && _mt.classList.contains('hidden')) || document.hidden) return;
     fetch('https://api.rainviewer.com/public/weather-maps.json')
       .then(function(r){ return r.json(); })
       .then(function(j){

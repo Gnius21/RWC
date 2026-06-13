@@ -53,6 +53,13 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 body{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+/* Reload countdown bar */
+#reloadBar{position:fixed;top:0;left:0;right:0;height:3px;z-index:9999;background:rgba(77,184,255,0.07);pointer-events:none;}
+#reloadBarFill{height:100%;width:0%;background:linear-gradient(90deg,var(--acc2),var(--acc),#7dd3fc);box-shadow:0 0 8px var(--acc),0 0 16px rgba(77,184,255,0.4);transition:width 0.6s linear;border-radius:0 2px 2px 0;}
+#reloadBar.flash #reloadBarFill{animation:reloadFlash .55s ease-out;}
+@keyframes reloadFlash{0%{box-shadow:0 0 8px var(--acc),0 0 32px rgba(77,184,255,0.9);}100%{box-shadow:0 0 8px var(--acc),0 0 16px rgba(77,184,255,0.4);}}
+:root.night #reloadBarFill{background:linear-gradient(90deg,var(--acc2),var(--acc),#e0a040);box-shadow:0 0 8px var(--acc),0 0 16px rgba(180,110,0,0.5);}
+
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse 1000px 600px at 15% -5%,rgba(26,111,255,0.07) 0%,transparent 55%),
              radial-gradient(ellipse 700px 500px at 90% 90%,rgba(77,184,255,0.04) 0%,transparent 50%);}
@@ -1815,6 +1822,9 @@ html,body{max-width:100%;overflow-x:hidden;}
 </style>
 </head>
 <body>
+<!-- Reload countdown bar — fills over 30s METAR cycle, flashes on refresh -->
+<div id="reloadBar"><div id="reloadBarFill"></div></div>
+
 <div class="page" id="pageRoot">
 
 <!-- TOP BAR (clocks live in the control row to save vertical space) -->
@@ -3404,6 +3414,7 @@ async function fetchMetar(icao){
   return false;
 }
 async function refreshAllMetars(){
+  if(typeof window.__reloadBarFlash === 'function') window.__reloadBarFlash();
   // CheckWX first (one batched JSON call incl. the map-only stations, cached
   // 60 s); NOAA tgftp per station as fallback.
   const cw = await fetchCheckwx('metar', STATIONS.concat(CMAP_EXTRA_ICAOS));
@@ -8945,6 +8956,31 @@ async function init(){
   if('requestIdleCallback' in window) requestIdleCallback(deferLoad, {timeout: 4000});
   else setTimeout(deferLoad, 2500);
 }
+
+/* ── Reload countdown bar ── */
+(function(){
+  var CYCLE = 30000; // matches METAR refresh interval
+  var fill = document.getElementById('reloadBarFill');
+  var bar  = document.getElementById('reloadBar');
+  if(!fill || !bar) return;
+  var start = Date.now();
+  function tick(){
+    var elapsed = (Date.now() - start) % CYCLE;
+    fill.style.width = (elapsed / CYCLE * 100).toFixed(2) + '%';
+  }
+  setInterval(tick, 500);
+  // Flash + reset when any global refresh fires
+  window.__reloadBarFlash = function(){
+    start = Date.now();
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    bar.classList.remove('flash');
+    void bar.offsetWidth; // reflow
+    bar.classList.add('flash');
+    fill.style.transition = 'width 0.6s linear';
+    setTimeout(function(){ bar.classList.remove('flash'); }, 600);
+  };
+})();
 
 /* Background refresh intervals (NO 60s vis interval — removed per FIX #4) */
 setInterval(() => { if(!testMode && !hidden()) refreshAllMetars(); }, 30000);setInterval(() => { if(!testMode && !hidden()){ loadAllTAFs(); loadAllSynops(); } }, 300000);

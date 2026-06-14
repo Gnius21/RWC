@@ -2171,13 +2171,13 @@ html,body{max-width:100%;overflow-x:hidden;}
 <!-- TABS -->
 <nav class="tabs" role="tablist">
   <button class="tab active" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
+  <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
   <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
   <button class="tab" data-tab="dashboards"><span class="tab-i">&#127753;</span>Dashboards</button>
-  <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
 </nav>
 
 <div class="content">
@@ -2796,11 +2796,6 @@ html,body{max-width:100%;overflow-x:hidden;}
       <span class="mon-switcher-lbl">Styles</span>
       <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
       <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
-      <button class="mon-style-btn" data-dashstyle="aurora" onclick="setDashStyle('aurora')"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
-      <button class="mon-style-btn" data-dashstyle="midnight" onclick="setDashStyle('midnight')"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
-      <button class="mon-style-btn" data-dashstyle="daylight" onclick="setDashStyle('daylight')"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
-      <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
-      <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#9899;</span>Dark</button>
       <button class="mon-style-btn" data-dashstyle="aqua" onclick="setDashStyle('aqua')"><span class="mon-style-btn-ic">&#127753;</span>Aqua</button>
     </div>
     <div id="dashboardsContent"></div>
@@ -2837,7 +2832,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; Dashboards &middot; KNMI)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; KNMI &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; Dashboards)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4782,7 +4777,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'dashboards','8':'knmi'};
+  const map={'1':'monitor','2':'knmi','3':'aviation','4':'stations','5':'weather','6':'maps','7':'atc','8':'dashboards'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -6334,7 +6329,7 @@ function renderMonitorViews(data){
 /* ═══════════ DASHBOARDS TAB ═══════════
    Premium glassmorphic weather dashboards (Aurora / Midnight / Daylight),
    all driven by the same live ABC data the Monitor uses. */
-let __dashStyle = (function(){ try{ return localStorage.getItem('rwc-dashstyle') || 'aurora'; }catch(e){ return 'aurora'; } })();
+let __dashStyle = (function(){ try{ var s = localStorage.getItem('rwc-dashstyle'); return ['sky','home','aqua'].indexOf(s)>=0 ? s : 'sky'; }catch(e){ return 'sky'; } })();
 function setDashStyle(style, btn){
   __dashStyle = style;
   try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}

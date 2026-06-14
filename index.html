@@ -2176,6 +2176,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
+  <button class="tab" data-tab="dashboards"><span class="tab-i">&#127753;</span>Dashboards</button>
   <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
 </nav>
 
@@ -2191,15 +2192,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="graphics"><span class="mon-style-btn-ic">&#128202;</span>Graphics</button>
       <button class="mon-style-btn" data-monstyle="home"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
-      <span class="mon-switcher-div"></span>
-      <button class="mon-style-btn" data-monstyle="aurora"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
-      <button class="mon-style-btn" data-monstyle="midnight"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
-      <button class="mon-style-btn" data-monstyle="daylight"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
-      <button class="mon-style-btn" data-monstyle="metro"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
-      <button class="mon-style-btn" data-monstyle="dark"><span class="mon-style-btn-ic">&#9899;</span>Dark</button>
-      <button class="mon-style-btn" data-monstyle="aqua"><span class="mon-style-btn-ic">&#127753;</span>Aqua</button>
     </div>
-    <div class="mon-view" id="monViewDash" style="display:none;"><div id="dashRoot" class="dash-aurora"></div></div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
     <div class="mon-view" id="monViewGauges" style="display:none;"></div>
     <div class="mon-view" id="monViewGraphics" style="display:none;"></div>
@@ -2799,6 +2792,20 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
+  <!-- DASHBOARDS -->
+  <div id="tab-dashboards" class="tpanel hidden">
+    <div class="mon-switcher" id="dashSwitcher">
+      <span class="mon-switcher-lbl">Styles</span>
+      <button class="mon-style-btn active" data-dashstyle="aurora" onclick="setDashStyle('aurora')"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
+      <button class="mon-style-btn" data-dashstyle="midnight" onclick="setDashStyle('midnight')"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
+      <button class="mon-style-btn" data-dashstyle="daylight" onclick="setDashStyle('daylight')"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
+      <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
+      <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#9899;</span>Dark</button>
+      <button class="mon-style-btn" data-dashstyle="aqua" onclick="setDashStyle('aqua')"><span class="mon-style-btn-ic">&#127753;</span>Aqua</button>
+    </div>
+    <div id="dashboardsContent"></div>
+  </div>
+
   <!-- KNMI -->
   <div id="tab-knmi" class="tpanel hidden">
     <div class="av-subnav">
@@ -2830,7 +2837,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 7</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; KNMI)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; Dashboards &middot; KNMI)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4668,7 +4675,7 @@ const panels = {
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps'),
-  knmi: byId('tab-knmi')
+  dashboards: byId('tab-dashboards'), knmi: byId('tab-knmi')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -4721,6 +4728,12 @@ function switchTab(name){
       });
     }
   }
+  if(name === 'dashboards'){
+    if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
+    else { renderDashboardsTab(); }
+    if(!__lastForecastData && typeof updateForecast==='function'){ updateForecast().then(()=>renderDashboardsTab()).catch(()=>renderDashboardsTab()); }
+    renderDashboardsTab();
+  }
   if(name === 'knmi'){
     if(!window.__knmiLoaded){ window.__knmiLoaded = true; if(typeof loadKnmiData==='function') loadKnmiData(false); }
     // default to KNMI Data sub-view if none active
@@ -4769,7 +4782,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'knmi'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'dashboards','8':'knmi'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -6315,8 +6328,6 @@ function renderMonitorViews(data){
   if(__monStyle === 'graphics') renderGraphicsView(data);
   if(__monStyle === 'home')     renderHomeView(data);
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
-  // Glass dashboard faces (Aurora/Midnight/Daylight/Metro/Dark) live inside Monitor now
-  try{ if(__DASH_FACES.indexOf(__monStyle) >= 0) renderDashboards(); }catch(e){}
   try{ var gv = byId('knmi-view-graphs'); if(gv && gv.style.display !== 'none' && !byId('tab-knmi').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
 }
 
@@ -6721,6 +6732,112 @@ function renderAquaDash(host){
 }
 
 window.renderDashboards = renderDashboards;
+
+/* Render dashboards to the Dashboards tab */
+function renderDashboardsTab(){
+  const host = byId('dashboardsContent');
+  if(!host) return;
+  if(__dashStyle === 'metro') { renderMetroDash(host); return; }
+  if(__dashStyle === 'dark') { renderDarkDash(host); return; }
+  if(__dashStyle === 'aqua') { renderAquaDash(host); return; }
+  const d = __monLastData;
+  if(!d){ host.innerHTML = '<div class="dash-empty">Loading live conditions…</div>'; return; }
+
+  // For standard dashboard views, use the normal renderDashboards logic
+  const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
+  const fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
+  const wmo = _monWmoFromData(d);
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US',{weekday:'long'});
+  const dateStr = now.toLocaleDateString('en-US',{day:'numeric',month:'short'});
+
+  const temp = p.temp_c!=null ? Math.round(p.temp_c) : null;
+  const feels = (p.temp_c!=null) ? Math.round(calcFeelsMonitor(p.temp_c, p.rh)) : null;
+  const hi = (fc&&fc[0]&&fc[0].tempHigh!=null)?Math.round(fc[0].tempHigh):(temp!=null?temp+1:null);
+  const lo = (fc&&fc[0]&&fc[0].tempLow!=null)?Math.round(fc[0].tempLow):(temp!=null?temp-3:null);
+
+  let hours = [];
+  if(fc && fc[0] && fc[0]._hourly && fc[0]._hourly.length){
+    const cur = now.getHours();
+    hours = fc[0]._hourly.filter(h => h.hour >= cur).slice(0,8);
+    if(hours.length < 8 && fc[1] && fc[1]._hourly) hours = hours.concat(fc[1]._hourly.slice(0, 8-hours.length));
+  }
+  const hoursHtml = hours.length ? hours.map((h,i)=>{
+    const hr12 = h.hour%12===0?12:h.hour%12; const ap = h.hour<12?'AM':'PM';
+    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19);
+    const pop = (h.pop!=null && h.pop>=20) ? Math.round(h.pop)+'%' : '';
+    return `<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;
+  }).join('') : '<div style="color:var(--dmut);font-family:var(--cond);font-size:13px;padding:14px;">Hourly data loads with Forecast</div>';
+
+  let curvePts = [];
+  if(fc && fc[0] && fc[0]._hourly){
+    const cur = now.getHours();
+    curvePts = fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,12);
+    if(curvePts.length<6 && fc[1] && fc[1]._hourly) curvePts = curvePts.concat(fc[1]._hourly.slice(0,12-curvePts.length));
+  }
+  const curveHtml = _dashTempCurve(curvePts) || '<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:18px;text-align:center;">Temperature trend loads with Forecast</div>';
+
+  let sunrise='—', sunset='—';
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  if(sr) sunrise=_fmtClk(sr); if(ss) sunset=_fmtClk(ss);
+
+  const uv = om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const uvLvl = uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
+  const windKt = p.wind_kt!=null?p.wind_kt:null;
+  const windDir = p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
+  const rh = p.rh!=null?Math.round(p.rh):null;
+  const rain1h = (om.rain!=null?om.rain:(om.precipitation!=null?om.precipitation:(p.precip_mm!=null?p.precip_mm:null)));
+  const dew = (p.temp_c!=null && rh!=null) ? Math.round(p.temp_c - (100-rh)/5) : null;
+
+  const metrics = [
+    {icon:'☀️', label:'UV Index', v:(uv!=null?Math.round(uv):'—'), sub:uvLvl, bar:uv!=null?Math.min(100,(uv/11)*100):0},
+    {icon:'\u{1F305}', label:'Sunrise', v:sunrise, sub:'Sunset '+sunset},
+    {icon:'\u{1F4A8}', label:'Wind', v:(windKt!=null?windKt+'<small> kt</small>':'—'), sub:(windDir?windDir+' · ':'')+(p.wind_dir!=null?Math.round(p.wind_dir)+'°':'')},
+    {icon:'\u{1F4A7}', label:'Humidity', v:(rh!=null?rh+'<small>%</small>':'—'), sub:(dew!=null?'Dew '+dew+'°':''), bar:rh},
+    {icon:'\u{1F321}️', label:'Feels Like', v:(feels!=null?feels+'°':'—'), sub:(temp!=null&&feels!=null?(feels>temp?'Warmer':feels<temp?'Cooler':'Similar')+' than actual':'')},
+    {icon:'\u{1F327}️', label:'Rainfall', v:(rain1h!=null?rain1h.toFixed(1)+'<small>mm</small>':'0<small>mm</small>'), sub:'last hour'}
+  ];
+  const metricsHtml = metrics.map(m=>`<div class="dash-card dash-metric"><div class="dash-metric-hd">${m.icon} ${m.label}</div><div class="dash-metric-v">${m.v}</div>${m.bar!=null?`<div class="dash-metric-bar"><div style="width:${Math.max(3,m.bar||0)}%;"></div></div>`:''}<div class="dash-metric-s">${m.sub||''}</div></div>`).join('');
+
+  const cityKeys = [['TNCA','Aruba'],['TNCB','Bonaire'],['TNCM','St Maarten'],['SVMI','Caracas']];
+  const citiesHtml = cityKeys.map(([icao,nm])=>{
+    let t=null, ic='cloud', desc='—';
+    const raw = mState && mState[icao] ? mState[icao].lastRaw : null;
+    if(raw){ try{ const mp=parseMetar(raw); if(mp.tempC!=null)t=mp.tempC; const bkn=mp.cldToks.some(x=>/^(BKN|OVC)/.test(x)); const sct=mp.cldToks.some(x=>/^(SCT|FEW)/.test(x)); const rn=mp.wxToks.some(x=>/RA|SH|TS/.test(x)); const lh=(now.getUTCHours()-4+24)%24; const nt=lh<6||lh>=18.5; ic= rn?'rain':bkn?'cloud':sct?(nt?'cloud-moon':'cloud-sun'):(nt?'moon':'sun'); desc= rn?'Rain':bkn?'Cloudy':sct?'Partly cloudy':'Clear'; }catch(e){} }
+    return `<div class="dash-city"><span class="dash-city-ic">${buildWxIconSvg(ic,40)}</span><span class="dash-city-name">${nm}<span>${desc}</span></span><span class="dash-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;
+  }).join('');
+
+  host.innerHTML = `
+  <div class="dash-grid">
+    <div class="dash-col">
+      <div class="dash-card dash-hero">
+        <div class="dash-hero-loc">\u{1F4CD} Curaçao · ABC Islands</div>
+        <div class="dash-hero-sub">${dayName}, ${dateStr}${p.time?' · '+p.time:''}</div>
+        <div class="dash-hero-ic">${buildWxIconSvg(wmo.icon,108)}</div>
+        <div class="dash-hero-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+        <div class="dash-hero-cond">${wmo.desc}</div>
+        <div class="dash-hero-hl">${hi!=null?`<span>H: <b>${hi}°</b></span>`:''}${lo!=null?`<span>L: <b>${lo}°</b></span>`:''}${feels!=null?`<span>Feels <b>${feels}°</b></span>`:''}</div>
+      </div>
+      <div class="dash-card dash-hours-card">
+        <div class="dash-hours-hd"><span>Hourly Forecast</span></div>
+        <div class="dash-hours">${hoursHtml}</div>
+      </div>
+      <div class="dash-card dash-graph-card">
+        <div class="dash-graph-hd">Temperature · next 12h</div>
+        ${curveHtml}
+      </div>
+    </div>
+    <div class="dash-col">
+      <div class="dash-metrics">${metricsHtml}</div>
+      <div class="dash-card dash-cities-card">
+        <div class="dash-cities-hd">Other Cities</div>
+        ${citiesHtml}
+      </div>
+    </div>
+  </div>`;
+}
+window.renderDashboardsTab = renderDashboardsTab;
 
 /* ═══ GRAPHS TAB ═══ */
 function _graphSparkSvg(pts, color, idx){

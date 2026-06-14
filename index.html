@@ -1463,6 +1463,8 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-daylight{--db1:#9fbdec;--db2:#c2d3f4;--db3:#dce7fb;--dcard:rgba(255,255,255,0.55);--dcard2:rgba(255,255,255,0.72);--dbd:rgba(255,255,255,0.85);--dtxt:#243456;--dmut:#5e6f96;--dacc:#4f6ef0;--dacc2:#8a6cf0;--dglow:rgba(110,140,235,0.30);}
 .dash-metro{--db1:#07091f;--db2:#0d1545;--db3:#030712;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.10);--dbd:rgba(100,140,255,0.18);--dtxt:#e8eeff;--dmut:#7b90c0;--dacc:#4f80ff;--dacc2:#6c5fff;--dglow:rgba(79,128,255,0.35);}
 .dash-dark{--db1:#151515;--db2:#1c1c1c;--db3:#0d0d0d;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.08);--dbd:rgba(255,255,255,0.10);--dtxt:#f0f0f0;--dmut:#888888;--dacc:#4f9ef8;--dacc2:#764af7;--dglow:rgba(79,158,248,0.20);}
+.dash-aqua{--db1:#5bb9d6;--db2:#7ac8e3;--db3:#3a97b8;--dcard:rgba(255,255,255,0.15);--dcard2:rgba(255,255,255,0.22);--dbd:rgba(255,255,255,0.25);--dtxt:#ffffff;--dmut:#cce8f5;--dacc:#ffc967;--dacc2:#ffb347;--dglow:rgba(255,201,103,0.35);}
+.dash-gauge{--db1:#1a1a1a;--db2:#242424;--db3:#0f0f0f;--dcard:rgba(255,255,255,0.06);--dcard2:rgba(255,255,255,0.10);--dbd:rgba(100,200,255,0.15);--dtxt:#f5f5f5;--dmut:#999999;--dacc:#4db8ff;--dacc2:#ff6b6b;--dglow:rgba(77,184,255,0.30);}
 /* ═══ GRAPHS TAB ═══ */
 .graphs-wrap{display:flex;flex-direction:column;gap:14px;}
 .graphs-top{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:stretch;}
@@ -2056,11 +2058,17 @@ html,body{max-width:100%;overflow-x:hidden;}
 .knmi-status{font-family:var(--mono);font-size:13px;color:var(--muted);padding:8px 0;}
 .knmi-status.err{color:#ff8a8a;}
 .knmi-status.ok{color:#2ec97a;}
-.knmi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-.knmi-tile{background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;min-width:0;}
-.knmi-tile-lbl{font-family:var(--cond);font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:3px;}
-.knmi-tile-val{font-family:var(--cond);font-size:22px;font-weight:800;color:var(--txt);line-height:1.1;}
-.knmi-tile-val small{font-size:13px;color:var(--muted);font-weight:600;}
+.knmi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.knmi-tile{background:rgba(255,255,255,0.04);border:2px solid var(--bdr);border-radius:14px;padding:18px 16px;min-width:0;transition:all .3s;}
+.knmi-tile-lbl{font-family:var(--cond);font-size:14px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;}
+.knmi-tile-val{font-family:var(--cond);font-size:32px;font-weight:800;color:var(--txt);line-height:1.1;}
+.knmi-tile-val small{font-size:15px;color:var(--muted);font-weight:600;}
+.knmi-tile.knmi-good{border-color:#4ade80;background:rgba(74,222,128,0.08);}
+.knmi-tile.knmi-good .knmi-tile-val{color:#4ade80;}
+.knmi-tile.knmi-warn{border-color:#facc15;background:rgba(250,204,21,0.08);}
+.knmi-tile.knmi-warn .knmi-tile-val{color:#facc15;}
+.knmi-tile.knmi-bad{border-color:#ef4444;background:rgba(239,68,68,0.08);}
+.knmi-tile.knmi-bad .knmi-tile-val{color:#ef4444;}
 .knmi-station{grid-column:1/-1;font-family:var(--cond);font-size:13px;font-weight:700;color:var(--acc);padding:4px 2px;}
 
 
@@ -2190,6 +2198,8 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="daylight"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
       <button class="mon-style-btn" data-monstyle="metro"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
       <button class="mon-style-btn" data-monstyle="dark"><span class="mon-style-btn-ic">&#9899;</span>Dark</button>
+      <button class="mon-style-btn" data-monstyle="aqua"><span class="mon-style-btn-ic">&#127753;</span>Aqua</button>
+      <button class="mon-style-btn" data-monstyle="gauge"><span class="mon-style-btn-ic">&#128201;</span>Gauge</button>
     </div>
     <div class="mon-view" id="monViewDash" style="display:none;"><div id="dashRoot" class="dash-aurora"></div></div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
@@ -6261,7 +6271,7 @@ function _persistIsltMinMax(){
   try{ localStorage.setItem('islt-minmax', JSON.stringify({d:__isltTempDay, mx:__isltTempMax, mn:__isltTempMin})); }catch(e){}
 }
 // Dashboard "faces" share the Monitor switcher: each maps to the glass dashboard view.
-const __DASH_FACES = ['aurora','midnight','daylight','metro','dark'];
+const __DASH_FACES = ['aurora','midnight','daylight','metro','dark','aqua','gauge'];
 const __MON_FACES = ['sky','gauges','current','graphics','home','power'];
 try { const sv = localStorage.getItem('rwc-monstyle'); if(__MON_FACES.indexOf(sv)>=0 || __DASH_FACES.indexOf(sv)>=0) __monStyle = sv; } catch(e){}
 
@@ -6568,6 +6578,8 @@ function renderDashboards(){
   if(!host) return;
   if(__dashStyle === 'metro') { renderMetroDash(host); return; }
   if(__dashStyle === 'dark') { renderDarkDash(host); return; }
+  if(__dashStyle === 'aqua') { renderAquaDash(host); return; }
+  if(__dashStyle === 'gauge') { renderGaugeDash(host); return; }
   const d = __monLastData;
   if(!d){ host.innerHTML = '<div class="dash-empty">Loading live conditions…</div>'; return; }
   const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
@@ -6668,6 +6680,84 @@ function renderDashboards(){
     </div>
   </div>`;
 }
+
+/* Aqua dashboard — light blue with large gauge + hourly chart + metric cards */
+function renderAquaDash(host){
+  const d = __monLastData; if(!d){ host.innerHTML = '<div class="dash-empty">Loading…</div>'; return; }
+  const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
+  const fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
+  const temp = p.temp_c!=null ? Math.round(p.temp_c) : null;
+  const rh = p.rh!=null?Math.round(p.rh):null;
+  const windKt = p.wind_kt!=null?p.wind_kt:null; const windDir = p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
+  const uv = om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const dew = (p.temp_c!=null && rh!=null) ? Math.round(p.temp_c - (100-rh)/5) : null;
+  const hi = (fc&&fc[0]&&fc[0].tempHigh!=null)?Math.round(fc[0].tempHigh):(temp!=null?temp+1:null);
+  const lo = (fc&&fc[0]&&fc[0].tempLow!=null)?Math.round(fc[0].tempLow):(temp!=null?temp-3:null);
+
+  // Temperature gauge (0-50°C scale)
+  const gaugeAngle = temp!=null ? Math.min(100, Math.max(0, (temp / 50) * 100)) : 50;
+  const gaugeSVG = `<svg style="width:120px;height:120px;" viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/><circle cx="60" cy="60" r="55" fill="none" stroke="var(--dacc)" stroke-width="8" stroke-dasharray="${gaugeAngle*3.46} 346" stroke-dashoffset="0" stroke-linecap="round"/><circle cx="60" cy="60" r="12" fill="var(--dacc)"/></svg>`;
+
+  // Hourly forecast
+  let hours = [];
+  if(fc && fc[0] && fc[0]._hourly){ const cur = new Date().getHours(); hours = fc[0]._hourly.filter(h => h.hour >= cur).slice(0,10); }
+  const hoursBar = hours.length ? hours.map((h,i)=>`<div style="flex:1;text-align:center;font-size:11px;"><div style="height:30px;background:linear-gradient(to top,var(--dacc),transparent);border-radius:3px;margin-bottom:2px;opacity:0.7;"></div><span>${h.hour%12===0?12:h.hour%12}${h.hour<12?'A':'P'}</span></div>`).join('') : '<div style="padding:10px;text-align:center;color:var(--dmut);">No hourly data</div>';
+
+  // Metric cards
+  const cards = [
+    {icon:'☀️',label:'UV Index',v:(uv!=null?Math.round(uv):'—'),sub:uv!=null?(uv<3?'Low':uv<6?'Moderate':uv<8?'High':'Very High'):''},
+    {icon:'💨',label:'Wind Status',v:(windKt!=null?windKt:'—'),sub:(windDir?windDir+' · ':'')+(p.wind_dir!=null?Math.round(p.wind_dir)+'°':'')},
+    {icon:'🌅',label:'Sunrise & Sunset',v:(fc&&fc[0]&&fc[0].sunrise?_fmtClk(fc[0].sunrise):'—'),sub:'Set '+( fc&&fc[0]&&fc[0].sunset?_fmtClk(fc[0].sunset):'—')},
+    {icon:'💧',label:'Humidity',v:(rh!=null?rh+'%':'—'),sub:(dew!=null?'Dew '+dew+'°':'')},
+    {icon:'👁️',label:'Visibility',v:(om.visibility!=null?(om.visibility/1000).toFixed(1):'—'),sub:'km'},
+    {icon:'☁️',label:'Air Quality',v:(om.aqi!=null?Math.round(om.aqi):'—'),sub:om.aqi!=null?(om.aqi<50?'Good':om.aqi<100?'Moderate':'Unhealthy'):''}
+  ];
+  const cardsHtml = cards.map(c=>`<div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:24px;margin-bottom:4px;">${c.icon}</div><div style="font-family:var(--cond);font-size:11px;color:var(--dmut);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${c.label}</div><div style="font-family:var(--cond);font-size:20px;font-weight:800;color:var(--txt);">${c.v}</div><div style="font-size:10px;color:var(--dmut);margin-top:2px;">${c.sub}</div></div>`).join('');
+
+  host.innerHTML = `<div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+    <div style="display:grid;grid-template-columns:140px 1fr;gap:16px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div style="font-family:var(--cond);font-size:32px;font-weight:800;color:var(--txt);">${temp!=null?temp:'—'}<sup style="font-size:20px;">°C</sup></div>${gaugeSVG}<div style="font-family:var(--cond);font-size:12px;color:var(--dmut);">Today</div></div>
+      <div style="background:linear-gradient(90deg,var(--dacc),var(--dacc2));border-radius:12px;padding:12px;display:flex;gap:4px;align-items:flex-end;">${hoursBar}</div>
+    </div>
+    <div><div style="font-family:var(--cond);font-size:14px;font-weight:800;color:var(--txt);margin-bottom:10px;">Highlights</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">${cardsHtml}</div></div>
+  </div>`;
+}
+
+/* Gauge dashboard — dark with large circular gauges in grid */
+function renderGaugeDash(host){
+  const d = __monLastData; if(!d){ host.innerHTML = '<div class="dash-empty">Loading…</div>'; return; }
+  const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
+  const fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
+  const temp = p.temp_c!=null ? Math.round(p.temp_c) : null;
+  const rh = p.rh!=null?Math.round(p.rh):null;
+  const windKt = p.wind_kt!=null?p.wind_kt:null;
+  const uv = om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const pressure = p.press_hpa!=null?p.press_hpa:null;
+
+  // Gauge SVG builder
+  const gaugeHTML = (label, value, unit, min, max, color) => {
+    const pct = Math.min(100,Math.max(0,((value-min)/(max-min))*100));
+    return `<div style="text-align:center;padding:16px;background:var(--dcard);border-radius:14px;border:1px solid var(--bdr);">
+      <svg style="width:100px;height:100px;margin:0 auto;display:block;" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--bdr)" stroke-width="6"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="${color}" stroke-width="6" stroke-dasharray="${pct*3.14} 314" stroke-linecap="round"/>
+        <text x="60" y="65" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle" fill="var(--txt)">${Math.round(value)}</text>
+      </svg>
+      <div style="font-family:var(--cond);font-size:13px;color:var(--dmut);margin-top:8px;text-transform:uppercase;letter-spacing:0.5px;">${label}</div>
+      <div style="font-family:var(--cond);font-size:11px;color:var(--muted);">${unit}</div>
+    </div>`;
+  };
+
+  host.innerHTML = `<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;">
+    ${gaugeHTML('Temperature','°C',temp!=null?temp:0,0,50,'#4db8ff')}
+    ${gaugeHTML('Humidity','%',rh!=null?rh:0,0,100,'#4db8ff')}
+    ${gaugeHTML('Wind','kt',windKt!=null?windKt:0,0,30,'var(--dacc)')}
+    ${gaugeHTML('UV Index',uv!=null?uv:0,'',0,12,'#ffb347')}
+    ${gaugeHTML('Pressure','hPa',pressure!=null?pressure:1013,1000,1030,'#4db8ff')}
+    ${temp!=null && temp>28?'<div style="display:flex;align-items:center;justify-content:center;padding:16px;background:var(--dcard);border-radius:14px;border:2px solid #ff6b6b;"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🌡️</div><div style="font-family:var(--cond);font-size:13px;color:#ff6b6b;font-weight:700;">HOT</div></div></div>':''}
+  </div>`;
+}
+
 window.renderDashboards = renderDashboards;
 
 /* ═══ GRAPHS TAB ═══ */
@@ -9298,7 +9388,25 @@ function buildKnmiGridHtml(parsed){
       disp = rec.value + (rec.extra ? ' ' + rec.extra + '°' : '');
       unit = '';
     }
-    html += '<div class="knmi-tile"><div class="knmi-tile-lbl">' + f.lbl + '</div>' +
+    var colorClass = '';
+    var num = parseFloat(rec.value);
+    // Color coding based on metric type
+    if(f.match === 'Temperature'){
+      if(isFinite(num) && num > 30) colorClass = 'knmi-bad'; else if(isFinite(num) && num > 26) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else if(f.match === 'Wind'){
+      if(isFinite(num) && num > 15) colorClass = 'knmi-bad'; else if(isFinite(num) && num > 10) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else if(f.match === 'Humidity'){
+      if(isFinite(num) && (num > 85 || num < 20)) colorClass = 'knmi-bad'; else if(isFinite(num) && (num > 75 || num < 35)) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else if(f.match === 'Pressure'){
+      if(isFinite(num) && num < 1008) colorClass = 'knmi-bad'; else if(isFinite(num) && num < 1013) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else if(f.match === 'Precipitation'){
+      if(isFinite(num) && num > 10) colorClass = 'knmi-bad'; else if(isFinite(num) && num > 2) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else if(f.match === 'Visibility'){
+      if(isFinite(num) && num < 2) colorClass = 'knmi-bad'; else if(isFinite(num) && num < 5) colorClass = 'knmi-warn'; else colorClass = 'knmi-good';
+    } else {
+      colorClass = 'knmi-good';
+    }
+    html += '<div class="knmi-tile ' + colorClass + '"><div class="knmi-tile-lbl">' + f.lbl + '</div>' +
             '<div class="knmi-tile-val">' + disp + (unit?' <small>'+unit+'</small>':'') + '</div></div>';
     shown++;
   });

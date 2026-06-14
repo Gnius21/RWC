@@ -2187,10 +2187,8 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="mon-switcher" id="monSwitcher">
       <span class="mon-switcher-lbl">Faces</span>
       <button class="mon-style-btn active" data-monstyle="current"><span class="mon-style-btn-ic">&#9632;</span>Current</button>
-      <button class="mon-style-btn" data-monstyle="sky"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
       <button class="mon-style-btn" data-monstyle="gauges"><span class="mon-style-btn-ic">&#9201;</span>Gauges</button>
       <button class="mon-style-btn" data-monstyle="graphics"><span class="mon-style-btn-ic">&#128202;</span>Graphics</button>
-      <button class="mon-style-btn" data-monstyle="home"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
     </div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
@@ -2796,7 +2794,9 @@ html,body{max-width:100%;overflow-x:hidden;}
   <div id="tab-dashboards" class="tpanel hidden">
     <div class="mon-switcher" id="dashSwitcher">
       <span class="mon-switcher-lbl">Styles</span>
-      <button class="mon-style-btn active" data-dashstyle="aurora" onclick="setDashStyle('aurora')"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
+      <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
+      <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
+      <button class="mon-style-btn" data-dashstyle="aurora" onclick="setDashStyle('aurora')"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
       <button class="mon-style-btn" data-dashstyle="midnight" onclick="setDashStyle('midnight')"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
       <button class="mon-style-btn" data-dashstyle="daylight" onclick="setDashStyle('daylight')"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
       <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
@@ -6338,10 +6338,10 @@ let __dashStyle = (function(){ try{ return localStorage.getItem('rwc-dashstyle')
 function setDashStyle(style, btn){
   __dashStyle = style;
   try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}
-  const root = byId('dashRoot');
-  if(root) root.className = 'dash-' + style;
-  document.querySelectorAll('.dash-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
-  try{ renderDashboards(); }catch(e){}
+  // Update Dashboards tab buttons
+  document.querySelectorAll('#dashSwitcher .mon-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
+  // Render to Dashboards tab content
+  try{ renderDashboardsTab(); }catch(e){}
 }
 window.setDashStyle = setDashStyle;
 
@@ -6737,10 +6737,17 @@ window.renderDashboards = renderDashboards;
 function renderDashboardsTab(){
   const host = byId('dashboardsContent');
   if(!host) return;
+  const d = __monLastData;
+
+  // Glass dashboard styles
   if(__dashStyle === 'metro') { renderMetroDash(host); return; }
   if(__dashStyle === 'dark') { renderDarkDash(host); return; }
   if(__dashStyle === 'aqua') { renderAquaDash(host); return; }
-  const d = __monLastData;
+
+  // Monitor-style views (sky, home) in Dashboards tab
+  if(__dashStyle === 'sky') { renderSkyView(d, host); return; }
+  if(__dashStyle === 'home') { renderHomeView(d, host); return; }
+
   if(!d){ host.innerHTML = '<div class="dash-empty">Loading live conditions…</div>'; return; }
 
   // For standard dashboard views, use the normal renderDashboards logic
@@ -6971,8 +6978,8 @@ function _fmtClk(iso){ if(!iso) return '\u2014'; try{ return new Date(iso).toLoc
 const _MON_COMPASS16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 
 /* ─── SkySense view render ─── */
-function renderSkyView(data){
-  const host = byId('monViewSky'); if(!host) return;
+function renderSkyView(data, hostEl){
+  const host = hostEl || byId('monViewSky'); if(!host) return;
   const d = data || {}; const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
   const fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
   const wmo = _monWmoFromData(d);
@@ -7609,8 +7616,8 @@ function _hhSpark(field, color, fillColor){
     +'</svg>';
 }
 
-function renderHomeView(data){
-  var host = byId('monViewHome'); if(!host) return;
+function renderHomeView(data, hostEl){
+  var host = hostEl || byId('monViewHome'); if(!host) return;
   var d = data || {};
   var p = d.synopP || {};
   var om = d.omCurrent || {};

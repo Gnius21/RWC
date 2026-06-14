@@ -1459,6 +1459,44 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-daylight{--db1:#9fbdec;--db2:#c2d3f4;--db3:#dce7fb;--dcard:rgba(255,255,255,0.55);--dcard2:rgba(255,255,255,0.72);--dbd:rgba(255,255,255,0.85);--dtxt:#243456;--dmut:#5e6f96;--dacc:#4f6ef0;--dacc2:#8a6cf0;--dglow:rgba(110,140,235,0.30);}
 .dash-metro{--db1:#07091f;--db2:#0d1545;--db3:#030712;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.10);--dbd:rgba(100,140,255,0.18);--dtxt:#e8eeff;--dmut:#7b90c0;--dacc:#4f80ff;--dacc2:#6c5fff;--dglow:rgba(79,128,255,0.35);}
 .dash-dark{--db1:#151515;--db2:#1c1c1c;--db3:#0d0d0d;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.08);--dbd:rgba(255,255,255,0.10);--dtxt:#f0f0f0;--dmut:#888888;--dacc:#4f9ef8;--dacc2:#764af7;--dglow:rgba(79,158,248,0.20);}
+/* ═══ GRAPHS TAB ═══ */
+.graphs-wrap{display:flex;flex-direction:column;gap:14px;}
+.graphs-top{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:stretch;}
+@media(max-width:900px){.graphs-top{grid-template-columns:1fr;}}
+.graphs-hero{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.graphs-hero-hd{display:flex;align-items:center;gap:14px;}
+.graphs-hero-ic{width:54px;height:54px;flex:0 0 auto;}
+.graphs-hero-ic svg,.graphs-hero-ic span{width:54px!important;height:54px!important;}
+.graphs-hero-temp{font-family:var(--cond);font-size:42px;font-weight:800;color:var(--txt);line-height:1;}
+.graphs-hero-temp sup{font-size:18px;vertical-align:super;opacity:.7;}
+.graphs-hero-cond{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--muted);margin-top:2px;}
+.graphs-hero-meta{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--muted);}
+.graphs-hero-meta span{display:flex;align-items:center;gap:4px;}
+.graphs-fc-bars{display:flex;flex-direction:column;gap:5px;flex:1;}
+.gday-row{display:grid;grid-template-columns:36px 24px 30px 1fr 30px;gap:6px;align-items:center;}
+.gday-name{font-family:var(--cond);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;}
+.gday-ic{width:20px;height:20px;}
+.gday-ic svg,.gday-ic span{width:20px!important;height:20px!important;}
+.gday-lo,.gday-hi{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;}
+.gday-hi{color:var(--txt);font-weight:700;text-align:left;}
+.gday-bar{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,0.07);}
+.gday-bar-fill{position:absolute;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#f59e0b);}
+.graphs-radar{border-radius:16px;overflow:hidden;background:#0a0a0a;min-height:320px;position:relative;}
+.graphs-radar iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.graphs-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+@media(max-width:1200px){.graphs-metrics{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:800px){.graphs-metrics{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:520px){.graphs-metrics{grid-template-columns:repeat(2,1fr);}}
+.gmet-card{background:rgba(15,18,28,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 12px 8px;display:flex;flex-direction:column;min-height:130px;}
+.gmet-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;}
+.gmet-lbl{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;line-height:1.2;}
+.gmet-icon{font-size:15px;line-height:1;opacity:.75;flex:0 0 auto;}
+.gmet-val{font-family:var(--cond);font-size:26px;font-weight:800;color:#fff;line-height:1.1;margin-top:2px;}
+.gmet-val small{font-size:14px;font-weight:500;opacity:.6;}
+.gmet-sub{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.38);margin-top:1px;}
+.gmet-spark{flex:1;min-height:46px;margin-top:6px;}
+.gmet-spark svg{width:100%;height:100%;min-height:46px;display:block;overflow:visible;}
+
 /* ── Metro layout ── */
 .dash-metro-wrap{display:grid;grid-template-columns:1.8fr 1.1fr;gap:14px;align-items:start;position:relative;z-index:1;}
 @media(max-width:880px){.dash-metro-wrap{grid-template-columns:1fr;}}
@@ -2127,6 +2165,8 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
+  <button class="tab" data-tab="graphs"><span class="tab-i">&#128202;</span>Graphs</button>
+  <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
 </nav>
 
 <div class="content">
@@ -2141,7 +2181,6 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="graphics"><span class="mon-style-btn-ic">&#128202;</span>Graphics</button>
       <button class="mon-style-btn" data-monstyle="home"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
-      <button class="mon-style-btn" data-monstyle="knmi"><span class="mon-style-btn-ic">&#127788;</span>KNMI</button>
       <span class="mon-switcher-div"></span>
       <button class="mon-style-btn" data-monstyle="aurora"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
       <button class="mon-style-btn" data-monstyle="midnight"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
@@ -2154,16 +2193,6 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="mon-view" id="monViewGauges" style="display:none;"></div>
     <div class="mon-view" id="monViewGraphics" style="display:none;"></div>
     <div class="mon-view" id="monViewHome" style="display:none;"></div>
-    <div class="mon-view" id="monViewKnmi" style="display:none;">
-      <div class="knmi-wrap">
-        <div class="knmi-hd">
-          <div class="knmi-hd-title">&#127788; KNMI Data Platform <span class="knmi-hd-sub">Live in-situ observations</span></div>
-          <button class="knmi-refresh" onclick="loadKnmiData(true)">&#8635; Refresh</button>
-        </div>
-        <div class="knmi-status" id="knmiStatus">Tap refresh to load KNMI observations…</div>
-        <div class="knmi-grid" id="knmiGrid"></div>
-      </div>
-    </div>
     <div class="mon-view" id="monViewPower" style="display:none;">
     <div class="pw-wrap">
       <div class="pw-hd">
@@ -2759,6 +2788,23 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
+  <!-- GRAPHS -->
+  <div id="tab-graphs" class="tpanel hidden">
+    <div id="graphsContent"></div>
+  </div>
+
+  <!-- KNMI -->
+  <div id="tab-knmi" class="tpanel hidden">
+    <div class="knmi-wrap">
+      <div class="knmi-hd">
+        <div class="knmi-hd-title">&#127788; KNMI Data Platform <span class="knmi-hd-sub">Live in-situ observations</span></div>
+        <button class="knmi-refresh" onclick="loadKnmiData(true)">&#8635; Refresh</button>
+      </div>
+      <div class="knmi-status" id="knmiStatus">Tap refresh to load KNMI observations…</div>
+      <div class="knmi-grid" id="knmiGrid"></div>
+    </div>
+  </div>
+
 </div><!-- /.content -->
 
 <!-- Help modal -->
@@ -2769,7 +2815,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 6</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; Graphs &middot; KNMI)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4606,7 +4652,8 @@ const panels = {
   monitor: byId('tab-monitor'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
-  weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps')
+  weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps'),
+  graphs: byId('tab-graphs'), knmi: byId('tab-knmi')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -4659,6 +4706,14 @@ function switchTab(name){
       });
     }
   }
+  if(name === 'knmi'){
+    if(!window.__knmiLoaded){ window.__knmiLoaded = true; if(typeof loadKnmiData==='function') loadKnmiData(false); }
+  }
+  if(name === 'graphs'){
+    if(!__monitorOpened){ __monitorOpened = true; updateMonitor().then(()=>renderGraphsTab()).catch(()=>renderGraphsTab()); startMonitorRefresh(); }
+    else renderGraphsTab();
+    if(!__lastForecastData && typeof updateForecast==='function'){ updateForecast().then(()=>renderGraphsTab()).catch(()=>{}); }
+  }
 }
 
 /* Weather tab view switcher (Forecast & Climate moved into Weather tab) */
@@ -4680,7 +4735,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'graphs','8':'knmi'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -6181,7 +6236,7 @@ function _persistIsltMinMax(){
 }
 // Dashboard "faces" share the Monitor switcher: each maps to the glass dashboard view.
 const __DASH_FACES = ['aurora','midnight','daylight','metro','dark'];
-const __MON_FACES = ['sky','gauges','current','graphics','home','power','knmi'];
+const __MON_FACES = ['sky','gauges','current','graphics','home','power'];
 try { const sv = localStorage.getItem('rwc-monstyle'); if(__MON_FACES.indexOf(sv)>=0 || __DASH_FACES.indexOf(sv)>=0) __monStyle = sv; } catch(e){}
 
 function setMonStyle(style){
@@ -6189,19 +6244,14 @@ function setMonStyle(style){
   try { localStorage.setItem('rwc-monstyle', style); } catch(e){}
   document.querySelectorAll('.mon-style-btn').forEach(b => b.classList.toggle('active', b.dataset.monstyle === style));
   const isDash = __DASH_FACES.indexOf(style) >= 0;
-  const vc = byId('monViewCurrent'), vs = byId('monViewSky'), vg = byId('monViewGauges'), vgr = byId('monViewGraphics'), vh = byId('monViewHome'), vp = byId('monViewPower'), vk = byId('monViewKnmi'), vd = byId('monViewDash');
+  const vc = byId('monViewCurrent'), vs = byId('monViewSky'), vg = byId('monViewGauges'), vgr = byId('monViewGraphics'), vh = byId('monViewHome'), vp = byId('monViewPower'), vd = byId('monViewDash');
   if(vc) vc.style.display = style === 'current' ? '' : 'none';
   if(vs) vs.style.display = style === 'sky'     ? '' : 'none';
   if(vg) vg.style.display = style === 'gauges'  ? '' : 'none';
   if(vgr) vgr.style.display = style === 'graphics' ? '' : 'none';
   if(vh) vh.style.display = style === 'home' ? '' : 'none';
   if(vp) vp.style.display = style === 'power' ? '' : 'none';
-  if(vk) vk.style.display = style === 'knmi' ? '' : 'none';
   if(vd) vd.style.display = isDash ? '' : 'none';
-  // KNMI sub-view: load observations on first open
-  if(style === 'knmi' && typeof loadKnmiData === 'function' && !window.__knmiLoaded){
-    window.__knmiLoaded = true; loadKnmiData(false);
-  }
   // Power sub-view: render + run the clock; stop clock when leaving
   if(style === 'power'){
     if(typeof renderPowerStation === 'function') renderPowerStation();
@@ -6233,6 +6283,7 @@ function renderMonitorViews(data){
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
   // Glass dashboard faces (Aurora/Midnight/Daylight/Metro/Dark) live inside Monitor now
   try{ if(__DASH_FACES.indexOf(__monStyle) >= 0) renderDashboards(); }catch(e){}
+  try{ if(byId('tab-graphs') && !byId('tab-graphs').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
 }
 
 /* ═══════════ DASHBOARDS TAB ═══════════
@@ -6592,6 +6643,107 @@ function renderDashboards(){
   </div>`;
 }
 window.renderDashboards = renderDashboards;
+
+/* ═══ GRAPHS TAB ═══ */
+function _graphSparkSvg(pts, color, idx){
+  if(!pts || pts.length < 2) return '';
+  const W=200, H=52, pad=2;
+  const vals = pts.map(v => isFinite(v)?v:0);
+  const mn=Math.min(...vals), mx=Math.max(...vals), rng=Math.max(0.01,mx-mn);
+  const n=vals.length;
+  const X=i=>pad+(i/(n-1))*(W-2*pad);
+  const Y=v=>(H-4)-((v-mn)/rng)*(H-8)+2;
+  const co=vals.map((v,i)=>({x:X(i),y:Y(v)}));
+  let path=`M${co[0].x.toFixed(1)} ${co[0].y.toFixed(1)}`;
+  for(let i=0;i<co.length-1;i++){
+    const p0=co[i-1]||co[i],p1=co[i],p2=co[i+1],p3=co[i+2]||co[i+1];
+    const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6,c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+    path+=` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  const fill=path+` L${co[n-1].x.toFixed(1)} ${H} L${co[0].x.toFixed(1)} ${H} Z`;
+  const gid=`_gsg${idx}`;
+  return `<svg viewBox="0 0 ${W} ${H}"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.45"/><stop offset="100%" stop-color="${color}" stop-opacity="0.03"/></linearGradient></defs>
+    <path d="${fill}" fill="url(#${gid})"/><path d="${path}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function renderGraphsTab(){
+  const host = byId('graphsContent'); if(!host) return;
+  const d = __monLastData||{};
+  const p = d.synopP||{}, om = d.omCurrent||{}, omd = d.omDaily||{};
+  const fc = (typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
+  const wmo = (typeof _monWmoFromData==='function' && __monLastData) ? _monWmoFromData(d) : {icon:'cloud',desc:'—'};
+  const now = new Date();
+  const temp = p.temp_c!=null ? p.temp_c : null;
+  const rh = p.rh!=null ? Math.round(p.rh) : null;
+  const windKt = p.wind_kt!=null ? p.wind_kt : null;
+  const windKmh = windKt!=null ? +(windKt*1.852).toFixed(1) : null;
+  const windGustKt = p.wind_gust_kt!=null ? p.wind_gust_kt : null;
+  const uv = om.uv_index!=null ? om.uv_index : (fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const pres = p.pres_hpa!=null ? p.pres_hpa : (om.surface_pressure!=null?+(om.surface_pressure/100).toFixed(1):null);
+  const vis = p.vis_m!=null ? p.vis_m : null;
+  const dew = (temp!=null&&rh!=null) ? +(temp-(100-rh)/5).toFixed(1) : null;
+  const feels = (temp!=null&&typeof calcFeelsMonitor==='function') ? calcFeelsMonitor(temp,rh) : null;
+  const rain1h = om.rain!=null?om.rain:(om.precipitation!=null?om.precipitation:(p.precip_mm!=null?p.precip_mm:null));
+  const windDir = p.wind_dir!=null ? (typeof _MON_COMPASS16!=='undefined'?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'') : '';
+  // Hourly forecast for sparklines
+  let hourly = [];
+  if(fc&&fc[0]&&fc[0]._hourly){ hourly=[...fc[0]._hourly,...(fc[1]&&fc[1]._hourly?fc[1]._hourly:[])].slice(0,20); }
+  const tempPts = hourly.map(h=>h.temp).filter(t=>t!=null);
+  const precipPts = hourly.map(h=>h.precip||0);
+  const popPts = hourly.map(h=>(h.pop||0));
+  // Synthetic sparkline helper (deterministic variation based on hour)
+  const synth = (base, amp, n=16) => base!=null ? Array.from({length:n},(_,i)=>Math.max(0,base+amp*Math.sin((i+now.getHours())*0.72))) : null;
+  // Daily forecast bars
+  let daysHtml = '<div style="color:var(--muted);font-family:var(--cond);font-size:12px;">Forecast loading…</div>';
+  if(fc&&fc.length){
+    const days7=fc.slice(0,7);
+    const allLo=days7.map(d=>d.tempLow||99).filter(t=>t<99), allHi=days7.map(d=>d.tempHigh||-99).filter(t=>t>-99);
+    const gLo=allLo.length?Math.min(...allLo):20, gHi=allHi.length?Math.max(...allHi):35, gRng=Math.max(1,gHi-gLo);
+    daysHtml=days7.map((day,i)=>{
+      const dname=i===0?'Today':new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'});
+      const lo=day.tempLow!=null?Math.round(day.tempLow):null, hi=day.tempHigh!=null?Math.round(day.tempHigh):null;
+      const wc=typeof decodeWmoCode==='function'?decodeWmoCode(day.code,false):{icon:'cloud'};
+      const barLeft=lo!=null?+((lo-gLo)/gRng*100).toFixed(0):0;
+      const barW=lo!=null&&hi!=null?+((hi-lo)/gRng*100).toFixed(0):8;
+      return `<div class="gday-row"><span class="gday-name">${dname}</span><span class="gday-ic">${typeof buildWxIconSvg==='function'?buildWxIconSvg(wc.icon,20):''}</span><span class="gday-lo">${lo!=null?lo+'°':'—'}</span><div class="gday-bar"><div class="gday-bar-fill" style="left:${barLeft}%;width:${Math.max(6,barW)}%;"></div></div><span class="gday-hi">${hi!=null?hi+'°':'—'}</span></div>`;
+    }).join('');
+  }
+  // Metric cards
+  let mi=0;
+  const mcard=(label,icon,color,val,sub,pts)=>`<div class="gmet-card"><div class="gmet-hd"><span class="gmet-lbl" style="color:${color}">${label}</span><span class="gmet-icon">${icon}</span></div><div class="gmet-val">${val}</div>${sub?`<div class="gmet-sub">${sub}</div>`:''}<div class="gmet-spark">${pts&&pts.length>=2?_graphSparkSvg(pts,color,mi++):''}</div></div>`;
+  const metrics = [
+    mcard('Temperature','🌡️','#f59e0b', temp!=null?Math.round(temp)+'<small>°C</small>':'—', feels!=null?'Feels '+Math.round(feels)+'°':'', tempPts.length>=2?tempPts:synth(temp,1.5)),
+    mcard('Dew Point','💧','#10b981', dew!=null?Math.round(dew)+'<small>°C</small>':'—', rh!=null?'RH '+rh+'%':'', synth(dew,1)),
+    mcard('Humidity','💦','#3b82f6', rh!=null?rh+'<small>%</small>':'—', dew!=null?'Dew '+Math.round(dew)+'°':'', synth(rh,4)),
+    mcard('UV Index','☀️','#f97316', uv!=null?Math.round(uv)+'':'—', uv!=null?(uv<3?'Low':uv<6?'Moderate':uv<8?'High':'Very High'):'', synth(uv,0.8)),
+    mcard('Pressure','📊','#94a3b8', pres!=null?Math.round(pres)+'<small> hPa</small>':'—', 'Station pressure', synth(pres,1.2)),
+    mcard('Visibility','👁','#06b6d4', vis!=null?(vis>=9999?'&gt;10<small> km</small>':(vis/1000).toFixed(0)+'<small> km</small>'):'—', '', synth(vis!=null?vis/1000:null,0.3)),
+    mcard('Wind Speed','💨','#8b5cf6', windKmh!=null?windKmh+'<small> km/h</small>':'—', windDir?windDir+(p.wind_dir!=null?' '+Math.round(p.wind_dir)+'°':''):'', synth(windKmh,5)),
+    mcard('Wind Gust','🌪️','#a78bfa', windGustKt!=null?+(windGustKt*1.852).toFixed(0)+'<small> km/h</small>':'—', '', synth(windGustKt!=null?windGustKt*1.852:windKmh,7)),
+    mcard('Rainfall','🌧️','#0ea5e9', rain1h!=null?rain1h.toFixed(1)+'<small> mm</small>':'0<small> mm</small>', 'Last hour', precipPts.length>=2?precipPts:synth(rain1h||0,0.1)),
+    mcard('Feels Like','🌡️','#ec4899', feels!=null?Math.round(feels)+'<small>°C</small>':'—', feels!=null&&temp!=null?(Math.round(feels)>Math.round(temp)?'Warmer than actual':Math.round(feels)<Math.round(temp)?'Cooler':'Same'):'', synth(feels,1.5)),
+    mcard('Cloud Cover','☁️','#64748b', p.cloud_oktas!=null?Math.round(p.cloud_oktas/8*100)+'<small>%</small>':'—', p.cloud_oktas!=null?(p.cloud_oktas<=2?'Clear':p.cloud_oktas<=4?'Partly cloudy':'Overcast'):'', synth(p.cloud_oktas!=null?p.cloud_oktas/8*100:null,8)),
+    mcard('Precip Prob.','🌦️','#38bdf8', popPts.length?Math.round(popPts[0])+'<small>%</small>':'—', 'Next hour', popPts.length>=2?popPts:synth(popPts[0]||0,5)),
+  ].join('');
+  host.innerHTML = `<div class="graphs-wrap">
+    <div class="graphs-top">
+      <div class="graphs-hero">
+        <div class="graphs-hero-hd">
+          <div class="graphs-hero-ic">${typeof buildWxIconSvg==='function'?buildWxIconSvg(wmo.icon,54):''}</div>
+          <div><div class="graphs-hero-temp">${temp!=null?Math.round(temp)+'<sup>°C</sup>':'—'}</div><div class="graphs-hero-cond">${wmo.desc}</div></div>
+        </div>
+        <div class="graphs-hero-meta">
+          ${windKmh!=null?`<span>💨 ${windKmh} km/h ${windDir}</span>`:''}${rh!=null?`<span>💧 ${rh}%</span>`:''}${rain1h!=null&&rain1h>0.05?`<span>🌧️ ${rain1h.toFixed(1)}mm</span>`:''}${pres!=null?`<span>📊 ${Math.round(pres)} hPa</span>`:''}
+        </div>
+        <div class="graphs-fc-bars">${daysHtml}</div>
+      </div>
+      <div class="graphs-radar">
+        <iframe src="https://embed.windy.com/embed2.html?lat=12.178&lon=-68.238&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" allowfullscreen loading="lazy" title="Windy radar — Bonaire"></iframe>
+      </div>
+    </div>
+    <div class="graphs-metrics">${metrics}</div>
+  </div>`;
+}
+window.renderGraphsTab = renderGraphsTab;
 
 /* shared helpers for the alt views */
 function _monWmoFromData(d){

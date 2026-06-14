@@ -2165,7 +2165,6 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
   <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
-  <button class="tab" data-tab="graphs"><span class="tab-i">&#128202;</span>Graphs</button>
   <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
 </nav>
 
@@ -2788,20 +2787,24 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
-  <!-- GRAPHS -->
-  <div id="tab-graphs" class="tpanel hidden">
-    <div id="graphsContent"></div>
-  </div>
-
   <!-- KNMI -->
   <div id="tab-knmi" class="tpanel hidden">
-    <div class="knmi-wrap">
-      <div class="knmi-hd">
-        <div class="knmi-hd-title">&#127788; KNMI Data Platform <span class="knmi-hd-sub">Live in-situ observations</span></div>
-        <button class="knmi-refresh" onclick="loadKnmiData(true)">&#8635; Refresh</button>
+    <div class="av-subnav">
+      <button class="av-sub-btn active" data-knmisub="data" onclick="showKnmiSub('data')">&#127788; KNMI Data</button>
+      <button class="av-sub-btn" data-knmisub="graphs" onclick="showKnmiSub('graphs')">&#128202; Graphs</button>
+    </div>
+    <div id="knmi-view-data" class="knmi-view">
+      <div class="knmi-wrap">
+        <div class="knmi-hd">
+          <div class="knmi-hd-title">&#127788; KNMI Data Platform <span class="knmi-hd-sub">Live in-situ observations</span></div>
+          <button class="knmi-refresh" onclick="loadKnmiData(true)">&#8635; Refresh</button>
+        </div>
+        <div class="knmi-status" id="knmiStatus">Tap refresh to load KNMI observations…</div>
+        <div class="knmi-grid" id="knmiGrid"></div>
       </div>
-      <div class="knmi-status" id="knmiStatus">Tap refresh to load KNMI observations…</div>
-      <div class="knmi-grid" id="knmiGrid"></div>
+    </div>
+    <div id="knmi-view-graphs" class="knmi-view" style="display:none;">
+      <div id="graphsContent"></div>
     </div>
   </div>
 
@@ -2815,7 +2818,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 8</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; Graphs &middot; KNMI)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 7</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC &middot; KNMI)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4653,7 +4656,7 @@ const panels = {
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps'),
-  graphs: byId('tab-graphs'), knmi: byId('tab-knmi')
+  knmi: byId('tab-knmi')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -4708,13 +4711,25 @@ function switchTab(name){
   }
   if(name === 'knmi'){
     if(!window.__knmiLoaded){ window.__knmiLoaded = true; if(typeof loadKnmiData==='function') loadKnmiData(false); }
+    // default to KNMI Data sub-view if none active
+    var anyK = document.querySelector('.av-sub-btn[data-knmisub].active');
+    showKnmiSub(anyK ? anyK.dataset.knmisub : 'data');
   }
-  if(name === 'graphs'){
+}
+
+/* KNMI sub-tab switcher (KNMI Data | Graphs) */
+function showKnmiSub(which){
+  document.querySelectorAll('#knmi-view-data, #knmi-view-graphs').forEach(function(el){
+    el.style.display = (el.id === 'knmi-view-' + which) ? '' : 'none';
+  });
+  document.querySelectorAll('.av-sub-btn[data-knmisub]').forEach(function(b){ b.classList.toggle('active', b.dataset.knmisub===which); });
+  if(which === 'graphs'){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor().then(()=>renderGraphsTab()).catch(()=>renderGraphsTab()); startMonitorRefresh(); }
     else renderGraphsTab();
     if(!__lastForecastData && typeof updateForecast==='function'){ updateForecast().then(()=>renderGraphsTab()).catch(()=>{}); }
   }
 }
+window.showKnmiSub = showKnmiSub;
 
 /* Weather tab view switcher (Forecast & Climate moved into Weather tab) */
 function switchWxView(view, btn){
@@ -4735,7 +4750,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'graphs','8':'knmi'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc','7':'knmi'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -6283,7 +6298,7 @@ function renderMonitorViews(data){
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
   // Glass dashboard faces (Aurora/Midnight/Daylight/Metro/Dark) live inside Monitor now
   try{ if(__DASH_FACES.indexOf(__monStyle) >= 0) renderDashboards(); }catch(e){}
-  try{ if(byId('tab-graphs') && !byId('tab-graphs').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
+  try{ var gv = byId('knmi-view-graphs'); if(gv && gv.style.display !== 'none' && !byId('tab-knmi').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
 }
 
 /* ═══════════ DASHBOARDS TAB ═══════════

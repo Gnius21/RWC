@@ -1466,6 +1466,16 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-metro-uv,.dash-metro-sun{padding:14px;display:flex;flex-direction:column;align-items:center;}
 .dash-metro-uv-lbl,.dash-metro-sun-lbl{font-family:var(--cond);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dmut);margin-bottom:4px;align-self:flex-start;}
 .dash-metro-sun-times{display:flex;justify-content:space-between;width:100%;font-family:var(--mono);font-size:9px;color:var(--dmut);margin-top:2px;}
+.dash-metro-hero{padding:16px 18px 14px;}
+.dash-metro-hero-loc{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.9px;color:var(--dmut);}
+.dash-metro-hero-row{display:flex;align-items:center;justify-content:space-between;margin:6px 0 2px;}
+.dash-metro-hero-temp{font-family:var(--cond);font-size:56px;font-weight:800;line-height:1;color:var(--dtxt);}
+.dash-metro-hero-temp sup{font-size:22px;vertical-align:super;opacity:.7;}
+.dash-metro-hero-icon{width:68px;height:68px;flex:0 0 auto;}
+.dash-metro-hero-icon svg,.dash-metro-hero-icon span{width:68px!important;height:68px!important;}
+.dash-metro-hero-cond{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--dtxt);}
+.dash-metro-hero-hl{display:flex;gap:14px;margin-top:5px;font-family:var(--cond);font-size:12px;color:var(--dmut);}
+.dash-metro-hero-hl b{color:var(--dtxt);}
 .dash-metro-hours-card{padding:10px 6px;}
 .dash-metro-hours-hd{padding:0 10px 6px;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dmut);}
 .dash-metro-days-card{padding:12px 12px 10px;}
@@ -1518,12 +1528,14 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-dark-sect-hd{font-family:var(--cond);font-size:14px;font-weight:800;color:var(--dtxt);}
 .dash-dark-hl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:8px;}
 @media(max-width:860px){.dash-dark-hl-grid{grid-template-columns:1fr 1fr;}}
-.dash-dark-hl-card{background:var(--dcard);border:1px solid var(--dbd);border-radius:13px;padding:11px 12px;display:flex;flex-direction:column;gap:3px;}
+.dash-dark-hl-card{background:var(--dcard);border:1px solid var(--dbd);border-radius:13px;padding:12px;display:flex;flex-direction:column;gap:2px;}
+.dash-dark-hl-top{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.dash-dark-hl-icon{font-size:16px;line-height:1;}
 .dash-dark-hl-label{font-family:var(--cond);font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--dmut);}
 .dash-dark-hl-val{font-family:var(--cond);font-size:22px;font-weight:800;color:var(--dtxt);line-height:1.1;}
 .dash-dark-hl-val small{font-size:12px;opacity:.7;}
-.dash-dark-hl-sub{font-family:var(--mono);font-size:9.5px;color:var(--dmut);}
-.dash-dark-hl-bar{height:4px;border-radius:2px;background:rgba(128,128,128,0.18);overflow:hidden;margin-top:3px;}
+.dash-dark-hl-sub{font-family:var(--mono);font-size:9.5px;color:var(--dmut);margin-top:1px;}
+.dash-dark-hl-bar{height:4px;border-radius:2px;background:rgba(128,128,128,0.18);overflow:hidden;margin-top:4px;}
 .dash-dark-hl-bar>div{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--dacc2),var(--dacc));}
 .dash-dark-fc-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-top:8px;}
 .dash-dark-fc-strip::-webkit-scrollbar{display:none;}
@@ -6234,6 +6246,7 @@ function setDashStyle(style, btn){
   const root = byId('dashRoot');
   if(root) root.className = 'dash-' + style;
   document.querySelectorAll('.dash-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
+  try{ renderDashboards(); }catch(e){}
 }
 window.setDashStyle = setDashStyle;
 
@@ -6355,10 +6368,14 @@ function renderMetroDash(host){
   const d=__monLastData; if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
   const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};
   const fc=(typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
-  const now=new Date();
+  const wmo=_monWmoFromData(d); const now=new Date();
   const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
   const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
   const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const temp=p.temp_c!=null?Math.round(p.temp_c):null;
+  const feels=p.temp_c!=null?Math.round(calcFeelsMonitor(p.temp_c,p.rh)):null;
+  const hiTemp=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
+  const loTemp=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
   let hours=[]; if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
   const hoursHtml=hours.length?hours.map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:12px;">Hourly data loads with Forecast</div>';
   const days=fc?fc.slice(0,6):[];
@@ -6373,16 +6390,26 @@ function renderMetroDash(host){
     {tag:'Rain',title:`${rain1h!=null&&rain1h>0.05?rain1h.toFixed(1)+'mm last hour.':'No significant rainfall at this time.'}`,meta:'Last hour'},
     {tag:'Humidity',title:`Relative humidity ${rh!=null?rh+'%':'data pending'}`,meta:'Current observation'},
   ];
+  /* Layout: LEFT = hero + hourly + 6-day grid  |  RIGHT = UV gauge + sun arc + chart + news */
   host.innerHTML=`<div class="dash-metro-wrap">
   <div class="dash-metro-left">
-    <div class="dash-metro-top-row">
-      <div class="dash-metro-card dash-metro-uv"><div class="dash-metro-uv-lbl">UV Index</div>${_metroUVGauge(uv)}</div>
-      <div class="dash-metro-card dash-metro-sun"><div class="dash-metro-sun-lbl">Sun Arc</div>${_metroSunArc(sr,ss)}<div class="dash-metro-sun-times"><span>&#9728; ${_fmtClk(sr)}</span><span>&#127748; ${_fmtClk(ss)}</span></div></div>
+    <div class="dash-metro-card dash-metro-hero">
+      <div class="dash-metro-hero-loc">&#128205; Cura&ccedil;ao &middot; ABC Islands &middot; ${now.toLocaleDateString('en-US',{weekday:'short',day:'numeric',month:'short'})}</div>
+      <div class="dash-metro-hero-row">
+        <div class="dash-metro-hero-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+        <div class="dash-metro-hero-icon">${buildWxIconSvg(wmo.icon,68)}</div>
+      </div>
+      <div class="dash-metro-hero-cond">${wmo.desc}</div>
+      <div class="dash-metro-hero-hl">${hiTemp!=null?'<span>H: <b>'+hiTemp+'°</b></span>':''}${loTemp!=null?'<span>L: <b>'+loTemp+'°</b></span>':''}${feels!=null?'<span>Feels <b>'+feels+'°</b></span>':''}</div>
     </div>
     <div class="dash-metro-card dash-metro-hours-card"><div class="dash-metro-hours-hd">Hourly Forecast</div><div class="dash-hours">${hoursHtml}</div></div>
     <div class="dash-metro-card dash-metro-days-card"><div class="dash-metro-days-hd">6-Day Forecast</div><div class="dash-metro-days">${daysHtml}</div></div>
   </div>
   <div class="dash-metro-right">
+    <div class="dash-metro-top-row">
+      <div class="dash-metro-card dash-metro-uv"><div class="dash-metro-uv-lbl">UV Index</div>${_metroUVGauge(uv)}</div>
+      <div class="dash-metro-card dash-metro-sun"><div class="dash-metro-sun-lbl">Sun Arc</div>${_metroSunArc(sr,ss)}<div class="dash-metro-sun-times"><span>&#9728; ${_fmtClk(sr)}</span><span>&#127748; ${_fmtClk(ss)}</span></div></div>
+    </div>
     <div class="dash-metro-card dash-metro-chart-card">
       <div class="dash-metro-chart-hd">Weather Trends</div>
       <div class="dash-metro-chart-tabs">
@@ -6430,14 +6457,14 @@ function renderDarkDash(host){
     return`<div class="dash-dark-city"><span class="dash-dark-city-ic">${buildWxIconSvg(ic2,30)}</span><span class="dash-dark-city-info"><span class="dash-dark-city-nm">${nm}</span><span class="dash-dark-city-desc">${desc}</span></span><span class="dash-dark-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;
   }).join('');
   const highlights=[
-    {label:'Wind Status',val:(windKmh!=null?windKmh+'<small> km/h</small>':'—'),sub:windDir||(windKmh!=null?'Variable':'No data'),bar:null},
-    {label:'Humidity',val:(rh!=null?rh+'<small>%</small>':'—'),sub:dew!=null?'Dew pt: '+dew+'°':'',bar:rh},
-    {label:'Sunrise',val:_fmtClk(sr),sub:'Sunset: '+_fmtClk(ss),bar:null},
-    {label:'UV Index',val:(uv!=null?String(Math.round(uv)):'—'),sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):0},
-    {label:'Visibility',val:vis,sub:'',bar:null},
-    {label:'Sunset',val:_fmtClk(ss),sub:'Sunrise: '+_fmtClk(sr),bar:null},
+    {icon:'💨',label:'Wind Status',val:(windKmh!=null?windKmh+'<small> km/h</small>':'—'),sub:windDir||(windKmh!=null?'Variable':'No data'),bar:null},
+    {icon:'💧',label:'Humidity',val:(rh!=null?rh+'<small>%</small>':'—'),sub:dew!=null?'Dew pt: '+dew+'°':'',bar:rh},
+    {icon:'🌅',label:'Sunrise',val:_fmtClk(sr),sub:'Sunset: '+_fmtClk(ss),bar:null},
+    {icon:'☀️',label:'UV Index',val:(uv!=null?String(Math.round(uv)):'—'),sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):0},
+    {icon:'👁️',label:'Visibility',val:vis,sub:'',bar:null},
+    {icon:'🌇',label:'Sunset',val:_fmtClk(ss),sub:'Sunrise: '+_fmtClk(sr),bar:null},
   ];
-  const hlHtml=highlights.map(m=>`<div class="dash-dark-hl-card"><div class="dash-dark-hl-label">${m.label}</div><div class="dash-dark-hl-val">${m.val}</div>${m.bar!=null?`<div class="dash-dark-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%;"></div></div>`:''}<div class="dash-dark-hl-sub">${m.sub||''}</div></div>`).join('');
+  const hlHtml=highlights.map(m=>`<div class="dash-dark-hl-card"><div class="dash-dark-hl-top"><span class="dash-dark-hl-icon">${m.icon}</span><span class="dash-dark-hl-label">${m.label}</span></div><div class="dash-dark-hl-val">${m.val}</div>${m.bar!=null?`<div class="dash-dark-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%;"></div></div>`:''}<div class="dash-dark-hl-sub">${m.sub||''}</div></div>`).join('');
   const fcDays=fc?fc.slice(0,10):[];
   const fcHtml=fcDays.length?fcDays.map((day,i)=>{const dname=i===0?'Today':new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false),hi2=day.tempHigh!=null?Math.round(day.tempHigh):null,lo2=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-dark-fc-day${i===0?' today':''}"><span class="dash-dark-fc-day-nm">${dname}</span><span class="dash-dark-fc-day-ic">${buildWxIconSvg(wc.icon,28)}</span><span class="dash-dark-fc-day-hi">${hi2!=null?hi2+'°':'—'}</span><span class="dash-dark-fc-day-lo">${lo2!=null?lo2+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;">Forecast loading…</div>';
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});

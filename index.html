@@ -4,9 +4,13 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="theme-color" content="#020c16"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="RWC Caribbean"/>
+<meta name="application-name" content="RWC Caribbean"/>
+<meta name="msapplication-TileColor" content="#020c16"/>
+<meta name="msapplication-config" content="none"/>
 <title>RWC Caribbean</title>
 <!-- PWA manifest + icons -->
 <link rel="manifest" href="manifest.json"/>
@@ -4743,6 +4747,13 @@ function switchWxView(view, btn){
 window.switchWxView = switchWxView;
 
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+
+/* PWA shortcut deep-linking — manifest shortcuts pass a #hash */
+(function(){
+  const validTabs = ['monitor','aviation','stations','weather','maps','atc','knmi'];
+  const hash = (location.hash||'').replace('#','').toLowerCase();
+  if(hash && validTabs.includes(hash)) switchTab(hash);
+})();
 
 /* Keyboard shortcuts (FIX #6: Escape handling for the help-modal lives only in the
    help-modal IIFE below, to avoid a duplicate listener. Escape here only releases

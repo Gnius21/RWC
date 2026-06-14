@@ -961,9 +961,11 @@ body.tab-hidden *{animation-play-state:paused !important;}
 }
 
 /* ═══════════ MONITOR STYLE SWITCHER ═══════════ */
-.mon-switcher{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;}
-.mon-switcher-lbl{font-family:var(--cond);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:4px;}
-.mon-style-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;height:32px;}
+.mon-switcher{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:2px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;padding-bottom:4px;scroll-padding-left:8px;}
+.mon-switcher::-webkit-scrollbar{display:none;}
+.mon-switcher-lbl{font-family:var(--cond);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:4px;flex:0 0 auto;}
+.mon-switcher-div{flex:0 0 auto;width:1px;height:22px;background:linear-gradient(180deg,transparent,var(--bdrb),transparent);margin:0 3px;}
+.mon-style-btn{flex:0 0 auto;scroll-snap-align:start;padding:6px 14px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;height:32px;white-space:nowrap;}
 .mon-style-btn:hover{border-color:var(--bdrb);color:var(--acc);background:rgba(77,184,255,0.05);}
 .mon-style-btn.active{background:linear-gradient(180deg,rgba(26,111,255,0.9),rgba(10,80,200,0.9));border-color:rgba(77,184,255,0.5);color:#fff;box-shadow:0 4px 14px rgba(26,111,255,0.28);}
 :root.night .mon-style-btn.active{background:linear-gradient(180deg,rgba(140,70,0,0.9),rgba(90,40,0,0.9));border-color:rgba(180,90,0,0.4);}
@@ -2120,7 +2122,6 @@ html,body{max-width:100%;overflow-x:hidden;}
 <!-- TABS -->
 <nav class="tabs" role="tablist">
   <button class="tab active" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
-  <button class="tab" data-tab="dashboards"><span class="tab-i">&#10024;</span>Dashboards</button>
   <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
@@ -2132,8 +2133,8 @@ html,body{max-width:100%;overflow-x:hidden;}
 
   <!-- MONITOR -->
   <div id="tab-monitor" class="tpanel">
-    <div class="mon-switcher">
-      <span class="mon-switcher-lbl">Dashboard</span>
+    <div class="mon-switcher" id="monSwitcher">
+      <span class="mon-switcher-lbl">Faces</span>
       <button class="mon-style-btn active" data-monstyle="current"><span class="mon-style-btn-ic">&#9632;</span>Current</button>
       <button class="mon-style-btn" data-monstyle="sky"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
       <button class="mon-style-btn" data-monstyle="gauges"><span class="mon-style-btn-ic">&#9201;</span>Gauges</button>
@@ -2141,7 +2142,14 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="home"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
       <button class="mon-style-btn" data-monstyle="knmi"><span class="mon-style-btn-ic">&#127788;</span>KNMI</button>
+      <span class="mon-switcher-div"></span>
+      <button class="mon-style-btn" data-monstyle="aurora"><span class="mon-style-btn-ic">&#127769;</span>Aurora</button>
+      <button class="mon-style-btn" data-monstyle="midnight"><span class="mon-style-btn-ic">&#127761;</span>Midnight</button>
+      <button class="mon-style-btn" data-monstyle="daylight"><span class="mon-style-btn-ic">&#9925;</span>Daylight</button>
+      <button class="mon-style-btn" data-monstyle="metro"><span class="mon-style-btn-ic">&#127956;</span>Metro</button>
+      <button class="mon-style-btn" data-monstyle="dark"><span class="mon-style-btn-ic">&#9899;</span>Dark</button>
     </div>
+    <div class="mon-view" id="monViewDash" style="display:none;"><div id="dashRoot" class="dash-aurora"></div></div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
     <div class="mon-view" id="monViewGauges" style="display:none;"></div>
     <div class="mon-view" id="monViewGraphics" style="display:none;"></div>
@@ -2610,19 +2618,6 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
-  <!-- DASHBOARDS -->
-  <div id="tab-dashboards" class="tpanel hidden">
-    <div class="dash-switcher">
-      <span class="dash-switcher-lbl">Style</span>
-      <button class="dash-style-btn active" data-dashstyle="aurora" onclick="setDashStyle('aurora',this)">&#127769; Aurora</button>
-      <button class="dash-style-btn" data-dashstyle="midnight" onclick="setDashStyle('midnight',this)">&#127769; Midnight</button>
-      <button class="dash-style-btn" data-dashstyle="daylight" onclick="setDashStyle('daylight',this)">&#9925; Daylight</button>
-      <button class="dash-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro',this)">&#127756; Metro</button>
-      <button class="dash-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark',this)">&#9899; Dark</button>
-    </div>
-    <div id="dashRoot" class="dash-aurora"></div>
-  </div>
-
   <!-- MAPS -->
   <div id="tab-maps" class="tpanel hidden">
     <div class="map-tab-wrap">
@@ -2774,7 +2769,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 7</kbd><span>Switch tabs (Monitor &middot; Dashboards &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 6</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4609,7 +4604,6 @@ document.querySelectorAll('[data-climview]').forEach(btn => {
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   monitor: byId('tab-monitor'),
-  dashboards: byId('tab-dashboards'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps')
@@ -4649,9 +4643,6 @@ function switchTab(name){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
     else { updateMonitor(); }
   }
-  if(name==='dashboards'){
-    if(typeof openDashboards === 'function') openDashboards();
-  }
   if(name==='aviation'){
     // default to METAR sub-view if none active
     var anyActive = document.querySelector('.av-sub-btn.active');
@@ -4689,7 +4680,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'dashboards','3':'aviation','4':'stations','5':'weather','6':'maps','7':'atc'};
+  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -6157,9 +6148,8 @@ function startMonitorRefresh(){
   if(__monitorTimer) clearInterval(__monitorTimer);
   __monitorTimer = setInterval(() => {
     const monOpen  = byId('tab-monitor')    && !byId('tab-monitor').classList.contains('hidden');
-    const dashOpen = byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden');
-    if(!testMode && !hidden() && (monOpen || dashOpen)){
-      updateMonitor();           // renderMonitorViews keeps the Dashboards tab fresh too
+    if(!testMode && !hidden() && monOpen){
+      updateMonitor();           // renderMonitorViews keeps the active face (incl. dashboards) fresh
       renderStationsAverage();   // refresh island avg from latest (background-fetched) station data
     }
   }, 60000);
@@ -6189,13 +6179,17 @@ function _checkIsltDayReset(){
 function _persistIsltMinMax(){
   try{ localStorage.setItem('islt-minmax', JSON.stringify({d:__isltTempDay, mx:__isltTempMax, mn:__isltTempMin})); }catch(e){}
 }
-try { const sv = localStorage.getItem('rwc-monstyle'); if(sv==='sky'||sv==='gauges'||sv==='current'||sv==='graphics'||sv==='home'||sv==='power'||sv==='knmi') __monStyle = sv; } catch(e){}
+// Dashboard "faces" share the Monitor switcher: each maps to the glass dashboard view.
+const __DASH_FACES = ['aurora','midnight','daylight','metro','dark'];
+const __MON_FACES = ['sky','gauges','current','graphics','home','power','knmi'];
+try { const sv = localStorage.getItem('rwc-monstyle'); if(__MON_FACES.indexOf(sv)>=0 || __DASH_FACES.indexOf(sv)>=0) __monStyle = sv; } catch(e){}
 
 function setMonStyle(style){
   __monStyle = style;
   try { localStorage.setItem('rwc-monstyle', style); } catch(e){}
   document.querySelectorAll('.mon-style-btn').forEach(b => b.classList.toggle('active', b.dataset.monstyle === style));
-  const vc = byId('monViewCurrent'), vs = byId('monViewSky'), vg = byId('monViewGauges'), vgr = byId('monViewGraphics'), vh = byId('monViewHome'), vp = byId('monViewPower'), vk = byId('monViewKnmi');
+  const isDash = __DASH_FACES.indexOf(style) >= 0;
+  const vc = byId('monViewCurrent'), vs = byId('monViewSky'), vg = byId('monViewGauges'), vgr = byId('monViewGraphics'), vh = byId('monViewHome'), vp = byId('monViewPower'), vk = byId('monViewKnmi'), vd = byId('monViewDash');
   if(vc) vc.style.display = style === 'current' ? '' : 'none';
   if(vs) vs.style.display = style === 'sky'     ? '' : 'none';
   if(vg) vg.style.display = style === 'gauges'  ? '' : 'none';
@@ -6203,6 +6197,7 @@ function setMonStyle(style){
   if(vh) vh.style.display = style === 'home' ? '' : 'none';
   if(vp) vp.style.display = style === 'power' ? '' : 'none';
   if(vk) vk.style.display = style === 'knmi' ? '' : 'none';
+  if(vd) vd.style.display = isDash ? '' : 'none';
   // KNMI sub-view: load observations on first open
   if(style === 'knmi' && typeof loadKnmiData === 'function' && !window.__knmiLoaded){
     window.__knmiLoaded = true; loadKnmiData(false);
@@ -6214,9 +6209,13 @@ function setMonStyle(style){
   } else {
     if(typeof stopPowerClock === 'function') stopPowerClock();
   }
+  // Dashboard faces: apply the palette class + render
+  if(isDash && typeof setDashStyle === 'function'){
+    setDashStyle(style);
+  }
   if(__monLastData) renderMonitorViews(__monLastData);
   // if switching into a forecast-backed view and the cache is empty, fetch it now
-  if((style === 'sky' || style === 'gauges' || style === 'graphics' || style === 'home') && !__lastForecastData){
+  if((style === 'sky' || style === 'gauges' || style === 'graphics' || style === 'home' || isDash) && !__lastForecastData){
     updateForecast().then(() => { if(__monLastData) renderMonitorViews(__monLastData); }).catch(()=>{});
   }
 }
@@ -6232,8 +6231,8 @@ function renderMonitorViews(data){
   if(__monStyle === 'graphics') renderGraphicsView(data);
   if(__monStyle === 'home')     renderHomeView(data);
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
-  // Keep the Dashboards tab live too if it's open
-  try{ if(byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden')) renderDashboards(); }catch(e){}
+  // Glass dashboard faces (Aurora/Midnight/Daylight/Metro/Dark) live inside Monitor now
+  try{ if(__DASH_FACES.indexOf(__monStyle) >= 0) renderDashboards(); }catch(e){}
 }
 
 /* ═══════════ DASHBOARDS TAB ═══════════
@@ -6591,14 +6590,6 @@ function renderDashboards(){
       </div>
     </div>
   </div>`;
-}
-function openDashboards(){
-  setDashStyle(__dashStyle);
-  if(!__monitorOpened){ __monitorOpened = true; startMonitorRefresh(); }
-  if(!__monLastData){ updateMonitor().then(()=>renderDashboards()).catch(()=>renderDashboards()); }
-  else { updateMonitor(); }   // background refresh; renderMonitorViews re-renders the dashboard
-  if(!__lastForecastData){ updateForecast().then(()=>renderDashboards()).catch(()=>{}); }
-  renderDashboards();
 }
 window.renderDashboards = renderDashboards;
 

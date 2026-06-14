@@ -1444,6 +1444,83 @@ body.tab-hidden *{animation-play-state:paused !important;}
 :root.neon .wx-style-btn.active, :root.neon .av-sub-btn.active { box-shadow: 0 0 10px rgba(0,229,255,0.3); }
 :root.neon #reloadBarFill { background: linear-gradient(90deg,#7c3aed,#00e5ff,#aef7ff); box-shadow: 0 0 8px #00e5ff, 0 0 18px rgba(0,229,255,0.55); }
 
+/* ═══════════ DASHBOARDS TAB (glassmorphic weather styles) ═══════════ */
+.dash-switcher{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.dash-switcher-lbl{font-family:var(--cond);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:2px;}
+.dash-style-btn{padding:6px 13px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;cursor:pointer;transition:all .18s;height:31px;}
+.dash-style-btn:hover{border-color:var(--bdrb);color:var(--acc);background:rgba(77,184,255,0.05);}
+.dash-style-btn.active{background:rgba(77,184,255,0.16);border-color:rgba(77,184,255,0.55);color:var(--acc);box-shadow:0 0 10px rgba(77,184,255,0.18);}
+
+/* Style palettes — applied to #dashRoot */
+.dash-aurora  {--db1:#1c1146;--db2:#2e1c63;--db3:#0e0a26;--dcard:rgba(255,255,255,0.065);--dcard2:rgba(255,255,255,0.10);--dbd:rgba(185,150,255,0.20);--dtxt:#f1ebff;--dmut:#ad9fda;--dacc:#c084fc;--dacc2:#818cf8;--dglow:rgba(192,132,252,0.40);}
+.dash-midnight{--db1:#0a1a3c;--db2:#112c63;--db3:#060e24;--dcard:rgba(120,165,255,0.07);--dcard2:rgba(120,165,255,0.12);--dbd:rgba(120,175,255,0.20);--dtxt:#e7f1ff;--dmut:#90a8d2;--dacc:#5fa8ff;--dacc2:#8b6cff;--dglow:rgba(95,168,255,0.35);}
+.dash-daylight{--db1:#9fbdec;--db2:#c2d3f4;--db3:#dce7fb;--dcard:rgba(255,255,255,0.55);--dcard2:rgba(255,255,255,0.72);--dbd:rgba(255,255,255,0.85);--dtxt:#243456;--dmut:#5e6f96;--dacc:#4f6ef0;--dacc2:#8a6cf0;--dglow:rgba(110,140,235,0.30);}
+
+#dashRoot{border-radius:22px;padding:16px;background:linear-gradient(165deg,var(--db1) 0%,var(--db2) 52%,var(--db3) 100%);color:var(--dtxt);position:relative;overflow:hidden;animation:pin .4s cubic-bezier(.16,1,.3,1) both;}
+#dashRoot::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 600px 400px at 12% -8%,var(--dglow),transparent 60%),radial-gradient(ellipse 500px 360px at 95% 110%,var(--dglow),transparent 55%);opacity:.5;}
+.dash-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.18fr 1fr;gap:14px;align-items:start;}
+@media(max-width:860px){.dash-grid{grid-template-columns:1fr;}}
+.dash-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.dash-card{background:var(--dcard);border:1px solid var(--dbd);border-radius:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.10),0 8px 26px rgba(0,0,0,0.22);}
+
+/* Hero */
+.dash-hero{position:relative;padding:22px 22px 18px;overflow:hidden;}
+.dash-hero-loc{display:flex;align-items:center;gap:6px;font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.6px;color:var(--dtxt);opacity:.92;}
+.dash-hero-sub{font-family:var(--mono);font-size:12px;color:var(--dmut);margin-top:1px;}
+.dash-hero-temp{font-family:var(--cond);font-size:74px;font-weight:800;line-height:.95;margin-top:10px;letter-spacing:-2px;}
+.dash-hero-temp sup{font-size:30px;font-weight:600;vertical-align:super;opacity:.75;}
+.dash-hero-cond{font-family:var(--cond);font-size:17px;font-weight:700;letter-spacing:.4px;margin-top:2px;}
+.dash-hero-hl{display:flex;gap:14px;margin-top:10px;font-family:var(--cond);font-size:13px;font-weight:700;color:var(--dmut);}
+.dash-hero-hl b{color:var(--dtxt);}
+.dash-hero-ic{position:absolute;top:14px;right:14px;width:108px;height:108px;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.35));}
+.dash-hero-ic svg,.dash-hero-ic span{width:108px!important;height:108px!important;}
+
+/* Hourly strip */
+.dash-hours-card{padding:12px 6px;}
+.dash-hours-hd{display:flex;justify-content:space-between;align-items:center;padding:0 12px 8px;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dmut);}
+.dash-hours{display:flex;gap:8px;overflow-x:auto;padding:0 10px 4px;scrollbar-width:none;}
+.dash-hours::-webkit-scrollbar{display:none;}
+.dash-hour{flex:0 0 auto;width:58px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;background:var(--dcard2);border:1px solid var(--dbd);}
+.dash-hour.now{background:linear-gradient(180deg,var(--dacc2),var(--dacc));border-color:transparent;box-shadow:0 4px 14px var(--dglow);}
+.dash-hour.now .dash-hour-t,.dash-hour.now .dash-hour-tmp{color:#fff;}
+.dash-hour-t{font-family:var(--mono);font-size:11px;color:var(--dmut);}
+.dash-hour-ic{width:34px;height:34px;}
+.dash-hour-ic svg,.dash-hour-ic span{width:34px!important;height:34px!important;}
+.dash-hour-tmp{font-family:var(--cond);font-size:14px;font-weight:800;color:var(--dtxt);}
+.dash-hour-pop{font-family:var(--mono);font-size:9px;color:var(--dacc);min-height:11px;}
+
+/* Temp graph */
+.dash-graph-card{padding:14px 16px 10px;}
+.dash-graph-hd{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dmut);margin-bottom:6px;}
+.dash-graph-svg{width:100%;height:90px;display:block;overflow:visible;}
+
+/* Metrics grid */
+.dash-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.dash-metric{padding:13px 14px;border-radius:16px;display:flex;flex-direction:column;gap:3px;min-height:84px;}
+.dash-metric-hd{display:flex;align-items:center;gap:6px;font-family:var(--cond);font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--dmut);}
+.dash-metric-v{font-family:var(--cond);font-size:26px;font-weight:800;color:var(--dtxt);line-height:1.05;}
+.dash-metric-v small{font-size:14px;font-weight:600;opacity:.7;}
+.dash-metric-s{font-family:var(--mono);font-size:11px;color:var(--dmut);margin-top:auto;}
+.dash-metric-bar{height:5px;border-radius:3px;background:rgba(128,128,128,0.18);overflow:hidden;margin-top:5px;}
+.dash-metric-bar>div{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--dacc2),var(--dacc));}
+
+/* Cities */
+.dash-cities-card{padding:8px 6px;}
+.dash-cities-hd{padding:6px 12px 4px;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dmut);}
+.dash-city{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:13px;transition:background .15s;}
+.dash-city:hover{background:var(--dcard2);}
+.dash-city-ic{width:40px;height:40px;flex:0 0 auto;}
+.dash-city-ic svg,.dash-city-ic span{width:40px!important;height:40px!important;}
+.dash-city-name{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--dtxt);flex:1;min-width:0;}
+.dash-city-name span{display:block;font-size:11px;font-weight:500;color:var(--dmut);font-family:var(--mono);}
+.dash-city-tmp{font-family:var(--cond);font-size:20px;font-weight:800;color:var(--dtxt);}
+.dash-empty{padding:40px 20px;text-align:center;font-family:var(--cond);color:var(--dmut);font-size:14px;}
+@media(max-width:520px){
+  .dash-hero-temp{font-size:62px;}
+  .dash-hero-ic,.dash-hero-ic svg,.dash-hero-ic span{width:84px!important;height:84px!important;}
+  .dash-metric-v{font-size:23px;}
+}
+
 /* ── Theme & Icon settings panel ── */
 #settings-panel {
   position: fixed; top: 54px; right: 14px; z-index: 9999; width: 288px;
@@ -1873,25 +1950,25 @@ html,body{max-width:100%;overflow-x:hidden;}
      automatically when the theme changes. -->
 <svg width="0" height="0" style="position:absolute;pointer-events:none;" aria-hidden="true"><defs>
   <radialGradient id="wxSunGrad" cx="42%" cy="36%" r="68%">
-    <stop offset="0%" stop-color="var(--wx-sun-hi)"/>
-    <stop offset="52%" stop-color="var(--wx-sun)"/>
-    <stop offset="100%" stop-color="var(--wx-sun-deep)"/>
+    <stop offset="0%" style="stop-color:var(--wx-sun-hi)"/>
+    <stop offset="52%" style="stop-color:var(--wx-sun)"/>
+    <stop offset="100%" style="stop-color:var(--wx-sun-deep)"/>
   </radialGradient>
   <linearGradient id="wxCloudGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="var(--wx-cloud-hi)"/>
-    <stop offset="100%" stop-color="var(--wx-cloud)"/>
+    <stop offset="0%" style="stop-color:var(--wx-cloud-hi)"/>
+    <stop offset="100%" style="stop-color:var(--wx-cloud)"/>
   </linearGradient>
   <linearGradient id="wxCloudDarkGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="var(--wx-cloud-dark-hi)"/>
-    <stop offset="100%" stop-color="var(--wx-cloud-dark)"/>
+    <stop offset="0%" style="stop-color:var(--wx-cloud-dark-hi)"/>
+    <stop offset="100%" style="stop-color:var(--wx-cloud-dark)"/>
   </linearGradient>
   <linearGradient id="wxStormGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="var(--wx-storm-hi)"/>
-    <stop offset="100%" stop-color="var(--wx-storm)"/>
+    <stop offset="0%" style="stop-color:var(--wx-storm-hi)"/>
+    <stop offset="100%" style="stop-color:var(--wx-storm)"/>
   </linearGradient>
   <linearGradient id="wxDropGrad" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="var(--wx-drop)" stop-opacity="0.5"/>
-    <stop offset="100%" stop-color="var(--wx-drop)"/>
+    <stop offset="0%" style="stop-color:var(--wx-drop)" stop-opacity="0.5"/>
+    <stop offset="100%" style="stop-color:var(--wx-drop)"/>
   </linearGradient>
 </defs></svg>
 
@@ -1950,6 +2027,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 <!-- TABS -->
 <nav class="tabs" role="tablist">
   <button class="tab active" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
+  <button class="tab" data-tab="dashboards"><span class="tab-i">&#10024;</span>Dashboards</button>
   <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
   <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
@@ -2439,7 +2517,18 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
-  <!-- ATC -->
+  <!-- DASHBOARDS -->
+  <div id="tab-dashboards" class="tpanel hidden">
+    <div class="dash-switcher">
+      <span class="dash-switcher-lbl">Style</span>
+      <button class="dash-style-btn active" data-dashstyle="aurora" onclick="setDashStyle('aurora',this)">&#127769; Aurora</button>
+      <button class="dash-style-btn" data-dashstyle="midnight" onclick="setDashStyle('midnight',this)">&#127769; Midnight</button>
+      <button class="dash-style-btn" data-dashstyle="daylight" onclick="setDashStyle('daylight',this)">&#9925; Daylight</button>
+    </div>
+    <div id="dashRoot" class="dash-aurora"></div>
+  </div>
+
+  <!-- MAPS -->
   <div id="tab-maps" class="tpanel hidden">
     <div class="map-tab-wrap">
       <div class="cond-map-wrap">
@@ -2590,7 +2679,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button id="help-modal-close" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;">&#10005;</button>
     </div>
     <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-family:var(--cond);font-size:13px;color:var(--txt);">
-      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 6</kbd><span>Switch tabs (Monitor &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
+      <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">1 &ndash; 7</kbd><span>Switch tabs (Monitor &middot; Dashboards &middot; Aviation &middot; Stations &middot; Weather &middot; Maps &middot; ATC)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">R</kbd><span>Refresh all data</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">M</kbd><span>Toggle mute (alerts)</span>
       <kbd style="font-family:var(--mono);font-size:12px;padding:2px 8px;border:1px solid var(--bdrb);border-radius:4px;background:rgba(255,255,255,0.04);text-align:center;">N</kbd><span>Toggle night mode</span>
@@ -4425,6 +4514,7 @@ document.querySelectorAll('[data-climview]').forEach(btn => {
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   monitor: byId('tab-monitor'),
+  dashboards: byId('tab-dashboards'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps')
@@ -4464,6 +4554,9 @@ function switchTab(name){
     if(!__monitorOpened){ __monitorOpened = true; updateMonitor(); startMonitorRefresh(); }
     else { updateMonitor(); }
   }
+  if(name==='dashboards'){
+    if(typeof openDashboards === 'function') openDashboards();
+  }
   if(name==='aviation'){
     // default to METAR sub-view if none active
     var anyActive = document.querySelector('.av-sub-btn.active');
@@ -4501,7 +4594,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.addEventListener('keydown', e=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  const map={'1':'monitor','2':'aviation','3':'stations','4':'weather','5':'maps','6':'atc'};
+  const map={'1':'monitor','2':'dashboards','3':'aviation','4':'stations','5':'weather','6':'maps','7':'atc'};
   if(map[e.key]){ switchTab(map[e.key]); e.preventDefault(); }
   else if(e.key==='r' || e.key==='R'){ byId('refresh-btn').click(); e.preventDefault(); }
   else if(e.key==='m' || e.key==='M'){ byId('mute-btn').click(); e.preventDefault(); }
@@ -5968,8 +6061,10 @@ async function updateMonitor(){
 function startMonitorRefresh(){
   if(__monitorTimer) clearInterval(__monitorTimer);
   __monitorTimer = setInterval(() => {
-    if(!testMode && !hidden() && byId('tab-monitor') && !byId('tab-monitor').classList.contains('hidden')){
-      updateMonitor();
+    const monOpen  = byId('tab-monitor')    && !byId('tab-monitor').classList.contains('hidden');
+    const dashOpen = byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden');
+    if(!testMode && !hidden() && (monOpen || dashOpen)){
+      updateMonitor();           // renderMonitorViews keeps the Dashboards tab fresh too
       renderStationsAverage();   // refresh island avg from latest (background-fetched) station data
     }
   }, 60000);
@@ -6042,7 +6137,172 @@ function renderMonitorViews(data){
   if(__monStyle === 'graphics') renderGraphicsView(data);
   if(__monStyle === 'home')     renderHomeView(data);
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
+  // Keep the Dashboards tab live too if it's open
+  try{ if(byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden')) renderDashboards(); }catch(e){}
 }
+
+/* ═══════════ DASHBOARDS TAB ═══════════
+   Premium glassmorphic weather dashboards (Aurora / Midnight / Daylight),
+   all driven by the same live ABC data the Monitor uses. */
+let __dashStyle = (function(){ try{ return localStorage.getItem('rwc-dashstyle') || 'aurora'; }catch(e){ return 'aurora'; } })();
+function setDashStyle(style, btn){
+  __dashStyle = style;
+  try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}
+  const root = byId('dashRoot');
+  if(root) root.className = 'dash-' + style;
+  document.querySelectorAll('.dash-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
+}
+window.setDashStyle = setDashStyle;
+
+// Smooth temperature curve (Catmull-Rom → bezier) with gradient fill under it
+function _dashTempCurve(pts){
+  if(!pts || pts.length < 2) return '';
+  const W = 320, H = 90, pad = 14;
+  const temps = pts.map(p=>p.temp).filter(t=>t!=null);
+  if(temps.length < 2) return '';
+  const mn = Math.min(...temps), mx = Math.max(...temps), rng = Math.max(1, mx-mn);
+  const n = pts.length;
+  const X = i => pad + (i/(n-1))*(W-2*pad);
+  const Y = t => (H-18) - ((t-mn)/rng)*(H-34) + 4;
+  const co = pts.map((p,i)=>({x:X(i), y:p.temp!=null?Y(p.temp):Y((mn+mx)/2)}));
+  let d = `M${co[0].x.toFixed(1)} ${co[0].y.toFixed(1)}`;
+  for(let i=0;i<co.length-1;i++){
+    const p0=co[i-1]||co[i], p1=co[i], p2=co[i+1], p3=co[i+2]||co[i+1];
+    const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
+    d += ` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  const fillD = d + ` L${co[co.length-1].x.toFixed(1)} ${H} L${co[0].x.toFixed(1)} ${H} Z`;
+  let dots = '', labels = '';
+  pts.forEach((p,i)=>{
+    if(p.temp==null) return;
+    if(i%2===0 || i===n-1){
+      dots += `<circle cx="${co[i].x.toFixed(1)}" cy="${co[i].y.toFixed(1)}" r="2.4" style="fill:var(--dacc)"/>`;
+      labels += `<text x="${co[i].x.toFixed(1)}" y="${(co[i].y-7).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="700" style="font-family:var(--cond);fill:var(--dtxt)">${Math.round(p.temp)}°</text>`;
+      labels += `<text x="${co[i].x.toFixed(1)}" y="${H-3}" text-anchor="middle" font-size="7.5" style="font-family:var(--mono);fill:var(--dmut)">${String(p.hour).padStart(2,'0')}h</text>`;
+    }
+  });
+  return `<svg class="dash-graph-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="dashCurveFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--dacc)" stop-opacity="0.32"/>
+      <stop offset="1" style="stop-color:var(--dacc)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${fillD}" fill="url(#dashCurveFill)"/>
+    <path d="${d}" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--dacc)"/>
+    ${dots}${labels}</svg>`;
+}
+
+function renderDashboards(){
+  const host = byId('dashRoot');
+  if(!host) return;
+  const d = __monLastData;
+  if(!d){ host.innerHTML = '<div class="dash-empty">Loading live conditions…</div>'; return; }
+  const p = d.synopP || {}; const om = d.omCurrent || {}; const omd = d.omDaily || {};
+  const fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
+  const wmo = _monWmoFromData(d);
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US',{weekday:'long'});
+  const dateStr = now.toLocaleDateString('en-US',{day:'numeric',month:'short'});
+
+  const temp = p.temp_c!=null ? Math.round(p.temp_c) : null;
+  const feels = (p.temp_c!=null) ? Math.round(calcFeelsMonitor(p.temp_c, p.rh)) : null;
+  const hi = (fc&&fc[0]&&fc[0].tempHigh!=null)?Math.round(fc[0].tempHigh):(temp!=null?temp+1:null);
+  const lo = (fc&&fc[0]&&fc[0].tempLow!=null)?Math.round(fc[0].tempLow):(temp!=null?temp-3:null);
+
+  // Hourly strip (next 8 from now)
+  let hours = [];
+  if(fc && fc[0] && fc[0]._hourly && fc[0]._hourly.length){
+    const cur = now.getHours();
+    hours = fc[0]._hourly.filter(h => h.hour >= cur).slice(0,8);
+    if(hours.length < 8 && fc[1] && fc[1]._hourly) hours = hours.concat(fc[1]._hourly.slice(0, 8-hours.length));
+  }
+  const hoursHtml = hours.length ? hours.map((h,i)=>{
+    const hr12 = h.hour%12===0?12:h.hour%12; const ap = h.hour<12?'AM':'PM';
+    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19);
+    const pop = (h.pop!=null && h.pop>=20) ? Math.round(h.pop)+'%' : '';
+    return `<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;
+  }).join('') : '<div style="color:var(--dmut);font-family:var(--cond);font-size:13px;padding:14px;">Hourly data loads with Forecast</div>';
+
+  // Temp curve (next 12h)
+  let curvePts = [];
+  if(fc && fc[0] && fc[0]._hourly){
+    const cur = now.getHours();
+    curvePts = fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,12);
+    if(curvePts.length<6 && fc[1] && fc[1]._hourly) curvePts = curvePts.concat(fc[1]._hourly.slice(0,12-curvePts.length));
+  }
+  const curveHtml = _dashTempCurve(curvePts) || '<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:18px;text-align:center;">Temperature trend loads with Forecast</div>';
+
+  // Sun times
+  let sunrise='—', sunset='—';
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  if(sr) sunrise=_fmtClk(sr); if(ss) sunset=_fmtClk(ss);
+
+  // Metrics
+  const uv = om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const uvLvl = uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
+  const windKt = p.wind_kt!=null?p.wind_kt:null;
+  const windDir = p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
+  const rh = p.rh!=null?Math.round(p.rh):null;
+  const rain1h = (om.rain!=null?om.rain:(om.precipitation!=null?om.precipitation:(p.precip_mm!=null?p.precip_mm:null)));
+  const dew = (p.temp_c!=null && rh!=null) ? Math.round(p.temp_c - (100-rh)/5) : null;
+
+  const metrics = [
+    {icon:'☀️', label:'UV Index', v:(uv!=null?Math.round(uv):'—'), sub:uvLvl, bar:uv!=null?Math.min(100,(uv/11)*100):0},
+    {icon:'\u{1F305}', label:'Sunrise', v:sunrise, sub:'Sunset '+sunset},
+    {icon:'\u{1F4A8}', label:'Wind', v:(windKt!=null?windKt+'<small> kt</small>':'—'), sub:(windDir?windDir+' · ':'')+(p.wind_dir!=null?Math.round(p.wind_dir)+'°':'')},
+    {icon:'\u{1F4A7}', label:'Humidity', v:(rh!=null?rh+'<small>%</small>':'—'), sub:(dew!=null?'Dew '+dew+'°':''), bar:rh},
+    {icon:'\u{1F321}️', label:'Feels Like', v:(feels!=null?feels+'°':'—'), sub:(temp!=null&&feels!=null?(feels>temp?'Warmer':feels<temp?'Cooler':'Similar')+' than actual':'')},
+    {icon:'\u{1F327}️', label:'Rainfall', v:(rain1h!=null?rain1h.toFixed(1)+'<small>mm</small>':'0<small>mm</small>'), sub:'last hour'}
+  ];
+  const metricsHtml = metrics.map(m=>`<div class="dash-card dash-metric"><div class="dash-metric-hd">${m.icon} ${m.label}</div><div class="dash-metric-v">${m.v}</div>${m.bar!=null?`<div class="dash-metric-bar"><div style="width:${Math.max(3,m.bar||0)}%;"></div></div>`:''}<div class="dash-metric-s">${m.sub||''}</div></div>`).join('');
+
+  // Other cities (ABC + Caracas)
+  const cityKeys = [['TNCA','Aruba'],['TNCB','Bonaire'],['TNCM','St Maarten'],['SVMI','Caracas']];
+  const citiesHtml = cityKeys.map(([icao,nm])=>{
+    let t=null, ic='cloud', desc='—';
+    const raw = mState && mState[icao] ? mState[icao].lastRaw : null;
+    if(raw){ try{ const mp=parseMetar(raw); if(mp.tempC!=null)t=mp.tempC; const bkn=mp.cldToks.some(x=>/^(BKN|OVC)/.test(x)); const sct=mp.cldToks.some(x=>/^(SCT|FEW)/.test(x)); const rn=mp.wxToks.some(x=>/RA|SH|TS/.test(x)); const lh=(now.getUTCHours()-4+24)%24; const nt=lh<6||lh>=18.5; ic= rn?'rain':bkn?'cloud':sct?(nt?'cloud-moon':'cloud-sun'):(nt?'moon':'sun'); desc= rn?'Rain':bkn?'Cloudy':sct?'Partly cloudy':'Clear'; }catch(e){} }
+    return `<div class="dash-city"><span class="dash-city-ic">${buildWxIconSvg(ic,40)}</span><span class="dash-city-name">${nm}<span>${desc}</span></span><span class="dash-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;
+  }).join('');
+
+  host.innerHTML = `
+  <div class="dash-grid">
+    <div class="dash-col">
+      <div class="dash-card dash-hero">
+        <div class="dash-hero-loc">\u{1F4CD} Curaçao · ABC Islands</div>
+        <div class="dash-hero-sub">${dayName}, ${dateStr}${p.time?' · '+p.time:''}</div>
+        <div class="dash-hero-ic">${buildWxIconSvg(wmo.icon,108)}</div>
+        <div class="dash-hero-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+        <div class="dash-hero-cond">${wmo.desc}</div>
+        <div class="dash-hero-hl">${hi!=null?`<span>H: <b>${hi}°</b></span>`:''}${lo!=null?`<span>L: <b>${lo}°</b></span>`:''}${feels!=null?`<span>Feels <b>${feels}°</b></span>`:''}</div>
+      </div>
+      <div class="dash-card dash-hours-card">
+        <div class="dash-hours-hd"><span>Hourly Forecast</span></div>
+        <div class="dash-hours">${hoursHtml}</div>
+      </div>
+      <div class="dash-card dash-graph-card">
+        <div class="dash-graph-hd">Temperature · next 12h</div>
+        ${curveHtml}
+      </div>
+    </div>
+    <div class="dash-col">
+      <div class="dash-metrics">${metricsHtml}</div>
+      <div class="dash-card dash-cities-card">
+        <div class="dash-cities-hd">Other Cities</div>
+        ${citiesHtml}
+      </div>
+    </div>
+  </div>`;
+}
+function openDashboards(){
+  setDashStyle(__dashStyle);
+  if(!__monitorOpened){ __monitorOpened = true; startMonitorRefresh(); }
+  if(!__monLastData){ updateMonitor().then(()=>renderDashboards()).catch(()=>renderDashboards()); }
+  else { updateMonitor(); }   // background refresh; renderMonitorViews re-renders the dashboard
+  if(!__lastForecastData){ updateForecast().then(()=>renderDashboards()).catch(()=>{}); }
+  renderDashboards();
+}
+window.renderDashboards = renderDashboards;
 
 /* shared helpers for the alt views */
 function _monWmoFromData(d){

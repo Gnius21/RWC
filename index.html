@@ -1680,8 +1680,8 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .theme-swatch[data-theme="neon"]  { background: linear-gradient(160deg,#080318,#1a0050); color: #00e5ff; border-color: rgba(0,229,255,0.22); }
 .theme-swatch.active { box-shadow: 0 0 14px var(--accd); }
 .theme-swatch:hover:not(.active) { filter: brightness(1.15); }
-.icon-swatches { display: flex; gap: 8px; }
-.icon-swatch { flex: 1; padding: 10px 6px; border-radius: 11px; border: 2px solid transparent; cursor: pointer; text-align: center; font-family: var(--cond); font-size: 12px; font-weight: 700; letter-spacing: .3px; background: rgba(255,255,255,0.04); color: var(--txt); transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.icon-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+.icon-swatch { flex: 1; min-width: 54px; padding: 9px 5px; border-radius: 11px; border: 2px solid transparent; cursor: pointer; text-align: center; font-family: var(--cond); font-size: 11px; font-weight: 700; letter-spacing: .3px; background: rgba(255,255,255,0.04); color: var(--txt); transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .icon-swatch.active { border-color: var(--acc); background: var(--accd); }
 .icon-swatch:hover:not(.active) { background: rgba(255,255,255,0.07); }
 .icon-swatch-preview { width: 32px; height: 32px; }
@@ -7905,18 +7905,15 @@ function _cloudG(cx, cy, sc, variant, extra){
 /* ═══ ICON STYLE SYSTEM ═══ */
 /* Current style stored in localStorage key 'rwc-icon-style' */
 /* Values: 'default' | 'outline' | 'realistic' */
-// One-time reset to the animated default (clears any stale outline/realistic preference).
-// The picker still works: re-selecting a style saves under the new key.
 let __iconStyle = (function(){
   try {
-    // Bumped to v4: ensure everyone lands on the animated 'default' style once.
-    // (The picker still works afterwards — choosing outline/realistic persists normally.)
-    if(!localStorage.getItem('rwc-icon-style-v4')){
-      localStorage.setItem('rwc-icon-style-v4','1');
+    if(!localStorage.getItem('rwc-icon-style-v5')){
+      localStorage.setItem('rwc-icon-style-v5','1');
       localStorage.setItem('rwc-icon-style','default');
       return 'default';
     }
-    return localStorage.getItem('rwc-icon-style') || 'default';
+    const s = localStorage.getItem('rwc-icon-style');
+    return ['default','fluent','glossy','dark3d','minimal','outline','realistic'].indexOf(s)>=0 ? s : 'default';
   } catch(e){ return 'default'; }
 })();
 
@@ -8007,9 +8004,116 @@ function buildRealisticIcon(key, size){
   return views[key] || views['sun'];
 }
 
+/* ── Fluent style (IMG_7084 — flat emoji-like, bold colors) ──────────── */
+function buildFluentIcon(key, size){
+  const s = size || 36;
+  const sunY = `<circle cx="18" cy="18" r="10" fill="#FFD60A"/><ellipse cx="14" cy="13" rx="4" ry="2.5" fill="#FFF59D" opacity="0.6"/>`;
+  const cld = (x,y,sc) => `<ellipse cx="${x+sc*9}" cy="${y+sc*9}" rx="${sc*10}" ry="${sc*7}" fill="#DDEEFF"/><ellipse cx="${x+sc*4}" cy="${y+sc*7}" rx="${sc*7}" ry="${sc*6}" fill="#EBF5FF"/><ellipse cx="${x+sc*14}" cy="${y+sc*6}" rx="${sc*8}" ry="${sc*6}" fill="#E0EEFF"/>`;
+  const moon = `<path d="M21 7 Q12 9 12 18 Q12 27 21 29 Q15 27 12 22 Q9 15 12 10 Z" fill="#FFE082"/>`;
+  const shapes = {
+    sun: sunY,
+    cloud: cld(0,3,1.5),
+    'cloud-sun': `<circle cx="10" cy="11" r="8" fill="#FFD60A"/><ellipse cx="7" cy="8" rx="3" ry="2" fill="#FFF59D" opacity="0.55"/>${cld(4,16,1.1)}`,
+    'sun-cloud': `<circle cx="9" cy="10" r="7" fill="#FFD60A"/><ellipse cx="6" cy="7" rx="2.5" ry="1.5" fill="#FFF59D" opacity="0.55"/>${cld(5,17,1.1)}`,
+    moon,
+    'moon-cloud': `${moon}${cld(6,20,1.1)}`,
+    'cloud-moon': `<path d="M16 7 Q9 9 9 15 Q9 21 16 23 Q11 22 8 18 Q6 13 9 9 Z" fill="#FFE082"/>${cld(5,18,1.1)}`,
+    rain: `${cld(0,2,1.5)}<circle cx="10" cy="28" r="2.5" fill="#5BC8F5"/><circle cx="18" cy="31" r="2.5" fill="#5BC8F5"/><circle cx="26" cy="28" r="2.5" fill="#5BC8F5"/>`,
+    showers: `${cld(0,2,1.5)}<line x1="12" y1="27" x2="9" y2="32" stroke="#5BC8F5" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="27" x2="17" y2="32" stroke="#5BC8F5" stroke-width="2.5" stroke-linecap="round"/>`,
+    drizzle: `${cld(0,2,1.5)}<line x1="11" y1="27" x2="9" y2="31" stroke="#80D8FF" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="27" x2="17" y2="31" stroke="#80D8FF" stroke-width="2" stroke-linecap="round"/>`,
+    thunder: `${cld(0,0,1.5)}<path d="M17 20 L13 27 L17 27 L14 35 L23 23 L18 23 L20 20 Z" fill="#FFD60A"/>`,
+    snow: `${cld(0,2,1.5)}<text x="6" y="35" font-size="12" fill="#90CAF9">❅</text><text x="20" y="35" font-size="12" fill="#90CAF9">❅</text>`,
+    fog: `<rect x="3" y="12" width="30" height="4" rx="2" fill="#B0C4D8" opacity="0.7"/><rect x="5" y="18" width="26" height="4" rx="2" fill="#B0C4D8" opacity="0.6"/><rect x="3" y="24" width="30" height="4" rx="2" fill="#B0C4D8" opacity="0.5"/>`,
+  };
+  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${shapes[key]||shapes.sun}</svg>`;
+}
+
+/* ── Glossy vector style (IMG_7086 — filled blue gradient with sheen) ── */
+function buildGlossyIcon(key, size){
+  const s = size || 36;
+  const gi = 'gloss'+s;
+  const defs = `<defs><linearGradient id="${gi}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ED4FF"/><stop offset="1" stop-color="#0077CC"/></linearGradient><linearGradient id="${gi}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8DAEE"/><stop offset="1" stop-color="#3A88B8"/></linearGradient></defs>`;
+  const sunG = `<circle cx="18" cy="18" r="10" fill="url(#${gi}s)"/><ellipse cx="14" cy="13" rx="4" ry="2.5" fill="white" opacity="0.35"/>`;
+  const cld = (x,y,sc) => `<ellipse cx="${x+sc*9}" cy="${y+sc*9}" rx="${sc*10}" ry="${sc*7}" fill="url(#${gi}c)"/><ellipse cx="${x+sc*4}" cy="${y+sc*7}" rx="${sc*7}" ry="${sc*6}" fill="url(#${gi}c)"/><ellipse cx="${x+sc*14}" cy="${y+sc*6}" rx="${sc*8}" ry="${sc*6}" fill="url(#${gi}c)"/><ellipse cx="${x+sc*8}" cy="${y+sc*5}" rx="${sc*7}" ry="${sc*2.5}" fill="white" opacity="0.18"/>`;
+  const moonG = `<path d="M21 7 Q12 9 12 18 Q12 27 21 29 Q15 27 12 22 Q9 15 12 10 Z" fill="url(#${gi}c)"/><ellipse cx="15" cy="12" rx="3" ry="2" fill="white" opacity="0.25"/>`;
+  const shapes = {
+    sun: sunG,
+    cloud: cld(0,3,1.5),
+    'cloud-sun': `<circle cx="10" cy="11" r="8" fill="url(#${gi}s)"/><ellipse cx="7" cy="8" rx="3" ry="2" fill="white" opacity="0.3"/>${cld(4,16,1.1)}`,
+    'sun-cloud': `<circle cx="9" cy="10" r="7" fill="url(#${gi}s)"/><ellipse cx="6" cy="7" rx="2.5" ry="1.5" fill="white" opacity="0.3"/>${cld(5,17,1.1)}`,
+    moon: moonG,
+    'moon-cloud': `<path d="M21 7 Q12 9 12 15 Q12 22 21 24 Q15 22 12 18 Q9 13 12 9 Z" fill="url(#${gi}c)"/><ellipse cx="15" cy="11" rx="3" ry="1.8" fill="white" opacity="0.25"/>${cld(5,18,1.1)}`,
+    'cloud-moon': `<path d="M16 7 Q9 9 9 15 Q9 21 16 23 Q11 22 8 18 Q6 13 9 9 Z" fill="url(#${gi}c)"/>${cld(5,18,1.1)}`,
+    rain: `${cld(0,2,1.5)}<line x1="10" y1="27" x2="8" y2="33" stroke="#0077CC" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="27" x2="16" y2="33" stroke="#0077CC" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="27" x2="24" y2="33" stroke="#0077CC" stroke-width="2" stroke-linecap="round"/>`,
+    showers: `${cld(0,2,1.5)}<line x1="12" y1="27" x2="10" y2="32" stroke="#0099DD" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="27" x2="18" y2="32" stroke="#0099DD" stroke-width="2.5" stroke-linecap="round"/>`,
+    drizzle: `${cld(0,2,1.5)}<line x1="12" y1="27" x2="11" y2="31" stroke="#44AAEE" stroke-width="1.5" stroke-linecap="round"/><line x1="20" y1="27" x2="19" y2="31" stroke="#44AAEE" stroke-width="1.5" stroke-linecap="round"/>`,
+    thunder: `${cld(0,0,1.5)}<path d="M17 20 L13 27 L17 27 L14 35 L23 23 L18 23 L20 20 Z" fill="#FFD60A"/>`,
+    snow: `${cld(0,2,1.5)}<circle cx="10" cy="30" r="2.2" fill="#A8DAEE"/><circle cx="18" cy="33" r="2.2" fill="#A8DAEE"/><circle cx="26" cy="30" r="2.2" fill="#A8DAEE"/>`,
+    fog: `<rect x="3" y="12" width="30" height="4" rx="2" fill="url(#${gi}c)" opacity="0.6"/><rect x="5" y="18" width="26" height="4" rx="2" fill="url(#${gi}c)" opacity="0.5"/><rect x="3" y="24" width="30" height="4" rx="2" fill="url(#${gi}c)" opacity="0.4"/>`,
+  };
+  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${defs}${shapes[key]||shapes.sun}</svg>`;
+}
+
+/* ── Dark 3D style (IMG_7088 — dark bg, glossy 3D spheres) ──────────── */
+function buildDark3DIcon(key, size){
+  const s = size || 36;
+  const gi = 'd3d'+s;
+  const bg = `<rect width="36" height="36" rx="9" fill="#0d1117"/>`;
+  const defs = `<defs><radialGradient id="${gi}s" cx="35%" cy="30%"><stop offset="0" stop-color="#fff4a0"/><stop offset="40%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c47900"/></radialGradient><radialGradient id="${gi}c" cx="30%" cy="25%"><stop offset="0" stop-color="#ddeeff"/><stop offset="60%" stop-color="#8ab4cc"/><stop offset="100%" stop-color="#3d6880"/></radialGradient><radialGradient id="${gi}m" cx="35%" cy="30%"><stop offset="0" stop-color="#f0e8d8"/><stop offset="50%" stop-color="#b8c8e0"/><stop offset="100%" stop-color="#607080"/></radialGradient></defs>`;
+  const sunS = (cx,cy,r) => `<circle cx="${cx}" cy="${cy}" r="${r*1.5}" fill="#ffd700" opacity="0.1"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${gi}s)"/><ellipse cx="${cx-r*0.25}" cy="${cy-r*0.3}" rx="${r*0.35}" ry="${r*0.2}" fill="white" opacity="0.45"/>`;
+  const cldB = (x,y,sc) => `<ellipse cx="${x+sc*9}" cy="${y+sc*8}" rx="${sc*10}" ry="${sc*7}" fill="url(#${gi}c)" opacity="0.95"/><ellipse cx="${x+sc*4}" cy="${y+sc*6}" rx="${sc*7}" ry="${sc*6}" fill="url(#${gi}c)"/><ellipse cx="${x+sc*14}" cy="${y+sc*5}" rx="${sc*8}" ry="${sc*6}" fill="url(#${gi}c)"/><ellipse cx="${x+sc*7}" cy="${y+sc*4}" rx="${sc*6}" ry="${sc*2.5}" fill="white" opacity="0.18"/>`;
+  const shapes = {
+    sun: sunS(18,18,10),
+    cloud: cldB(0,5,1.5),
+    'cloud-sun': `${sunS(10,12,8)}${cldB(4,17,1.1)}`,
+    'sun-cloud': `${sunS(9,10,7)}${cldB(5,17,1.1)}`,
+    moon: `<circle cx="18" cy="18" r="11" fill="url(#${gi}m)"/><circle cx="23" cy="15" r="10" fill="#0d1117"/><ellipse cx="14" cy="14" rx="3" ry="2" fill="white" opacity="0.25"/>`,
+    'moon-cloud': `<circle cx="12" cy="12" r="7" fill="url(#${gi}m)"/><circle cx="16" cy="10" r="6.5" fill="#0d1117"/>${cldB(4,18,1.1)}`,
+    'cloud-moon': `<circle cx="11" cy="12" r="7" fill="url(#${gi}m)"/><circle cx="15" cy="10" r="6.5" fill="#0d1117"/>${cldB(4,18,1.1)}`,
+    rain: `${cldB(0,2,1.5)}<line x1="10" y1="27" x2="8" y2="33" stroke="#60AAEE" stroke-width="2" stroke-linecap="round" opacity="0.9"/><line x1="18" y1="27" x2="16" y2="33" stroke="#60AAEE" stroke-width="2" stroke-linecap="round" opacity="0.9"/><line x1="26" y1="27" x2="24" y2="33" stroke="#60AAEE" stroke-width="2" stroke-linecap="round" opacity="0.9"/>`,
+    showers: `${cldB(0,2,1.5)}<line x1="12" y1="27" x2="10" y2="32" stroke="#4499DD" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="27" x2="18" y2="32" stroke="#4499DD" stroke-width="2.5" stroke-linecap="round"/>`,
+    drizzle: `${cldB(0,2,1.5)}<line x1="12" y1="27" x2="11" y2="31" stroke="#5599CC" stroke-width="1.5" stroke-linecap="round"/><line x1="20" y1="27" x2="19" y2="31" stroke="#5599CC" stroke-width="1.5" stroke-linecap="round"/>`,
+    thunder: `${cldB(0,1,1.5)}<path d="M17 22 L13 29 L17 29 L14 37 L23 25 L18 25 L20 22 Z" fill="#FFE23F"/>`,
+    snow: `${cldB(0,2,1.5)}<circle cx="10" cy="30" r="2" fill="#A0D8F8" opacity="0.9"/><circle cx="18" cy="33" r="2" fill="#A0D8F8" opacity="0.9"/><circle cx="26" cy="30" r="2" fill="#A0D8F8" opacity="0.9"/>`,
+    fog: `<rect x="3" y="14" width="30" height="4" rx="2" fill="#607080" opacity="0.7"/><rect x="5" y="20" width="26" height="4" rx="2" fill="#607080" opacity="0.6"/><rect x="3" y="26" width="30" height="4" rx="2" fill="#607080" opacity="0.5"/>`,
+  };
+  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${defs}${bg}${shapes[key]||shapes.sun}</svg>`;
+}
+
+/* ── Minimal flat style (IMG_7089 — simple grey/white/yellow) ────────── */
+function buildMinimalIcon(key, size){
+  const s = size || 36;
+  const Y='#FFCC00', G='#9BA8B5', W='#E8EDF2', B='#6BB3D6';
+  const sunRays = [0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180; return `<line x1="${(18+8*Math.sin(r)).toFixed(1)}" y1="${(18-8*Math.cos(r)).toFixed(1)}" x2="${(18+12*Math.sin(r)).toFixed(1)}" y2="${(18-12*Math.cos(r)).toFixed(1)}" stroke="${Y}" stroke-width="2" stroke-linecap="round"/>`;}).join('');
+  const sunFull = `${sunRays}<circle cx="18" cy="18" r="6" fill="${Y}"/>`;
+  const cld = (x,y) => `<ellipse cx="${x+15}" cy="${y+10}" rx="13" ry="8.5" fill="${G}" opacity="0.85"/><circle cx="${x+8}" cy="${y+9}" rx="0" r="7" fill="${G}" opacity="0.85"/><circle cx="${x+22}" cy="${y+8}" r="7" fill="${G}" opacity="0.85"/><circle cx="${x+15}" cy="${y+4}" r="8" fill="${W}"/>`;
+  const smSun = (cx,cy,r) => [0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180; return `<line x1="${(cx+(r+3)*Math.sin(rad)).toFixed(1)}" y1="${(cy-(r+3)*Math.cos(rad)).toFixed(1)}" x2="${(cx+(r+5)*Math.sin(rad)).toFixed(1)}" y2="${(cy-(r+5)*Math.cos(rad)).toFixed(1)}" stroke="${Y}" stroke-width="1.8" stroke-linecap="round"/>`;}).join('')+`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${Y}"/>`;
+  const moonM = `<path d="M22 8 Q13 10 13 18 Q13 26 22 28 Q16 26 13 22 Q10 16 13 11 Z" fill="${W}"/>`;
+  const shapes = {
+    sun: sunFull,
+    cloud: cld(3,8),
+    'cloud-sun': `${smSun(10,11,6)}${cld(5,17)}`,
+    'sun-cloud': `${smSun(9,10,5)}${cld(6,16)}`,
+    moon: moonM,
+    'moon-cloud': `${moonM}${cld(5,20)}`,
+    'cloud-moon': `<path d="M17 8 Q10 10 10 16 Q10 22 17 24 Q12 22 9 18 Q7 13 10 10 Z" fill="${W}"/>${cld(4,19)}`,
+    rain: `${cld(3,5)}<line x1="10" y1="27" x2="8" y2="33" stroke="${B}" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="27" x2="16" y2="33" stroke="${B}" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="27" x2="24" y2="33" stroke="${B}" stroke-width="2" stroke-linecap="round"/>`,
+    showers: `${cld(3,5)}<line x1="13" y1="27" x2="11" y2="32" stroke="${B}" stroke-width="2.5" stroke-linecap="round"/><line x1="21" y1="27" x2="19" y2="32" stroke="${B}" stroke-width="2.5" stroke-linecap="round"/>`,
+    drizzle: `${cld(3,5)}<line x1="13" y1="27" x2="12" y2="31" stroke="${B}" stroke-width="1.5" stroke-linecap="round"/><line x1="21" y1="27" x2="20" y2="31" stroke="${B}" stroke-width="1.5" stroke-linecap="round"/>`,
+    thunder: `${cld(3,2)}<path d="M17 20 L13 27 L17 27 L14 35 L23 23 L18 23 L20 20 Z" fill="${Y}"/>`,
+    snow: `${cld(3,5)}<text x="7" y="35" font-size="12" fill="${W}">❅</text><text x="21" y="35" font-size="12" fill="${W}">❅</text>`,
+    fog: `<rect x="3" y="12" width="30" height="4" rx="2" fill="${G}" opacity="0.6"/><rect x="6" y="18" width="24" height="4" rx="2" fill="${G}" opacity="0.5"/><rect x="3" y="24" width="30" height="4" rx="2" fill="${G}" opacity="0.4"/>`,
+  };
+  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${shapes[key]||shapes.sun}</svg>`;
+}
+
 /* ── Main icon dispatcher ─────────────────────────────────────────────── */
 const _origBuildWxIconSvg = buildWxIconSvg;
 function wxIconStyled(key, size){
+  if(__iconStyle === 'fluent')    return buildFluentIcon(key, size);
+  if(__iconStyle === 'glossy')    return buildGlossyIcon(key, size);
+  if(__iconStyle === 'dark3d')    return buildDark3DIcon(key, size);
+  if(__iconStyle === 'minimal')   return buildMinimalIcon(key, size);
   if(__iconStyle === 'outline')   return buildOutlineIcon(key, size);
   if(__iconStyle === 'realistic') return buildRealisticIcon(key, size);
   return buildWxIconSvg(key, size);
@@ -10059,9 +10163,11 @@ function buildSettingsPanel(){
   if(existing) return;
 
   // Preview SVGs for icon swatches
-  const previewDefault  = buildWxIconSvg('cloud-sun', 32);
-  const previewOutline  = buildOutlineIcon('cloud-sun', 32);
-  const previewRealistic= buildRealisticIcon('sun', 32);
+  const previewDefault   = buildWxIconSvg('cloud-sun', 32);
+  const previewFluent    = buildFluentIcon('cloud-sun', 32);
+  const previewGlossy    = buildGlossyIcon('cloud-sun', 32);
+  const previewDark3D    = buildDark3DIcon('cloud-sun', 32);
+  const previewMinimal   = buildMinimalIcon('cloud-sun', 32);
 
   const panel = document.createElement('div');
   panel.id = 'settings-panel';
@@ -10092,13 +10198,21 @@ function buildSettingsPanel(){
           <div class="icon-swatch-preview">${previewDefault}</div>
           Animated
         </div>
-        <div class="icon-swatch ${__iconStyle==='outline'?'active':''}" data-style="outline" onclick="applyIconStyle('outline')">
-          <div class="icon-swatch-preview">${previewOutline}</div>
-          Outline
+        <div class="icon-swatch ${__iconStyle==='fluent'?'active':''}" data-style="fluent" onclick="applyIconStyle('fluent')">
+          <div class="icon-swatch-preview">${previewFluent}</div>
+          Fluent
         </div>
-        <div class="icon-swatch ${__iconStyle==='realistic'?'active':''}" data-style="realistic" onclick="applyIconStyle('realistic')">
-          <div class="icon-swatch-preview">${previewRealistic}</div>
-          Realistic
+        <div class="icon-swatch ${__iconStyle==='glossy'?'active':''}" data-style="glossy" onclick="applyIconStyle('glossy')">
+          <div class="icon-swatch-preview">${previewGlossy}</div>
+          Glossy
+        </div>
+        <div class="icon-swatch ${__iconStyle==='dark3d'?'active':''}" data-style="dark3d" onclick="applyIconStyle('dark3d')">
+          <div class="icon-swatch-preview">${previewDark3D}</div>
+          3D Dark
+        </div>
+        <div class="icon-swatch ${__iconStyle==='minimal'?'active':''}" data-style="minimal" onclick="applyIconStyle('minimal')">
+          <div class="icon-swatch-preview">${previewMinimal}</div>
+          Minimal
         </div>
       </div>
     </div>

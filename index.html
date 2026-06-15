@@ -2074,11 +2074,9 @@ html,body{max-width:100%;overflow-x:hidden;}
 .knmi-tile-lbl{font-family:var(--cond);font-size:14px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;}
 .knmi-tile-val{font-family:var(--cond);font-size:32px;font-weight:800;color:var(--txt);line-height:1.1;}
 .knmi-tile-val small{font-size:15px;color:var(--muted);font-weight:600;}
-.knmi-tile.knmi-good{border-color:#4ade80;background:rgba(74,222,128,0.08);}
-.knmi-tile.knmi-good .knmi-tile-val{color:#4ade80;}
-.knmi-tile.knmi-warn{border-color:#facc15;background:rgba(250,204,21,0.08);}
+.knmi-tile.knmi-warn{border-color:#facc15;background:rgba(250,204,21,0.07);box-shadow:0 0 14px 2px rgba(250,204,21,0.28),inset 0 0 8px rgba(250,204,21,0.06);}
 .knmi-tile.knmi-warn .knmi-tile-val{color:#facc15;}
-.knmi-tile.knmi-bad{border-color:#ef4444;background:rgba(239,68,68,0.08);}
+.knmi-tile.knmi-bad{border-color:#ef4444;background:rgba(239,68,68,0.07);box-shadow:0 0 16px 3px rgba(239,68,68,0.35),inset 0 0 10px rgba(239,68,68,0.07);}
 .knmi-tile.knmi-bad .knmi-tile-val{color:#ef4444;}
 .knmi-station{grid-column:1/-1;font-family:var(--cond);font-size:13px;font-weight:700;color:var(--acc);padding:4px 2px;}
 
@@ -9600,12 +9598,12 @@ function buildKnmiGridHtml(parsed){
     }
     // Color coding keyed on the *displayed* (converted) numeric value.
     var dnum = parseFloat(disp);
-    var colorClass = 'knmi-good';
+    var colorClass = '';
     function band(v, warnLo, badLo, warnHi, badHi){
-      if(!isFinite(v)) return 'knmi-good';
+      if(!isFinite(v)) return '';
       if((badLo!=null && v <= badLo) || (badHi!=null && v >= badHi)) return 'knmi-bad';
       if((warnLo!=null && v <= warnLo) || (warnHi!=null && v >= warnHi)) return 'knmi-warn';
-      return 'knmi-good';
+      return '';
     }
     switch(f.lbl){
       case 'Temperature': colorClass = band(dnum, 22, 18, 32, 35); break;
@@ -9617,7 +9615,7 @@ function buildKnmiGridHtml(parsed){
       case 'Precip':      colorClass = band(dnum, null, null, 1, 5); break;
       case 'Visibility':  colorClass = band(dnum, 5, 2, null, null); break;
       case 'Cloud Cover': colorClass = band(dnum, null, null, 7, null); break;
-      default:            colorClass = 'knmi-good';
+      default:            colorClass = '';
     }
     html += '<div class="knmi-tile ' + colorClass + '"><div class="knmi-tile-lbl">' + f.lbl + '</div>' +
             '<div class="knmi-tile-val">' + disp + (unit?' <small>'+unit+'</small>':'') + '</div></div>';

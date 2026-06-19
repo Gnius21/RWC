@@ -2084,16 +2084,19 @@ html,body{max-width:100%;overflow-x:hidden;}
 /* ── ABC Islands conditions strip (header) ── */
 .cstrip{display:flex;align-items:stretch;gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none;}
 .cstrip::-webkit-scrollbar{display:none;}
-.cstrip-isl{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:6px 12px;background:var(--bg);white-space:nowrap;}
-.cstrip-flag{font-size:14px;flex:0 0 auto;}
-.cstrip-ic{width:22px;height:22px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;}
-.cstrip-ic svg{width:22px;height:22px;}
-.cstrip-temp{font-family:var(--cond);font-size:13px;font-weight:800;color:var(--txt);flex:0 0 auto;}
-.cstrip-wind,.cstrip-vis{font-family:var(--mono);font-size:13px;color:var(--muted);flex:0 0 auto;}
+.cstrip-isl{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg);white-space:nowrap;}
+.cstrip-flag{font-size:19px;flex:0 0 auto;}
+.cstrip-ic{width:30px;height:30px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;}
+.cstrip-ic svg{width:30px;height:30px;}
+.cstrip-temp{font-family:var(--cond);font-size:17px;font-weight:800;color:var(--txt);flex:0 0 auto;}
+.cstrip-wind,.cstrip-vis{font-family:var(--mono);font-size:16px;color:var(--muted);flex:0 0 auto;}
 .cstrip-vis::before{content:"\1F441\FE0F";font-family:initial;margin-right:2px;opacity:.6;}
 @media(max-width:560px){
-  .cstrip-isl{padding:5px 9px;gap:5px;}
-  .cstrip-temp{font-size:13px;}
+  .cstrip-isl{padding:7px 11px;gap:7px;}
+  .cstrip-flag{font-size:16px;}
+  .cstrip-ic,.cstrip-ic svg{width:25px;height:25px;}
+  .cstrip-temp{font-size:15px;}
+  .cstrip-wind,.cstrip-vis{font-size:14px;}
 }
 
 </style>

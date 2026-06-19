@@ -4260,7 +4260,7 @@ function renderSynopCard(src, rawText){
       const wkn    = P.wind_speed_kn;
       const rose   = miniRose(typeof dirDeg==='number'?dirDeg:null, typeof wkn==='number'?wkn:null);
       const dirTxt = P.wind_dir || '\u2014';
-      const spdTxt = wkn!==undefined ? wkn+' kt'+(P.wind_speed_ms!==undefined?' / '+P.wind_speed_ms+' m/s':'') : '\u2014';
+      const spdTxt = wkn!==undefined ? wkn+' kt' : '\u2014';
       html += `<div style="display:flex;gap:9px;align-items:center;border-bottom:1px solid rgba(14,165,233,0.1);padding-bottom:7px;margin-bottom:2px;">
         ${rose}
         <div style="flex:1;min-width:0;">
@@ -4312,7 +4312,7 @@ function renderSynopCard(src, rawText){
         <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
           <div class="syrow">
             ${chip('Direction', P.wind_dir||'\u2014')}
-            ${chip('Speed', P.wind_speed_kn!==undefined ? P.wind_speed_kn+' kt' : '\u2014', P.wind_speed_ms!==undefined ? P.wind_speed_ms+' m/s' : '')}
+            ${chip('Speed', P.wind_speed_kn!==undefined ? P.wind_speed_kn+' kt' : '\u2014')}
           </div>
           <div class="syrow">
             ${chip('Visibility', P.vis||'\u2014')}
@@ -5095,7 +5095,6 @@ function renderWxCard(key, P){
   const dew     = P.dew_c    != null ? P.dew_c    : null;
   const windKt  = P.wind_kt  != null ? P.wind_kt  : null;
   const windDir = (typeof P.wind_dir === 'number') ? P.wind_dir : null;
-  const windKph = windKt != null ? (windKt * 1.852).toFixed(1) : null;
   const dirName = windDir != null ? COMPASS[Math.round(windDir/22.5)%16] : (P.wind_dir_text || '\u2014');
   const slp     = P.slp      != null ? P.slp      : null;
   const vis     = P.vis_m    != null ? (P.vis_m/1000).toFixed(1) : null;
@@ -5276,7 +5275,7 @@ function renderWxCard(key, P){
     <div class="wdb-bot">
       <div class="wdb-metrics-grid">
         ${metricTile('\u{1F4A7}','Humidity',rh!=null?rh:'&mdash;','%')}
-        ${metricTile('\u{1F32C}','Wind Speed',windKph!=null?windKph:'&mdash;','Kph')}
+        ${metricTile('\u{1F32C}','Wind Speed',windKt!=null?Math.round(windKt):'&mdash;','kt')}
         ${metricTile('\u{1F441}','Visibility',vis!=null?vis:'&mdash;','Km')}
         ${metricTile('\u{1F321}','Pressure',slp!=null?Math.round(slp):'&mdash;','mb')}
         ${metricTile('\u2600','UV Index',uv!=null?uv.toFixed(0):'&mdash;',uvLbl)}
@@ -6437,8 +6436,8 @@ function _metroLineChart(hours, metric){
   } else if(metric==='rainfall'){
     pts=hours.slice(0,10).map((h,i)=>({x:i,v:h.precip!=null?+h.precip:(h.pop>50?+(h.pop/30).toFixed(1):0)}));
   } else {
-    const base=p.wind_kt!=null?+(p.wind_kt*1.852).toFixed(1):15;
-    pts=hours.slice(0,10).map((h,i)=>({x:i,v:Math.max(0,+(base+Math.sin(i*0.82)*7+Math.cos(i*0.31)*3).toFixed(1))}));
+    const base=p.wind_kt!=null?+p.wind_kt.toFixed(1):8;
+    pts=hours.slice(0,10).map((h,i)=>({x:i,v:Math.max(0,+(base+Math.sin(i*0.82)*4+Math.cos(i*0.31)*1.6).toFixed(1))}));
   }
   if(!pts.length) return '<div style="padding:20px;text-align:center;color:var(--dmut);font-family:var(--cond);font-size:12px;">No data</div>';
   const vals=pts.map(pp=>pp.v),mn=Math.min(...vals),mx=Math.max(...vals),rng=Math.max(0.1,mx-mn),n=pts.length;
@@ -6447,7 +6446,7 @@ function _metroLineChart(hours, metric){
   let path=`M${co[0].x.toFixed(1)} ${co[0].y.toFixed(1)}`;
   for(let i=0;i<co.length-1;i++){const p0=co[i-1]||co[i],p1=co[i],p2=co[i+1],p3=co[i+2]||co[i+1];const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6,c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;path+=` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;}
   const fill=path+` L${co[n-1].x.toFixed(1)} ${H} L${co[0].x.toFixed(1)} ${H} Z`;
-  const unit=metric==='humidity'?'%':metric==='rainfall'?'mm':' km/h';
+  const unit=metric==='humidity'?'%':metric==='rainfall'?'mm':' kt';
   const dots=co.map(c=>`<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="2.8" fill="var(--dacc)"/>`).join('');
   const lbls=co.map((c,i)=>i%2===0?`<text x="${c.x.toFixed(1)}" y="${(c.y-8).toFixed(1)}" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.6)" font-family="system-ui">${metric==='rainfall'?pts[i].v.toFixed(1):Math.round(pts[i].v)}${unit}</text>`:'').join('');
   const tlbls=co.map((c,i)=>i%2===0&&hours[i]?`<text x="${c.x.toFixed(1)}" y="${H-1}" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.3)" font-family="monospace">${String(hours[i].hour||0).padStart(2,'0')}h</text>`:'').join('');
@@ -6476,16 +6475,16 @@ function renderMetroDash(host){
   const hiTemp=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
   const loTemp=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
   let hours=[]; if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
-  const hoursHtml=hours.length?hours.map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:12px;">Hourly data loads with Forecast</div>';
+  const hoursHtml=hours.length?hours.map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19,h.pop),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:12px;">Hourly data loads with Forecast</div>';
   const days=fc?fc.slice(0,6):[];
-  const daysHtml=days.length?days.map((day,i)=>{const dname=new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false),hi=day.tempHigh!=null?Math.round(day.tempHigh):null,lo=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-metro-day"><span class="dash-metro-day-name">${dname}</span><span class="dash-metro-day-ic">${buildWxIconSvg(wc.icon,26)}</span><span class="dash-metro-day-temps">${hi!=null?hi+'°':'—'}<span>${lo!=null?' / '+lo+'°':''}</span></span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:6px;">Forecast loading…</div>';
+  const daysHtml=days.length?days.map((day,i)=>{const dname=new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false,day.pop),hi=day.tempHigh!=null?Math.round(day.tempHigh):null,lo=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-metro-day"><span class="dash-metro-day-name">${dname}</span><span class="dash-metro-day-ic">${buildWxIconSvg(wc.icon,26)}</span><span class="dash-metro-day-temps">${hi!=null?hi+'°':'—'}<span>${lo!=null?' / '+lo+'°':''}</span></span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:6px;">Forecast loading…</div>';
   let chartHrs=[]; if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();chartHrs=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,10);if(chartHrs.length<10&&fc[1]&&fc[1]._hourly)chartHrs=chartHrs.concat(fc[1]._hourly.slice(0,10-chartHrs.length));}
   const windKt=p.wind_kt!=null?p.wind_kt:null,windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'',rh=p.rh!=null?Math.round(p.rh):null;
   const rain1h=om.rain!=null?om.rain:(om.precipitation!=null?om.precipitation:(p.precip_mm!=null?p.precip_mm:null));
   const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
   const newsItems=[
     {tag:'UV',title:`UV Index ${uv!=null?Math.round(uv):'—'} — ${uvLvl}. ${uv!=null&&uv>=8?'Apply sunscreen every 2h.':'Standard sun protection advised.'}`,meta:'Today'},
-    {tag:'Wind',title:`${windKt!=null?+(windKt*1.852).toFixed(0)+' km/h':'Calm'} from the ${windDir||'—'}`,meta:'Current conditions'},
+    {tag:'Wind',title:`${windKt!=null?Math.round(windKt)+' kt':'Calm'} from the ${windDir||'—'}`,meta:'Current conditions'},
     {tag:'Rain',title:`${rain1h!=null&&rain1h>0.05?rain1h.toFixed(1)+'mm last hour.':'No significant rainfall at this time.'}`,meta:'Last hour'},
     {tag:'Humidity',title:`Relative humidity ${rh!=null?rh+'%':'data pending'}`,meta:'Current observation'},
   ];
@@ -6541,8 +6540,7 @@ function renderDarkDash(host){
   const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
   const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
   const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
-  const windKt=p.wind_kt!=null?p.wind_kt:null;
-  const windKmh=windKt!=null?+(windKt*1.852).toFixed(0):null;
+  const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
   const windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
   const rh=p.rh!=null?Math.round(p.rh):null;
   const dew=(p.temp_c!=null&&rh!=null)?Math.round(p.temp_c-(100-rh)/5):null;
@@ -6556,7 +6554,7 @@ function renderDarkDash(host){
     return`<div class="dash-dark-city"><span class="dash-dark-city-ic">${buildWxIconSvg(ic2,30)}</span><span class="dash-dark-city-info"><span class="dash-dark-city-nm">${nm}</span><span class="dash-dark-city-desc">${desc}</span></span><span class="dash-dark-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;
   }).join('');
   const highlights=[
-    {icon:'💨',label:'Wind Status',val:(windKmh!=null?windKmh+'<small> km/h</small>':'—'),sub:windDir||(windKmh!=null?'Variable':'No data'),bar:null},
+    {icon:'💨',label:'Wind Status',val:(windKt!=null?windKt+'<small> kt</small>':'—'),sub:windDir||(windKt!=null?'Variable':'No data'),bar:null},
     {icon:'💧',label:'Humidity',val:(rh!=null?rh+'<small>%</small>':'—'),sub:dew!=null?'Dew pt: '+dew+'°':'',bar:rh},
     {icon:'🌅',label:'Sunrise',val:_fmtClk(sr),sub:'Sunset: '+_fmtClk(ss),bar:null},
     {icon:'☀️',label:'UV Index',val:(uv!=null?String(Math.round(uv)):'—'),sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):0},
@@ -6565,7 +6563,7 @@ function renderDarkDash(host){
   ];
   const hlHtml=highlights.map(m=>`<div class="dash-dark-hl-card"><div class="dash-dark-hl-top"><span class="dash-dark-hl-icon">${m.icon}</span><span class="dash-dark-hl-label">${m.label}</span></div><div class="dash-dark-hl-val">${m.val}</div>${m.bar!=null?`<div class="dash-dark-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%;"></div></div>`:''}<div class="dash-dark-hl-sub">${m.sub||''}</div></div>`).join('');
   const fcDays=fc?fc.slice(0,10):[];
-  const fcHtml=fcDays.length?fcDays.map((day,i)=>{const dname=i===0?'Today':new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false),hi2=day.tempHigh!=null?Math.round(day.tempHigh):null,lo2=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-dark-fc-day${i===0?' today':''}"><span class="dash-dark-fc-day-nm">${dname}</span><span class="dash-dark-fc-day-ic">${buildWxIconSvg(wc.icon,28)}</span><span class="dash-dark-fc-day-hi">${hi2!=null?hi2+'°':'—'}</span><span class="dash-dark-fc-day-lo">${lo2!=null?lo2+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;">Forecast loading…</div>';
+  const fcHtml=fcDays.length?fcDays.map((day,i)=>{const dname=i===0?'Today':new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false,day.pop),hi2=day.tempHigh!=null?Math.round(day.tempHigh):null,lo2=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-dark-fc-day${i===0?' today':''}"><span class="dash-dark-fc-day-nm">${dname}</span><span class="dash-dark-fc-day-ic">${buildWxIconSvg(wc.icon,28)}</span><span class="dash-dark-fc-day-hi">${hi2!=null?hi2+'°':'—'}</span><span class="dash-dark-fc-day-lo">${lo2!=null?lo2+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;">Forecast loading…</div>';
   const dateStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
   host.innerHTML=`<div class="dash-dark-wrap">
   <div class="dash-dark-left">
@@ -6614,7 +6612,7 @@ function renderDashboards(){
   }
   const hoursHtml = hours.length ? hours.map((h,i)=>{
     const hr12 = h.hour%12===0?12:h.hour%12; const ap = h.hour<12?'AM':'PM';
-    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19);
+    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19, h.pop);
     const pop = (h.pop!=null && h.pop>=20) ? Math.round(h.pop)+'%' : '';
     return `<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;
   }).join('') : '<div style="color:var(--dmut);font-family:var(--cond);font-size:13px;padding:14px;">Hourly data loads with Forecast</div>';
@@ -6731,7 +6729,7 @@ function renderDashboardsTab(){
   }
   const hoursHtml = hours.length ? hours.map((h,i)=>{
     const hr12 = h.hour%12===0?12:h.hour%12; const ap = h.hour<12?'AM':'PM';
-    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19);
+    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19, h.pop);
     const pop = (h.pop!=null && h.pop>=20) ? Math.round(h.pop)+'%' : '';
     return `<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;
   }).join('') : '<div style="color:var(--dmut);font-family:var(--cond);font-size:13px;padding:14px;">Hourly data loads with Forecast</div>';
@@ -6860,7 +6858,6 @@ function renderGraphsTab(){
   const temp = k.temp_c!=null ? k.temp_c : (p.temp_c!=null ? p.temp_c : null);
   const rh = k.rh!=null ? Math.round(k.rh) : (p.rh!=null ? Math.round(p.rh) : null);
   const windKt = k.wind_kt!=null ? k.wind_kt : (p.wind_kt!=null ? p.wind_kt : null);
-  const windKmh = windKt!=null ? +(windKt*1.852).toFixed(1) : null;
   const windGustKt = k.gust_kt!=null ? k.gust_kt : (p.wind_gust_kt!=null ? p.wind_gust_kt : null);
   const uv = om.uv_index!=null ? om.uv_index : (fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
   const pres = k.slp!=null ? k.slp : (p.pres_hpa!=null ? p.pres_hpa : (om.surface_pressure!=null?+(om.surface_pressure/100).toFixed(1):null));
@@ -6888,7 +6885,7 @@ function renderGraphsTab(){
     daysHtml=days7.map((day,i)=>{
       const dname=i===0?'Today':new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'});
       const lo=day.tempLow!=null?Math.round(day.tempLow):null, hi=day.tempHigh!=null?Math.round(day.tempHigh):null;
-      const wc=typeof decodeWmoCode==='function'?decodeWmoCode(day.code,false):{icon:'cloud'};
+      const wc=typeof decodeWmoCode==='function'?decodeWmoCode(day.code,false,day.pop):{icon:'cloud'};
       const barLeft=lo!=null?+((lo-gLo)/gRng*100).toFixed(0):0;
       const barW=lo!=null&&hi!=null?+((hi-lo)/gRng*100).toFixed(0):8;
       return `<div class="gday-row"><span class="gday-name">${dname}</span><span class="gday-ic">${typeof buildWxIconSvg==='function'?buildWxIconSvg(wc.icon,20):''}</span><span class="gday-lo">${lo!=null?lo+'°':'—'}</span><div class="gday-bar"><div class="gday-bar-fill" style="left:${barLeft}%;width:${Math.max(6,barW)}%;"></div></div><span class="gday-hi">${hi!=null?hi+'°':'—'}</span></div>`;
@@ -6901,8 +6898,8 @@ function renderGraphsTab(){
   const pick = (knmiPts, fallback) => (knmiPts && knmiPts.length>=2) ? knmiPts : fallback;
   const kTemp = _knmiSeries('temp_c'), kDew = _knmiSeries('dew_c'), kRh = _knmiSeries('rh');
   const kSlp = _knmiSeries('slp'), kVisKm = _knmiSeries('vis_m').map(v=>v/1000);
-  const kWindKmh = _knmiSeries('wind_kt').map(kt=>+(kt*1.852).toFixed(1));
-  const kGustKmh = _knmiSeries('gust_kt').map(kt=>+(kt*1.852).toFixed(1));
+  const kWindKt = _knmiSeries('wind_kt');
+  const kGustKt = _knmiSeries('gust_kt');
   const kRain = _knmiSeries('precip_10m'), kCloudPct = _knmiSeries('cloud_octa').map(o=>o/8*100);
   const metrics = [
     mcard('Temperature','🌡️','#f59e0b', temp!=null?Math.round(temp)+'<small>°C</small>':'—', feels!=null?'Feels '+Math.round(feels)+'°':'', pick(kTemp, tempPts.length>=2?tempPts:synth(temp,1.5))),
@@ -6911,8 +6908,8 @@ function renderGraphsTab(){
     mcard('UV Index','☀️','#f97316', uv!=null?Math.round(uv)+'':'—', uv!=null?(uv<3?'Low':uv<6?'Moderate':uv<8?'High':'Very High'):'', synth(uv,0.8)),
     mcard('Pressure','📊','#94a3b8', pres!=null?Math.round(pres)+'<small> hPa</small>':'—', 'Station pressure', pick(kSlp, synth(pres,1.2))),
     mcard('Visibility','👁','#06b6d4', vis!=null?(vis>=9999?'&gt;10<small> km</small>':(vis/1000).toFixed(0)+'<small> km</small>'):'—', '', pick(kVisKm, synth(vis!=null?vis/1000:null,0.3))),
-    mcard('Wind Speed','💨','#8b5cf6', windKmh!=null?windKmh+'<small> km/h</small>':'—', windDir?windDir+(windDirDeg!=null?' '+Math.round(windDirDeg)+'°':''):'', pick(kWindKmh, synth(windKmh,5))),
-    mcard('Wind Gust','🌪️','#a78bfa', windGustKt!=null?+(windGustKt*1.852).toFixed(0)+'<small> km/h</small>':'—', '', pick(kGustKmh, synth(windGustKt!=null?windGustKt*1.852:windKmh,7))),
+    mcard('Wind Speed','💨','#8b5cf6', windKt!=null?Math.round(windKt)+'<small> kt</small>':'—', windDir?windDir+(windDirDeg!=null?' '+Math.round(windDirDeg)+'°':''):'', pick(kWindKt, synth(windKt,3))),
+    mcard('Wind Gust','🌪️','#a78bfa', windGustKt!=null?Math.round(windGustKt)+'<small> kt</small>':'—', '', pick(kGustKt, synth(windGustKt!=null?windGustKt:windKt,4))),
     mcard('Rainfall','🌧️','#0ea5e9', rain1h!=null?rain1h.toFixed(1)+'<small> mm</small>':'0<small> mm</small>', knmiLive?'Per 10 min':'Last hour', pick(kRain, precipPts.length>=2?precipPts:synth(rain1h||0,0.1))),
     mcard('Feels Like','🌡️','#ec4899', feels!=null?Math.round(feels)+'<small>°C</small>':'—', feels!=null&&temp!=null?(Math.round(feels)>Math.round(temp)?'Warmer than actual':Math.round(feels)<Math.round(temp)?'Cooler':'Same'):'', pick(kTemp, synth(feels,1.5))),
     mcard('Cloud Cover','☁️','#64748b', cloudOcta!=null?Math.round(cloudOcta/8*100)+'<small>%</small>':'—', cloudOcta!=null?(cloudOcta<=2?'Clear':cloudOcta<=4?'Partly cloudy':'Overcast'):'', pick(kCloudPct, synth(cloudOcta!=null?cloudOcta/8*100:null,8))),
@@ -6926,12 +6923,12 @@ function renderGraphsTab(){
           <div><div class="graphs-hero-temp">${temp!=null?Math.round(temp)+'<sup>°C</sup>':'—'}</div><div class="graphs-hero-cond">${wmo.desc}${knmiLive?' · 🇧🇶 KNMI Bonaire':''}</div></div>
         </div>
         <div class="graphs-hero-meta">
-          ${windKmh!=null?`<span>💨 ${windKmh} km/h ${windDir}</span>`:''}${rh!=null?`<span>💧 ${rh}%</span>`:''}${rain1h!=null&&rain1h>0.05?`<span>🌧️ ${rain1h.toFixed(1)}mm</span>`:''}${pres!=null?`<span>📊 ${Math.round(pres)} hPa</span>`:''}${knmiLive&&k.ts?`<span>🕒 ${new Date(k.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`:''}
+          ${windKt!=null?`<span>💨 ${Math.round(windKt)} kt ${windDir}</span>`:''}${rh!=null?`<span>💧 ${rh}%</span>`:''}${rain1h!=null&&rain1h>0.05?`<span>🌧️ ${rain1h.toFixed(1)}mm</span>`:''}${pres!=null?`<span>📊 ${Math.round(pres)} hPa</span>`:''}${knmiLive&&k.ts?`<span>🕒 ${new Date(k.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`:''}
         </div>
         <div class="graphs-fc-bars">${daysHtml}</div>
       </div>
       <div class="graphs-radar">
-        <iframe src="https://embed.windy.com/embed2.html?lat=12.178&lon=-68.238&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" allowfullscreen loading="lazy" title="Windy radar — Bonaire"></iframe>
+        <iframe src="https://embed.windy.com/embed2.html?lat=12.178&lon=-68.238&zoom=8&level=surface&overlay=radar&product=radar&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C&radarRange=-1" allowfullscreen loading="lazy" title="Windy radar — Bonaire"></iframe>
       </div>
     </div>
     <div class="graphs-metrics">${metrics}</div>
@@ -6991,7 +6988,7 @@ function renderSkyView(data, hostEl){
   }
   const hoursHtml = hours.length ? hours.map(h => {
     const hr12 = h.hour%12===0?12:h.hour%12; const ap = h.hour<12?'AM':'PM';
-    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19);
+    const w = decodeWmoCode(h.code, h.hour<6||h.hour>=19, h.pop);
     return `<div class="sky-hour"><span class="sky-hour-t">${hr12}${ap}</span><span class="sky-hour-ic">${buildWxIconSvg(w.icon,34)}</span><span class="sky-hour-tmp">${h.temp!=null?Math.round(h.temp)+'\u00b0':'\u2014'}</span></div>`;
   }).join('') : '<div style="color:var(--muted);font-family:var(--cond);font-size:12px;padding:12px;">Hourly data loads with Forecast tab</div>';
   // sun times
@@ -7002,7 +6999,7 @@ function renderSkyView(data, hostEl){
   if(sr && ss){ const ms=new Date(ss)-new Date(sr); if(ms>0){ const h=Math.floor(ms/3600000),m=Math.round((ms%3600000)/60000); lod=h+'h '+m+'m'; } }
   // tomorrow
   let tomTmp='\u2014', tomDesc='\u2014', tomIcon='cloud';
-  if(fc && fc[1]){ tomTmp = fc[1].tempHigh!=null?Math.round(fc[1].tempHigh)+'\u00b0':'\u2014'; const tw=decodeWmoCode(fc[1].code,false); tomDesc=tw.desc; tomIcon=tw.icon; }
+  if(fc && fc[1]){ tomTmp = fc[1].tempHigh!=null?Math.round(fc[1].tempHigh)+'\u00b0':'\u2014'; const tw=decodeWmoCode(fc[1].code,false,fc[1].pop); tomDesc=tw.desc; tomIcon=tw.icon; }
   // highlight values
   const pop = (fc&&fc[0]&&fc[0].pop!=null)?Math.round(fc[0].pop):(p.precip_mm>0?60:null);
   const uv = om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
@@ -7188,7 +7185,7 @@ function renderGaugesView(data){
   let weekHtml='';
   if(fc && fc.length){
     weekHtml = fc.slice(0,7).map((day,i)=>{
-      const w=decodeWmoCode(day.code,false);
+      const w=decodeWmoCode(day.code,false,day.pop);
       const dn=new Date(day.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});
       return `<div class="gau-week-day ${i===0?'today':''}"><span class="gau-week-dname">${dn}</span><span class="gau-week-ic">${buildWxIconSvg(w.icon,30)}</span><span class="gau-week-tmp">${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0<small> ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u00b0</small></span></div>`;
     }).join('');
@@ -7528,7 +7525,7 @@ function renderPowerStation(){
   if(g('pwCloudBar')){ g('pwCloudBar').style.width = cloudPct+'%'; g('pwCloudBarVal').textContent = cloudPct+'%'; }
 
   // Conditions
-  if(g('pwCondWind')) g('pwCondWind').textContent = windKt!=null ? Math.round(windKt)+' kt ('+windMs.toFixed(1)+' m/s)' : '\u2014';
+  if(g('pwCondWind')) g('pwCondWind').textContent = windKt!=null ? Math.round(windKt)+' kt' : '\u2014';
   if(g('pwCondDir'))  g('pwCondDir').textContent  = windDir!=null ? dirName+' '+Math.round(windDir)+'\u00b0' : '\u2014';
   if(g('pwCondUv'))   g('pwCondUv').textContent   = uv!=null ? uv.toFixed(1) : '\u2014';
   if(g('pwCondSun'))  g('pwCondSun').textContent  = elev>0 ? elev.toFixed(0)+'\u00b0 above horizon' : 'Below horizon';
@@ -7665,7 +7662,7 @@ function renderHomeView(data, hostEl){
     var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     fcStrip = '<div class="hh-fc-strip">'+fc.slice(0,7).map(function(day,i){
       var dt = new Date(); dt.setDate(dt.getDate()+i);
-      var w = decodeWmoCode(day.code||0, false);
+      var w = decodeWmoCode(day.code||0, false, day.pop);
       return '<div class="hh-fc-day">'
         +'<div class="hh-fc-day-nm">'+(i===0?'Today':days[dt.getDay()])+'</div>'
         +'<div class="hh-fc-day-ic">'+buildWxIconSvg(w.icon,28)+'</div>'
@@ -7686,7 +7683,7 @@ function renderHomeView(data, hostEl){
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F9ED}</span><b>'+dirName+'</b></div>'
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F321}</span><b>'+num(slp,0)+'</b> hPa</div>'
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F306}</span><b>'+sunset+'</b></div>'
-        +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F32C}</span><b>'+num(windMs,1)+'</b> m/s</div>'
+        +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F32C}</span><b>'+num(windKt,0)+'</b> kt</div>'
       +'</div>'
       +'<div class="hh-hero-chart">'+_hhSpark('temp','#ef4444','#ef4444')+'</div>'
       +'<div class="hh-cond-list">'
@@ -7715,7 +7712,7 @@ function renderHomeView(data, hostEl){
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F9ED}</span><b>'+dirName+'</b></div>'
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F321}</span><b>'+num(slp,0)+'</b> hPa</div>'
         +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F306}</span><b>'+sunset+'</b></div>'
-        +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F32C}</span><b>'+num(windMs,1)+'</b> m/s</div>'
+        +'<div class="hh-meta-item"><span class="hh-meta-ic">\u{1F32C}</span><b>'+num(windKt,0)+'</b> kt</div>'
       +'</div>'
       +(fcStrip||'<div class="hh-note">7-day outlook — open Forecast tab for detail.</div>')
     +'</div>'
@@ -8328,23 +8325,30 @@ function isDaylight(timeStr, sunriseStr, sunsetStr){
   return t >= sr && t <= ss;
 }
 
-function decodeWmoCode(code, isNight){
-  if(code === 0) return {icon: isNight?'moon':'sun', desc:'Clear sky', sev:0};
-  if(code === 1) return {icon: isNight?'moon-cloud':'sun-cloud', desc:'Mainly clear', sev:0};
-  if(code === 2) return {icon: isNight?'cloud-moon':'cloud-sun', desc:'Partly cloudy', sev:0};
-  if(code === 3) return {icon:'cloud', desc:'Overcast', sev:1};
-  if(code === 45 || code === 48) return {icon:'fog', desc:'Fog', sev:1};
-  if(code >= 51 && code <= 57) return {icon:'drizzle', desc:'Drizzle', sev:1};
-  if(code >= 61 && code <= 65) return {icon:'rain', desc:'Rain', sev:2};
-  if(code >= 66 && code <= 67) return {icon:'rain', desc:'Freezing rain', sev:3};
-  if(code >= 71 && code <= 77) return {icon:'snow', desc:'Snow', sev:2};
-  if(code === 80) return {icon:'showers', desc:'Light showers', sev:1};
-  if(code === 81) return {icon:'showers', desc:'Showers', sev:2};
-  if(code === 82) return {icon:'showers', desc:'Heavy showers', sev:3};
-  if(code >= 85 && code <= 86) return {icon:'snow', desc:'Snow showers', sev:2};
-  if(code === 95) return {icon:'thunder', desc:'Thunderstorm', sev:3};
-  if(code >= 96 && code <= 99) return {icon:'thunder', desc:'Thunder + hail', sev:4};
-  return {icon:'cloud', desc:'Unknown', sev:1};
+function decodeWmoCode(code, isNight, pop){
+  var r;
+  if(code === 0) r = {icon: isNight?'moon':'sun', desc:'Clear sky', sev:0};
+  else if(code === 1) r = {icon: isNight?'moon-cloud':'sun-cloud', desc:'Mainly clear', sev:0};
+  else if(code === 2) r = {icon: isNight?'cloud-moon':'cloud-sun', desc:'Partly cloudy', sev:0};
+  else if(code === 3) r = {icon:'cloud', desc:'Overcast', sev:1};
+  else if(code === 45 || code === 48) r = {icon:'fog', desc:'Fog', sev:1};
+  else if(code >= 51 && code <= 57) r = {icon:'drizzle', desc:'Drizzle', sev:1};
+  else if(code >= 61 && code <= 65) r = {icon:'rain', desc:'Rain', sev:2};
+  else if(code >= 66 && code <= 67) r = {icon:'rain', desc:'Freezing rain', sev:3};
+  else if(code >= 71 && code <= 77) r = {icon:'snow', desc:'Snow', sev:2};
+  else if(code === 80) r = {icon:'showers', desc:'Light showers', sev:1};
+  else if(code === 81) r = {icon:'showers', desc:'Showers', sev:2};
+  else if(code === 82) r = {icon:'showers', desc:'Heavy showers', sev:3};
+  else if(code >= 85 && code <= 86) r = {icon:'snow', desc:'Snow showers', sev:2};
+  else if(code === 95) r = {icon:'thunder', desc:'Thunderstorm', sev:3};
+  else if(code >= 96 && code <= 99) r = {icon:'thunder', desc:'Thunder + hail', sev:4};
+  else r = {icon:'cloud', desc:'Unknown', sev:1};
+  // Only show a rain icon when chance of precipitation is 40%+ — otherwise the
+  // sky is just cloudy. Applies to drizzle/rain/showers when a pop is supplied.
+  if(pop != null && pop < 40 && (r.icon==='drizzle' || r.icon==='rain' || r.icon==='showers')){
+    r = {icon: isNight?'cloud-moon':'cloud-sun', desc:'Partly cloudy', sev:0};
+  }
+  return r;
 }
 
 
@@ -8566,7 +8570,7 @@ function renderForecast(days, allModels){
   showDays.forEach((day, idx) => {
     const now = new Date();
     const dayNight = false;
-    const wmo = decodeWmoCode(day.code, false);
+    const wmo = decodeWmoCode(day.code, false, day.pop);
     const sevClass = wmo.sev >= 4 ? 'sev-crit' : wmo.sev >= 3 ? 'sev-crit' : wmo.sev >= 2 ? 'sev-wrn' : '';
     const isToday = fcDayName(day.date, idx) === 'Today';
     const isBest = idx === bestIdx;
@@ -8589,7 +8593,7 @@ function renderForecast(days, allModels){
       callout = `<div class="fc-callout warn"><span class="fc-callout-icon">\u26a1</span><span>${bits.join(' \u00b7 ')}</span></div>`;
     }
     const blocksHtml = (day.blocks||[]).map(blk => {
-      const bWmo = decodeWmoCode(blk.code, blk.key==='night');
+      const bWmo = decodeWmoCode(blk.code, blk.key==='night', blk.pop);
       const bTemp = blk.temp != null ? Math.round(blk.temp) : '\u2014';
       const bFeels = blk.feels != null ? Math.round(blk.feels) : null;
       const bPrecip = blk.precip || 0;
@@ -8657,7 +8661,7 @@ function openForecastDetail(idx){
   const models = __lastForecastData.models || [];
   const hourly = day._hourly || [];
   const hourRows = hourly.filter((_,i)=>i%2===0).map(hr => {
-    const wmo = decodeWmoCode(hr.code, hr.hour<6||hr.hour>=19);
+    const wmo = decodeWmoCode(hr.code, hr.hour<6||hr.hour>=19, hr.pop);
     return `<tr><td>${String(hr.hour).padStart(2,'0')}:00</td><td>${hr.temp!=null?Math.round(hr.temp)+'\u00b0':'\u2014'}</td><td>${hr.pop!=null?Math.round(hr.pop)+'%':'\u2014'}</td><td>${hr.precip>0.05?hr.precip.toFixed(1)+'mm':'\u2014'}</td><td style="font-size:13px;">${wmo.desc}</td></tr>`;
   }).join('');
   const modelRows = models.map(m =>
@@ -8670,7 +8674,7 @@ function openForecastDetail(idx){
       <button class="fc-detail-close" data-detail-close aria-label="Close detail">\u2715</button>
       <div class="fc-detail-hd">
         <div class="fc-day-name-big" style="font-size:24px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
-        <div style="font-family:var(--cond);color:var(--muted);font-size:13px;margin-top:3px;">${decodeWmoCode(day.code,false).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence</div>
+        <div style="font-family:var(--cond);color:var(--muted);font-size:13px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence</div>
       </div>
       <div class="fc-detail-grid">
         <div>

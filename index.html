@@ -2147,11 +2147,11 @@ html,body{max-width:100%;overflow-x:hidden;}
       <div id="fresh-badge" class="fresh-badge" title="Time since last successful data fetch"><span class="fresh-dot"></span><span id="fresh-txt">--</span></div>
       <button id="refresh-btn" class="bg" aria-label="Refresh all data" title="Refresh all data (R)">&#8635;</button>
       <button id="help-btn" class="bg" aria-label="Keyboard shortcuts" title="Show keyboard shortcuts">?</button>
-      <button id="mute-btn" class="bg" aria-pressed="false" title="Mute alerts (M)">&#128266;</button>
-      <button id="test-btn" class="bg" title="Test mode (T)">&#9879;</button>
-      <button id="settings-btn" class="bg" title="Settings: Theme &amp; Icons (S)">⚙️</button>
-      <button id="pwa-install-btn" class="bg" style="display:none;" title="Install app">&#11015;</button>
-      <button id="night-btn" class="bg" aria-pressed="false" title="Toggle night mode (N)">&#127769;</button>
+      <button id="mute-btn" class="bg" aria-pressed="false" aria-label="Mute alerts" title="Mute alerts (M)">&#128266;</button>
+      <button id="test-btn" class="bg" aria-label="Test mode" title="Test mode (T)">&#9879;</button>
+      <button id="settings-btn" class="bg" aria-label="Settings: theme and icons" title="Settings: Theme &amp; Icons (S)">⚙️</button>
+      <button id="pwa-install-btn" class="bg" style="display:none;" aria-label="Install app" title="Install app">&#11015;</button>
+      <button id="night-btn" class="bg" aria-pressed="false" aria-label="Toggle night mode" title="Toggle night mode (N)">&#127769;</button>
     </div>
   </div>
 </div>
@@ -2183,14 +2183,14 @@ html,body{max-width:100%;overflow-x:hidden;}
 
 <!-- TABS -->
 <nav class="tabs" role="tablist">
-  <button class="tab active" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
-  <button class="tab" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
-  <button class="tab" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
-  <button class="tab" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
-  <button class="tab" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
-  <button class="tab" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
-  <button class="tab" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
-  <button class="tab" data-tab="dashboards"><span class="tab-i">&#127753;</span>Dashboards</button>
+  <button class="tab active" role="tab" aria-selected="true" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="dashboards"><span class="tab-i">&#127753;</span>Dashboards</button>
 </nav>
 
 <div class="content">
@@ -4711,7 +4711,7 @@ function showAviationSub(which){
 window.showAviationSub = showAviationSub;
 
 function switchTab(name){
-  tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  tabs.forEach(t=>{ const on=t.dataset.tab===name; t.classList.toggle('active',on); t.setAttribute('aria-selected', on?'true':'false'); });
   Object.entries(panels).forEach(([k,p])=>p&&p.classList.toggle('hidden',k!==name));
   if(name!=='monitor' && __pwClockTimer){ clearInterval(__pwClockTimer); __pwClockTimer=null; }
   if(name==='stations'){

@@ -6005,7 +6005,7 @@ function renderMonitor(data){
   });
   // ── Sea surface temperature (Marine API) ──
   if(seaTemp != null && isFinite(seaTemp)){
-    byId('monSeaVal').innerHTML = Math.round(seaTemp) + ' <span class="mon-unit">\u00b0C</span>';
+    byId('monSeaVal').innerHTML = seaTemp.toFixed(1) + ' <span class="mon-unit">\u00b0C</span>';
     // Caribbean SST typically 26-30°C. Describe relative to that.
     let sdesc, scol;
     if(seaTemp >= 29){ sdesc='Very warm'; scol='#ff8a3d'; }
@@ -6118,14 +6118,14 @@ function renderMonitor(data){
         dc('Wind', synopP.wind_kt!=null?Math.round(synopP.wind_kt)+' kt':null) +
         dc('Dir', dir) +
         dc('MSLP', synopP.slp!=null?synopP.slp+' hPa':null) +
-        dc('Vis', synopP.vis_m!=null?Math.round(synopP.vis_m/1000)+' km':null) +
+        dc('Vis', synopP.vis_m!=null?(synopP.vis_m/1000)+' km':null) +
         dc('Cloud', synopP.cloud_oktas!=null?synopP.cloud_oktas+'/8':null) +
         dc('Wx', synopP.wx_desc||null);
     } else { decEl.innerHTML = ''; }
   })();
   if(omCurrent && omCurrent.uv_index != null){
     const uv = omCurrent.uv_index;
-    byId('monUvVal').textContent = Math.round(uv);
+    byId('monUvVal').textContent = uv.toFixed(1);
     let lbl = 'LOW', col = '#2ec97a';
     if(uv >= 11){ lbl='EXTREME';   col='#a78bfa'; }
     else if(uv >= 8){ lbl='VERY HIGH'; col='#ff4f4f'; }
@@ -6200,9 +6200,9 @@ function renderMonitor(data){
   updateWxTileForecast();
   var _temp = (_k && _k.temp_c != null) ? _k.temp_c : (synopP && synopP.temp_c != null ? synopP.temp_c : null);
   if(_temp != null){
-    byId('monTemp').innerHTML = Math.round(_temp) + '<span class="mon-temp-deg">\u00b0</span>';
+    byId('monTemp').innerHTML = _temp.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';
     const feels = calcFeelsMonitor(_temp, _rh);
-    byId('monFeels').textContent = (feels != null ? Math.round(feels) : '\u2014') + '\u00b0';
+    byId('monFeels').textContent = (feels != null ? feels.toFixed(1) : '\u2014') + '\u00b0';
   } else {
     byId('monTemp').innerHTML = '\u2014<span class="mon-temp-deg">\u00b0</span>';
     byId('monFeels').textContent = '\u2014\u00b0';
@@ -7140,7 +7140,7 @@ function renderSkyView(data, hostEl){
           </div>
           <div class="sky-hl-tile">
             <div class="sky-hl-lbl">Visibility</div>
-            <div class="sky-hl-big" style="margin-top:10px;">${om.visibility!=null?Math.round(om.visibility/1000):'\u2014'}<small>km</small></div>
+            <div class="sky-hl-big" style="margin-top:10px;">${om.visibility!=null?(om.visibility/1000).toFixed(1):'\u2014'}<small>km</small></div>
             <div class="sky-hl-sub">${om.visibility!=null?(om.visibility<2000?'Poor':om.visibility<5000?'Moderate':'Good'):''}</div>
             <div style="margin-top:auto;"><div style="width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:${om.visibility!=null?Math.min(100,(om.visibility/10000)*100):0}%;background:linear-gradient(90deg,#2ec97a,#4db8ff);border-radius:4px;"></div></div></div>
           </div>
@@ -7243,7 +7243,7 @@ function renderGaugesView(data){
     </div>
     <div class="gau-tile">
       <div class="gau-hd">\u{1F321} Temperature</div>
-      ${_gauArc({value:temp,min:6,max:40,unit:'\u00b0C',big:temp!=null?Math.round(temp):'\u2014',color:tempCol})}
+      ${_gauArc({value:temp,min:6,max:40,unit:'\u00b0C',big:temp!=null?temp.toFixed(1):'\u2014',color:tempCol})}
     </div>
     <div class="gau-tile">
       <div class="gau-hd">\u2600 UV Index</div>
@@ -7736,11 +7736,11 @@ function renderHomeView(data, hostEl){
         +condRow('\u{1F4A8}','Wind', (windKt!=null?Math.round(windKt)+' kt '+dirName:'\u2014'))
       +'</div>'
     +'</div>'
-    +metricCard('Temperature','\u{1F321}', num(temp,0),'\u00b0C','temp','#a78bfa','#a78bfa')
+    +metricCard('Temperature','\u{1F321}', num(temp,1),'\u00b0C','temp','#a78bfa','#a78bfa')
     +metricCard('Humidity','\u{1F4A7}', num(rh,0),'%','rh','#d4a017','#d4a017')
-    +metricCard('Dew Point','\u{1F4A7}', num(dew,0),'\u00b0C','dew','#818cf8','#818cf8')
+    +metricCard('Dew Point','\u{1F4A7}', num(dew,1),'\u00b0C','dew','#818cf8','#818cf8')
     +'<div class="hh-sec-ttl">Air Pressure</div>'
-    +metricCard('Air Pressure','\u23F1', num(slp,0),'hPa','pres','#818cf8','#818cf8')
+    +metricCard('Air Pressure','\u23F1', num(slp,1),'hPa','pres','#818cf8','#818cf8')
   +'</div>';
 
   // ─ Column 2: Weather This Week + Precipitation + Cloud Coverage ─
@@ -7762,7 +7762,7 @@ function renderHomeView(data, hostEl){
     +metricCard('% Chance Precip.','\u{1F4A7}', (om.precipitation_probability!=null?om.precipitation_probability:0),'%','rain1h','#4db8ff','#4db8ff')
     +metricCard('Rain Rate','\u{1F327}', (precip!=null?precip.toFixed(1):'0'),'mm','rain1h','#4db8ff','#4db8ff')
     +'<div class="hh-sec-ttl">Cloud Coverage</div>'
-    +metricCard('Visibility','\u{1F441}', num(visKm,0),'km','vis','#8aa0c0','#8aa0c0')
+    +metricCard('Visibility','\u{1F441}', num(visKm,2),'km','vis','#8aa0c0','#8aa0c0')
   +'</div>';
 
   // ─ Column 3: Air Quality + Wind ─
@@ -7777,14 +7777,14 @@ function renderHomeView(data, hostEl){
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>PM2.5</span><span class="hh-metric-ic">\u{1F32B}</span></div>'
       +'<div class="hh-aqrow-val">'+num(pm25,0)+' <small>\u00b5g/m\u00b3</small></div></div>'
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>UV Index</span><span class="hh-metric-ic">\u2600</span></div>'
-      +'<div class="hh-aqrow-val">'+num(uv,0)+'</div>'
+      +'<div class="hh-aqrow-val">'+num(uv,1)+'</div>'
       +'<div class="hh-spark">'+_hhSpark('uv','#fbbf24','#fbbf24')+'</div></div>'
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Sea Temp</span><span class="hh-metric-ic">\u{1F30A}</span></div>'
-      +'<div class="hh-aqrow-val">'+num(seaTemp,0)+' <small>\u00b0C</small></div></div>'
+      +'<div class="hh-aqrow-val">'+num(seaTemp,1)+' <small>\u00b0C</small></div></div>'
     +'<div class="hh-sec-ttl">Wind</div>'
     
     +'<div class="hh-card"><div class="hh-compass">'+monitorWindCompass(windDir, windKt!=null?Math.round(windKt):null)+'</div></div>'
-    +metricCard('Wind Speed','\u{1F32C}', num(windKt,0),'kt','wind','#a78bfa','#a78bfa')
+    +metricCard('Wind Speed','\u{1F32C}', num(windKt,1),'kt','wind','#a78bfa','#a78bfa')
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Wind Bearing</span><span class="hh-metric-ic">\u{1F9ED}</span></div>'
       +'<div class="hh-aqrow-val">'+num(windDir,0)+' <small>\u00b0 '+dirName+'</small></div>'
       +'<div class="hh-spark">'+_hhSpark('windDir','#4db8ff','#4db8ff')+'</div></div>'

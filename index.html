@@ -2904,6 +2904,26 @@ function tickClocks(){
 tickClocks(); setInterval(tickClocks,1000);
 function nowStamp(){const d=new Date();return`${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;}
 
+/* Aviation "last updated … · N ago" timestamps. Each setter records the
+   absolute clock + epoch; a ticker repaints the relative part every 30s. */
+var __avTs = {};
+function relAgo(ms){
+  var s = Math.max(0, Math.round((Date.now()-ms)/1000));
+  if(s < 45) return 'just now';
+  var m = Math.round(s/60);
+  if(m < 60) return m + 'm ago';
+  var h = Math.floor(m/60), mm = m%60;
+  return h + 'h' + (mm ? ' '+mm+'m' : '') + ' ago';
+}
+function paintAvTs(){
+  for(var id in __avTs){
+    var t = __avTs[id]; if(!t) continue;
+    var el = byId(id); if(el) el.textContent = t.label + ': ' + t.clock + ' · ' + relAgo(t.at);
+  }
+}
+function setAvTs(id, label){ __avTs[id] = {label:label, at:Date.now(), clock:nowStamp()}; paintAvTs(); }
+setInterval(function(){ try { paintAvTs(); } catch(e){} }, 30000);
+
 /* ─── AUDIO ─── */
 let _ac=null;
 function getAC(){if(_ac)return _ac;try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){_ac=null;}return _ac;}
@@ -3554,7 +3574,7 @@ function updateCstrip(icao, p){
     else if(icao==='TNCC' && window.__synopPCur && window.__synopPCur.vis_m!=null) _vm = window.__synopPCur.vis_m;
     else if(icao==='TNCB' && window.__knmiData && window.__knmiData.vis_m!=null) _vm = window.__knmiData.vis_m;
     if(_vm==null && p.visM!=null && !isNaN(p.visM)) _vm = p.visM;
-    vs.textContent = _vm!=null ? (_vm/1000).toFixed(1)+'km' : '\u2014';
+    vs.textContent = _vm!=null ? (icao==='TNCB' ? (_vm/1000).toFixed(1) : Math.round(_vm/1000))+'km' : '\u2014';
   }
 }
 
@@ -3610,7 +3630,7 @@ function renderMetarCard(icao, rawLine){
 
   const vChip = cf(card,'vis-chip');
   if(!isNaN(p.visM)){
-    cf(card,'vis-val').textContent = p.visM>=9999 ? '\u226510 km' : p.visM>=1000 ? `${(p.visM/1000).toFixed(1)} km` : `${p.visM} m`;
+    cf(card,'vis-val').textContent = p.visM>=9999 ? '\u226510 km' : p.visM>=1000 ? `${Math.round(p.visM/1000)} km` : `${p.visM} m`;
     cf(card,'vis-sub').textContent = p.visM>=8000?'Good':p.visM>=5000?'Moderate':p.visM>=2000?'Poor':'Low vis';
     vChip.className = 'chip' + (p.visM>=8000?' cok':p.visM>=2000?' cwrn':' cred');
   } else { cf(card,'vis-val').textContent='\u2014'; cf(card,'vis-sub').textContent=''; vChip.className='chip'; }
@@ -3772,7 +3792,7 @@ async function refreshAllMetars(){
     } catch(e){}
   }));
   try{ if(typeof condMap!=='undefined' && condMap && __condMapReady) renderCondMap(); }catch(e){}
-  const el=byId('metar-ts'); if(el) el.textContent='Last updated: '+nowStamp();
+  setAvTs('metar-ts', 'Last updated');
   // FIX #5: simplified — no redundant double-check
   const freshCount = STATIONS.filter(icao=>mState[icao]?.lastRaw).length;
   const badge = document.querySelector('.tab[data-tab="metar"] .tbadge');
@@ -4001,7 +4021,7 @@ function renderTAF(icao, rawText){
 }
 async function loadTAF(icao){
   const o=await fetchURL(TAF_URL(icao));
-  if(o.ok){renderTAF(icao,o.text);const el=byId('taf-ts');if(el)el.textContent='TAF: '+nowStamp();}
+  if(o.ok){renderTAF(icao,o.text);setAvTs('taf-ts','TAF');}
 }
 async function loadAllTAFs(){
   // CheckWX first (one batched JSON call); NOAA tgftp per station as fallback.
@@ -4010,7 +4030,7 @@ async function loadAllTAFs(){
     if(cw && cw[icao]){
       try {
         renderTAF(icao, cw[icao]);
-        const el = byId('taf-ts'); if(el) el.textContent = 'TAF: ' + nowStamp();
+        setAvTs('taf-ts', 'TAF');
         return;
       } catch(e){}
     }
@@ -4405,7 +4425,7 @@ async function loadSynop(src){
       rawText = scraped || rawText;
     }
     renderSynopCard(src, rawText);
-    const el=byId('synop-ts'); if(el) el.textContent='SYNOP: '+nowStamp();
+    setAvTs('synop-ts', 'SYNOP');
   }
 }
 async function loadAllSynops(){ await Promise.all(SYNOP_SRCS.map(loadSynop)); }
@@ -4441,7 +4461,7 @@ function applyTest(){
                                               TSYNOP_SICA20;
     renderSynopCard(src, raw);
   });
-  const el=byId('metar-ts');if(el)el.textContent='Test data: '+nowStamp();
+  setAvTs('metar-ts', 'Test data');
 }
 function startTest(){if(testInt)clearInterval(testInt);applyTest();testInt=setInterval(applyTest,4000);}
 function stopTest(){if(testInt){clearInterval(testInt);testInt=null;}}
@@ -5106,7 +5126,7 @@ function renderWxCard(key, P){
   const windDir = (typeof P.wind_dir === 'number') ? P.wind_dir : null;
   const dirName = windDir != null ? COMPASS[Math.round(windDir/22.5)%16] : (P.wind_dir_text || '\u2014');
   const slp     = P.slp      != null ? P.slp      : null;
-  const vis     = P.vis_m    != null ? (P.vis_m/1000).toFixed(1) : null;
+  const vis     = P.vis_m    != null ? Math.round(P.vis_m/1000) : null;
   const precip  = P.precip_mm!= null ? P.precip_mm : null;
   const uv      = extra.uv   != null ? extra.uv   : null;
   const uvLbl   = uv==null?'\u2014':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very high':'Extreme';
@@ -5124,7 +5144,7 @@ function renderWxCard(key, P){
     forecastStrip = fc.slice(0,7).map((d,i)=>{
       const dt  = new Date(d.date + 'T12:00:00'); // local noon: avoids UTC-midnight day shift
       const day = i===0?'Today':DAYS[dt.getDay()];
-      const t   = d.temp_max!=null ? d.temp_max.toFixed(1) : '\u2014';
+      const t   = d.temp_max!=null ? Math.round(d.temp_max) : '\u2014';
       const ico = wxIconStyled(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
       return `<div class="wdb-fstrip-card">
         <div class="wdb-fstrip-ico">${ico}</div>
@@ -5248,13 +5268,13 @@ function renderWxCard(key, P){
         </div>
         <div class="wdb-hero-body">
           <div class="wdb-hero-ico">${heroIco}</div>
-          <div class="wdb-hero-big">${temp!=null?temp.toFixed(1):'\u2014'} <span class="wdb-deg">\u00b0C</span></div>
+          <div class="wdb-hero-big">${temp!=null?Math.round(temp):'\u2014'} <span class="wdb-deg">\u00b0C</span></div>
         </div>
         <div class="wdb-hero-desc">${wxDesc}</div>
         <div class="wdb-hero-pills">
           ${['aruba','curacao','bonaire'].map(k=>{
             const ks=WX_STNS[k]; const kh=WX_HISTORY[k]; const kt=kh&&kh.length?kh[kh.length-1]:null;
-            return `<div class="wdb-hero-pill ${k===key?'active':''}" onclick="switchWxKey('${k}')">${ks?ks.name:k}<br><span>${kt&&kt.temp_c!=null?kt.temp_c.toFixed(1)+'\u00b0C':'\u2014'}</span></div>`;
+            return `<div class="wdb-hero-pill ${k===key?'active':''}" onclick="switchWxKey('${k}')">${ks?ks.name:k}<br><span>${kt&&kt.temp_c!=null?Math.round(kt.temp_c)+'\u00b0C':'\u2014'}</span></div>`;
           }).join('')}
         </div>
       </div>
@@ -5985,7 +6005,7 @@ function renderMonitor(data){
   });
   // ── Sea surface temperature (Marine API) ──
   if(seaTemp != null && isFinite(seaTemp)){
-    byId('monSeaVal').innerHTML = seaTemp.toFixed(1) + ' <span class="mon-unit">\u00b0C</span>';
+    byId('monSeaVal').innerHTML = Math.round(seaTemp) + ' <span class="mon-unit">\u00b0C</span>';
     // Caribbean SST typically 26-30°C. Describe relative to that.
     let sdesc, scol;
     if(seaTemp >= 29){ sdesc='Very warm'; scol='#ff8a3d'; }
@@ -6098,14 +6118,14 @@ function renderMonitor(data){
         dc('Wind', synopP.wind_kt!=null?Math.round(synopP.wind_kt)+' kt':null) +
         dc('Dir', dir) +
         dc('MSLP', synopP.slp!=null?synopP.slp+' hPa':null) +
-        dc('Vis', synopP.vis_m!=null?(synopP.vis_m/1000)+' km':null) +
+        dc('Vis', synopP.vis_m!=null?Math.round(synopP.vis_m/1000)+' km':null) +
         dc('Cloud', synopP.cloud_oktas!=null?synopP.cloud_oktas+'/8':null) +
         dc('Wx', synopP.wx_desc||null);
     } else { decEl.innerHTML = ''; }
   })();
   if(omCurrent && omCurrent.uv_index != null){
     const uv = omCurrent.uv_index;
-    byId('monUvVal').textContent = uv.toFixed(1);
+    byId('monUvVal').textContent = Math.round(uv);
     let lbl = 'LOW', col = '#2ec97a';
     if(uv >= 11){ lbl='EXTREME';   col='#a78bfa'; }
     else if(uv >= 8){ lbl='VERY HIGH'; col='#ff4f4f'; }
@@ -6180,9 +6200,9 @@ function renderMonitor(data){
   updateWxTileForecast();
   var _temp = (_k && _k.temp_c != null) ? _k.temp_c : (synopP && synopP.temp_c != null ? synopP.temp_c : null);
   if(_temp != null){
-    byId('monTemp').innerHTML = _temp.toFixed(1) + '<span class="mon-temp-deg">\u00b0</span>';
+    byId('monTemp').innerHTML = Math.round(_temp) + '<span class="mon-temp-deg">\u00b0</span>';
     const feels = calcFeelsMonitor(_temp, _rh);
-    byId('monFeels').textContent = (feels != null ? feels.toFixed(1) : '\u2014') + '\u00b0';
+    byId('monFeels').textContent = (feels != null ? Math.round(feels) : '\u2014') + '\u00b0';
   } else {
     byId('monTemp').innerHTML = '\u2014<span class="mon-temp-deg">\u00b0</span>';
     byId('monFeels').textContent = '\u2014\u00b0';
@@ -7120,7 +7140,7 @@ function renderSkyView(data, hostEl){
           </div>
           <div class="sky-hl-tile">
             <div class="sky-hl-lbl">Visibility</div>
-            <div class="sky-hl-big" style="margin-top:10px;">${om.visibility!=null?(om.visibility/1000).toFixed(1):'\u2014'}<small>km</small></div>
+            <div class="sky-hl-big" style="margin-top:10px;">${om.visibility!=null?Math.round(om.visibility/1000):'\u2014'}<small>km</small></div>
             <div class="sky-hl-sub">${om.visibility!=null?(om.visibility<2000?'Poor':om.visibility<5000?'Moderate':'Good'):''}</div>
             <div style="margin-top:auto;"><div style="width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,0.07);overflow:hidden;"><div style="height:100%;width:${om.visibility!=null?Math.min(100,(om.visibility/10000)*100):0}%;background:linear-gradient(90deg,#2ec97a,#4db8ff);border-radius:4px;"></div></div></div>
           </div>
@@ -7223,7 +7243,7 @@ function renderGaugesView(data){
     </div>
     <div class="gau-tile">
       <div class="gau-hd">\u{1F321} Temperature</div>
-      ${_gauArc({value:temp,min:6,max:40,unit:'\u00b0C',big:temp!=null?temp.toFixed(1):'\u2014',color:tempCol})}
+      ${_gauArc({value:temp,min:6,max:40,unit:'\u00b0C',big:temp!=null?Math.round(temp):'\u2014',color:tempCol})}
     </div>
     <div class="gau-tile">
       <div class="gau-hd">\u2600 UV Index</div>
@@ -7716,11 +7736,11 @@ function renderHomeView(data, hostEl){
         +condRow('\u{1F4A8}','Wind', (windKt!=null?Math.round(windKt)+' kt '+dirName:'\u2014'))
       +'</div>'
     +'</div>'
-    +metricCard('Temperature','\u{1F321}', num(temp,1),'\u00b0C','temp','#a78bfa','#a78bfa')
+    +metricCard('Temperature','\u{1F321}', num(temp,0),'\u00b0C','temp','#a78bfa','#a78bfa')
     +metricCard('Humidity','\u{1F4A7}', num(rh,0),'%','rh','#d4a017','#d4a017')
-    +metricCard('Dew Point','\u{1F4A7}', num(dew,1),'\u00b0C','dew','#818cf8','#818cf8')
+    +metricCard('Dew Point','\u{1F4A7}', num(dew,0),'\u00b0C','dew','#818cf8','#818cf8')
     +'<div class="hh-sec-ttl">Air Pressure</div>'
-    +metricCard('Air Pressure','\u23F1', num(slp,1),'hPa','pres','#818cf8','#818cf8')
+    +metricCard('Air Pressure','\u23F1', num(slp,0),'hPa','pres','#818cf8','#818cf8')
   +'</div>';
 
   // ─ Column 2: Weather This Week + Precipitation + Cloud Coverage ─
@@ -7742,7 +7762,7 @@ function renderHomeView(data, hostEl){
     +metricCard('% Chance Precip.','\u{1F4A7}', (om.precipitation_probability!=null?om.precipitation_probability:0),'%','rain1h','#4db8ff','#4db8ff')
     +metricCard('Rain Rate','\u{1F327}', (precip!=null?precip.toFixed(1):'0'),'mm','rain1h','#4db8ff','#4db8ff')
     +'<div class="hh-sec-ttl">Cloud Coverage</div>'
-    +metricCard('Visibility','\u{1F441}', num(visKm,2),'km','vis','#8aa0c0','#8aa0c0')
+    +metricCard('Visibility','\u{1F441}', num(visKm,0),'km','vis','#8aa0c0','#8aa0c0')
   +'</div>';
 
   // ─ Column 3: Air Quality + Wind ─
@@ -7757,14 +7777,14 @@ function renderHomeView(data, hostEl){
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>PM2.5</span><span class="hh-metric-ic">\u{1F32B}</span></div>'
       +'<div class="hh-aqrow-val">'+num(pm25,0)+' <small>\u00b5g/m\u00b3</small></div></div>'
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>UV Index</span><span class="hh-metric-ic">\u2600</span></div>'
-      +'<div class="hh-aqrow-val">'+num(uv,1)+'</div>'
+      +'<div class="hh-aqrow-val">'+num(uv,0)+'</div>'
       +'<div class="hh-spark">'+_hhSpark('uv','#fbbf24','#fbbf24')+'</div></div>'
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Sea Temp</span><span class="hh-metric-ic">\u{1F30A}</span></div>'
-      +'<div class="hh-aqrow-val">'+num(seaTemp,1)+' <small>\u00b0C</small></div></div>'
+      +'<div class="hh-aqrow-val">'+num(seaTemp,0)+' <small>\u00b0C</small></div></div>'
     +'<div class="hh-sec-ttl">Wind</div>'
     
     +'<div class="hh-card"><div class="hh-compass">'+monitorWindCompass(windDir, windKt!=null?Math.round(windKt):null)+'</div></div>'
-    +metricCard('Wind Speed','\u{1F32C}', num(windKt,1),'kt','wind','#a78bfa','#a78bfa')
+    +metricCard('Wind Speed','\u{1F32C}', num(windKt,0),'kt','wind','#a78bfa','#a78bfa')
     +'<div class="hh-card"><div class="hh-aqrow-ttl"><span>Wind Bearing</span><span class="hh-metric-ic">\u{1F9ED}</span></div>'
       +'<div class="hh-aqrow-val">'+num(windDir,0)+' <small>\u00b0 '+dirName+'</small></div>'
       +'<div class="hh-spark">'+_hhSpark('windDir','#4db8ff','#4db8ff')+'</div></div>'

@@ -1458,6 +1458,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 
 /* ═══════════ DASHBOARDS TAB (glassmorphic weather styles) ═══════════ */
 .dash-switcher{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+#dashSwitcher{flex-wrap:wrap;overflow-x:visible;overflow-y:visible;}
 .dash-switcher-lbl{font-family:var(--cond);font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:2px;}
 .dash-style-btn{padding:8px 15px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;cursor:pointer;transition:all .18s;height:37px;}
 .dash-style-btn:hover{border-color:var(--bdrb);color:var(--acc);background:rgba(77,184,255,0.05);}
@@ -1469,6 +1470,94 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-daylight{--db1:#9fbdec;--db2:#c2d3f4;--db3:#dce7fb;--dcard:rgba(255,255,255,0.55);--dcard2:rgba(255,255,255,0.72);--dbd:rgba(255,255,255,0.85);--dtxt:#243456;--dmut:#5e6f96;--dacc:#4f6ef0;--dacc2:#8a6cf0;--dglow:rgba(110,140,235,0.30);}
 .dash-metro{--db1:#07091f;--db2:#0d1545;--db3:#030712;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.10);--dbd:rgba(100,140,255,0.18);--dtxt:#e8eeff;--dmut:#7b90c0;--dacc:#4f80ff;--dacc2:#6c5fff;--dglow:rgba(79,128,255,0.35);}
 .dash-dark{--db1:#151515;--db2:#1c1c1c;--db3:#0d0d0d;--dcard:rgba(255,255,255,0.055);--dcard2:rgba(255,255,255,0.08);--dbd:rgba(255,255,255,0.10);--dtxt:#f0f0f0;--dmut:#888888;--dacc:#4f9ef8;--dacc2:#764af7;--dglow:rgba(79,158,248,0.20);}
+.dash-violet{--db1:#1e1b4b;--db2:#312e81;--db3:#0f0e2a;--dcard:rgba(255,255,255,0.07);--dcard2:rgba(255,255,255,0.12);--dbd:rgba(165,180,252,0.22);--dtxt:#e0e7ff;--dmut:#a5b4fc;--dacc:#818cf8;--dacc2:#c084fc;--dglow:rgba(129,140,248,0.35);}
+.dash-airy{--db1:#e0f2fe;--db2:#bae6fd;--db3:#f0f9ff;--dcard:rgba(255,255,255,0.82);--dcard2:rgba(255,255,255,0.60);--dbd:rgba(14,165,233,0.22);--dtxt:#0c4a6e;--dmut:#0284c7;--dacc:#0ea5e9;--dacc2:#0369a1;--dglow:rgba(14,165,233,0.18);}
+/* dashboardsContent palette host — applies gradient + variables when a palette class is set */
+#dashboardsContent.dash-violet,#dashboardsContent.dash-metro,#dashboardsContent.dash-dark,#dashboardsContent.dash-airy{border-radius:22px;padding:16px;background:linear-gradient(165deg,var(--db1) 0%,var(--db2) 52%,var(--db3) 100%);color:var(--dtxt);position:relative;overflow:hidden;transition:background .3s;}
+/* ── Violet (Weacast-inspired) layout ── */
+.dash-violet-wrap{display:grid;grid-template-columns:210px 1fr 195px;gap:13px;align-items:start;position:relative;z-index:1;}
+@media(max-width:940px){.dash-violet-wrap{grid-template-columns:1fr;}}
+.dash-violet-sidebar{display:flex;flex-direction:column;gap:10px;}
+.dash-violet-brand{font-family:var(--cond);font-size:16px;font-weight:800;color:var(--dtxt);letter-spacing:.5px;padding:4px 0 2px;}
+.dash-violet-brand small{font-size:10px;font-weight:500;color:var(--dmut);display:block;letter-spacing:.3px;}
+.dash-violet-time{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--dtxt);letter-spacing:1px;}
+.dash-violet-time small{font-size:10px;color:var(--dmut);display:block;font-weight:400;letter-spacing:.5px;margin-top:1px;}
+.dash-violet-nav{display:flex;flex-direction:column;gap:3px;}
+.dash-violet-nav-item{font-family:var(--cond);font-size:12px;font-weight:700;padding:8px 10px;border-radius:9px;cursor:default;color:var(--dmut);display:flex;align-items:center;gap:6px;}
+.dash-violet-nav-item.active{background:var(--dcard2);border:1px solid var(--dbd);color:var(--dtxt);}
+.dash-violet-cond-card{background:linear-gradient(135deg,var(--dacc2),var(--dacc));border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:auto;}
+.dash-violet-cond-temp{font-family:var(--cond);font-size:44px;font-weight:800;color:#fff;line-height:1;}
+.dash-violet-cond-temp sup{font-size:16px;vertical-align:super;}
+.dash-violet-cond-ic{width:44px;height:44px;}
+.dash-violet-cond-ic svg,.dash-violet-cond-ic span{width:44px!important;height:44px!important;}
+.dash-violet-cond-desc{font-family:var(--cond);font-size:12px;font-weight:700;color:rgba(255,255,255,0.85);text-align:center;}
+.dash-violet-cond-sub{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.55);text-align:center;margin-top:1px;}
+.dash-violet-main{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.dash-violet-card{background:var(--dcard);border:1px solid var(--dbd);border-radius:15px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.dash-violet-hd{font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--dmut);}
+.dash-violet-chart-card{padding:14px 14px 8px;}
+.dash-violet-chart-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.dash-violet-loc-badge{font-family:var(--mono);font-size:9.5px;background:var(--dcard2);border:1px solid var(--dbd);border-radius:6px;padding:2px 8px;color:var(--dmut);}
+.dash-violet-stats-card{padding:12px 14px;}
+.dash-violet-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.dash-violet-stat{background:var(--dcard2);border:1px solid var(--dbd);border-radius:11px;padding:10px 11px;display:flex;flex-direction:column;gap:2px;}
+.dash-violet-stat-icon{font-size:18px;margin-bottom:1px;}
+.dash-violet-stat-val{font-family:var(--cond);font-size:20px;font-weight:800;color:var(--dtxt);}
+.dash-violet-stat-val small{font-size:12px;opacity:.7;}
+.dash-violet-stat-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--dmut);}
+.dash-violet-stat-trend{font-family:var(--mono);font-size:9px;color:var(--dacc2);margin-top:2px;}
+.dash-violet-hourly-card{padding:8px 4px;}
+.dash-violet-right{display:flex;flex-direction:column;gap:11px;min-width:0;}
+.dash-violet-rain-card{padding:12px 14px;}
+.dash-violet-rain-bars{display:flex;align-items:flex-end;gap:4px;height:56px;margin-top:8px;}
+.dash-violet-rain-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.dash-violet-rain-bar{width:100%;background:var(--dacc);border-radius:3px 3px 0 0;min-height:3px;}
+.dash-violet-rain-bar-t{font-family:var(--mono);font-size:7px;color:var(--dmut);}
+.dash-violet-cities-card{padding:12px 14px;}
+.dash-violet-city{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--dbd);}
+.dash-violet-city:last-child{border-bottom:none;padding-bottom:0;}
+.dash-violet-city-ic{width:26px;height:26px;flex:0 0 auto;}
+.dash-violet-city-ic svg,.dash-violet-city-ic span{width:26px!important;height:26px!important;}
+.dash-violet-city-info{flex:1;min-width:0;}
+.dash-violet-city-nm{font-family:var(--cond);font-size:11px;font-weight:700;color:var(--dtxt);display:block;}
+.dash-violet-city-desc{font-family:var(--mono);font-size:9px;color:var(--dmut);display:block;}
+.dash-violet-city-tmp{font-family:var(--cond);font-size:15px;font-weight:800;color:var(--dtxt);}
+.dash-violet-sun-card{padding:12px 14px;display:flex;flex-direction:column;gap:9px;}
+.dash-violet-sun-row{display:flex;align-items:center;justify-content:space-between;}
+.dash-violet-sun-label{font-family:var(--cond);font-size:11px;font-weight:700;color:var(--dmut);}
+.dash-violet-sun-time{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--dtxt);}
+.dash-violet-sun-ago{font-family:var(--mono);font-size:9px;color:var(--dmut);}
+/* ── Airy (light teal) layout ── */
+.dash-airy-wrap{display:grid;grid-template-columns:260px 1fr;gap:14px;align-items:start;position:relative;z-index:1;}
+@media(max-width:820px){.dash-airy-wrap{grid-template-columns:1fr;}}
+.dash-airy-left{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:4px 0;}
+.dash-airy-gauge-wrap{width:100%;max-width:220px;}
+.dash-airy-temp{font-family:var(--cond);font-size:54px;font-weight:800;color:var(--dtxt);line-height:1;margin-top:-4px;}
+.dash-airy-temp sup{font-size:20px;vertical-align:super;opacity:.6;}
+.dash-airy-ic{width:64px;height:64px;margin:4px auto;}
+.dash-airy-ic svg,.dash-airy-ic span{width:64px!important;height:64px!important;}
+.dash-airy-cond{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--dtxt);}
+.dash-airy-hilos{font-family:var(--cond);font-size:12px;color:var(--dmut);}
+.dash-airy-hilos b{color:var(--dtxt);}
+.dash-airy-date{font-family:var(--mono);font-size:10px;color:var(--dmut);margin-top:2px;}
+.dash-airy-right{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.dash-airy-card{background:var(--dcard);border:1px solid var(--dbd);border-radius:16px;padding:14px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 12px rgba(14,165,233,0.08);}
+.dash-airy-hd{font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--dmut);margin-bottom:10px;}
+.dash-airy-bar-chart{display:flex;align-items:flex-end;gap:5px;height:80px;width:100%;}
+.dash-airy-bar-grp{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;}
+.dash-airy-bar-outer{width:100%;height:100%;display:flex;align-items:flex-end;position:relative;}
+.dash-airy-bar{width:100%;background:linear-gradient(180deg,var(--dacc) 0%,var(--dacc2) 100%);border-radius:5px 5px 0 0;min-height:4px;position:relative;}
+.dash-airy-bar-tmp{font-family:var(--cond);font-size:8px;font-weight:700;color:var(--dtxt);position:absolute;top:-14px;left:50%;transform:translateX(-50%);white-space:nowrap;}
+.dash-airy-bar-hr{font-family:var(--mono);font-size:7.5px;color:var(--dmut);}
+.dash-airy-hl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:2px;}
+@media(max-width:700px){.dash-airy-hl-grid{grid-template-columns:1fr 1fr;}}
+.dash-airy-hl{background:var(--dcard2);border:1px solid var(--dbd);border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:2px;}
+.dash-airy-hl-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--dmut);margin-bottom:2px;}
+.dash-airy-hl-val{font-family:var(--cond);font-size:20px;font-weight:800;color:var(--dtxt);line-height:1.1;}
+.dash-airy-hl-val small{font-size:12px;opacity:.65;}
+.dash-airy-hl-sub{font-family:var(--mono);font-size:9px;color:var(--dmut);margin-top:1px;}
+.dash-airy-hl-bar{height:5px;border-radius:3px;background:var(--dbd);overflow:hidden;margin-top:4px;}
+.dash-airy-hl-bar>div{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--dacc2),var(--dacc));}
 /* ═══ GRAPHS TAB ═══ */
 .graphs-wrap{display:flex;flex-direction:column;gap:14px;}
 .graphs-top{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:stretch;}
@@ -2809,6 +2898,10 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="mon-switcher" id="dashSwitcher">
       <span class="mon-switcher-lbl">Styles</span>
       <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
+      <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#127769;</span>Classic</button>
+      <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127749;</span>Metro</button>
+      <button class="mon-style-btn" data-dashstyle="violet" onclick="setDashStyle('violet')"><span class="mon-style-btn-ic">&#128150;</span>Violet</button>
+      <button class="mon-style-btn" data-dashstyle="airy" onclick="setDashStyle('airy')"><span class="mon-style-btn-ic">&#9728;</span>Airy</button>
       <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
     </div>
     <div id="dashboardsContent"></div>
@@ -6250,8 +6343,7 @@ function renderMonitor(data){
     else if(hk.scale >= 6) { hlbl = 'hoog \u2014 drink water';           hcol = '#ff8a3d'; }
     else if(hk.scale >= 4) { hlbl = 'matig';                            hcol = '#f59e0b'; }
     else                   { hlbl = 'laag';                             hcol = 'var(--muted)'; }
-    hEl.innerHTML = '\u{1F321} Hittekracht ' + hk.scale + '/10 \u00b7 ' + hlbl +
-      ' <span style="opacity:.55;">(WBGT ' + Math.round(hk.wbgt) + '\u00b0' + (hk.sun ? '' : ', schaduw') + ')</span>';
+    hEl.innerHTML = '\u{1F321} Hittekracht ' + hk.scale + '/10 \u00b7 ' + hlbl;
     hEl.style.color = hk.scale >= 4 ? hcol : 'var(--muted)';
   })();
   const tnccMetarRaw = (typeof mState === 'object' && mState && mState.TNCC) ? mState.TNCC.lastRaw : null;
@@ -6426,7 +6518,7 @@ function renderMonitorViews(data){
 /* ═══════════ DASHBOARDS TAB ═══════════
    Premium glassmorphic weather dashboards (Aurora / Midnight / Daylight),
    all driven by the same live ABC data the Monitor uses. */
-let __dashStyle = (function(){ try{ var s = localStorage.getItem('rwc-dashstyle'); return ['sky','home'].indexOf(s)>=0 ? s : 'sky'; }catch(e){ return 'sky'; } })();
+let __dashStyle = (function(){ try{ var s = localStorage.getItem('rwc-dashstyle'); return ['sky','home','metro','dark','violet','airy'].indexOf(s)>=0 ? s : 'sky'; }catch(e){ return 'sky'; } })();
 function setDashStyle(style, btn){
   __dashStyle = style;
   try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}
@@ -6550,6 +6642,179 @@ function _metroChartSwitch(metric){
   area.innerHTML=_metroLineChart(hours,metric);
 }
 window._metroChartSwitch=_metroChartSwitch;
+
+/* ── Violet rain bar helper ── */
+function _violetRainBars(hours){
+  if(!hours||!hours.length) return '<div class="dash-violet-rain-bars" style="align-items:center;justify-content:center;"><span style="font-family:var(--cond);font-size:11px;color:var(--dmut);">No forecast data</span></div>';
+  const pts=hours.slice(0,8).map(h=>({pop:h.pop!=null?h.pop:0,hr:h.hour}));
+  const maxPop=Math.max(10,...pts.map(p=>p.pop));
+  return '<div class="dash-violet-rain-bars">'+pts.map(p=>{const pct=Math.max(4,Math.round((p.pop/maxPop)*100));const hr=String(p.hr).padStart(2,'0');return`<div class="dash-violet-rain-bar-wrap"><div class="dash-violet-rain-bar" style="height:${pct}%;opacity:${(0.35+0.65*(p.pop/100)).toFixed(2)}"></div><div class="dash-violet-rain-bar-t">${hr}h</div></div>`;}).join('')+'</div>';
+}
+/* ── Airy temperature dial gauge ── */
+function _airyTempGauge(tempC,loC,hiC){
+  const mn=loC!=null?loC:24,mx=hiC!=null?hiC:34,t=tempC!=null?tempC:28;
+  const pct=Math.max(0,Math.min(1,(t-mn)/Math.max(1,mx-mn)));
+  const cx=110,cy=100,r=80;
+  const angle=Math.PI*(1-pct);
+  const nX=(cx+r*Math.cos(angle)).toFixed(1),nY=(cy-r*Math.sin(angle)).toFixed(1);
+  const nNx=(cx+52*Math.cos(angle)).toFixed(1),nNy=(cy-52*Math.sin(angle)).toFixed(1);
+  const lgf=pct>0.5?1:0;
+  const fillArc=pct>0.01?`<path d="M${cx-r},${cy} A${r},${r} 0 ${lgf},0 ${nX},${nY}" fill="none" stroke="url(#_airyGG)" stroke-width="13" stroke-linecap="round"/>`:'';
+  return`<svg viewBox="0 0 220 116" width="100%" style="max-height:116px"><defs><linearGradient id="_airyGG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#ef4444"/></linearGradient></defs>
+  <path d="M${cx-r},${cy} A${r},${r} 0 0,0 ${cx+r},${cy}" fill="none" stroke="rgba(14,165,233,0.15)" stroke-width="13" stroke-linecap="round"/>
+  ${fillArc}
+  <line x1="${cx}" y1="${cy}" x2="${nNx}" y2="${nNy}" stroke="var(--dtxt)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="6" fill="var(--dtxt)" stroke="var(--dacc)" stroke-width="2"/>
+  <text x="${cx-r+2}" y="${cy+18}" font-size="10" fill="var(--dmut)" font-family="system-ui">${Math.round(mn)}°</text>
+  <text x="${cx+r-22}" y="${cy+18}" font-size="10" fill="var(--dmut)" font-family="system-ui">${Math.round(mx)}°</text>
+  </svg>`;
+}
+/* ── Airy hourly bar chart ── */
+function _airyBarChart(hours){
+  if(!hours||!hours.length) return '<div style="text-align:center;padding:20px;color:var(--dmut);font-family:var(--cond);font-size:11px;">Hourly data loading…</div>';
+  const pts=hours.slice(0,9);
+  const temps=pts.map(p=>p.temp).filter(t=>t!=null);
+  if(!temps.length) return '';
+  const mn=Math.min(...temps)-1,mx=Math.max(...temps)+1;
+  return '<div class="dash-airy-bar-chart">'+pts.map(h=>{
+    const pct=h.temp!=null?Math.max(10,Math.round(((h.temp-mn)/(mx-mn))*90)+5):15;
+    const hrLbl=h.hour%12===0?'12'+(h.hour<12?'A':'P'):(h.hour%12)+(h.hour<12?'A':'P');
+    return`<div class="dash-airy-bar-grp"><div class="dash-airy-bar" style="height:${pct}%">${h.temp!=null?`<span class="dash-airy-bar-tmp">${Math.round(h.temp)}°</span>`:''}</div><div class="dash-airy-bar-hr">${hrLbl}</div></div>`;
+  }).join('')+'</div>';
+}
+
+/* ── Violet dashboard ── */
+function renderVioletDash(host){
+  const d=__monLastData;if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
+  const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};
+  const fc=(typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
+  const wmo=_monWmoFromData(d);const now=new Date();const lh=now.getHours();
+  const temp=p.temp_c!=null?Math.round(p.temp_c):null;
+  const feels=p.temp_c!=null?Math.round(calcFeelsMonitor(p.temp_c,p.rh)):null;
+  const hi=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
+  const lo=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
+  const rh=p.rh!=null?Math.round(p.rh):null;
+  const rainMm=om.rain!=null?+om.rain:(om.precipitation!=null?+om.precipitation:0);
+  let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
+  const hoursHtml=hours.length?hours.slice(0,6).map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19,h.pop),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${wxIconStyled(w.icon,32)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'';
+  let curvePts=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();curvePts=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,10);if(curvePts.length<6&&fc[1]&&fc[1]._hourly)curvePts=curvePts.concat(fc[1]._hourly.slice(0,10-curvePts.length));}
+  const curveHtml=_dashTempCurve(curvePts)||'';
+  const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
+  const cityKeys=[['TNCA','Aruba'],['TNCB','Bonaire'],['TNCM','St Maarten']];
+  const citiesHtml=cityKeys.map(([icao,nm])=>{let t=null,ic2='cloud',desc='—';const raw=mState&&mState[icao]?mState[icao].lastRaw:null;if(raw){try{const mp=parseMetar(raw);if(mp.tempC!=null)t=mp.tempC;const bkn=mp.cldToks.some(x=>/^(BKN|OVC)/.test(x)),sct=mp.cldToks.some(x=>/^(SCT|FEW)/.test(x)),rn=mp.wxToks.some(x=>/RA|SH|TS/.test(x)),nt=lh<6||lh>=19;ic2=rn?'rain':bkn?'cloud':sct?(nt?'cloud-moon':'cloud-sun'):(nt?'moon':'sun');desc=rn?'Rain':bkn?'Cloudy':sct?'Partly cloudy':'Clear';}catch(e){}}return`<div class="dash-violet-city"><span class="dash-violet-city-ic">${wxIconStyled(ic2,26)}</span><span class="dash-violet-city-info"><span class="dash-violet-city-nm">${nm}</span><span class="dash-violet-city-desc">${desc}</span></span><span class="dash-violet-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;}).join('');
+  function sunAgo(iso){if(!iso)return'';try{const diff=Math.round((new Date()-new Date(iso))/60000);if(diff<0)return'in '+(-diff)+'m';if(diff<120)return diff+'m ago';return Math.round(diff/60)+'h ago';}catch(e){return'';}}
+  const stats=[
+    {icon:'💨',val:(windKt!=null?windKt+'<small> kt</small>':'—'),lbl:'Wind Speed',trend:windKt!=null&&windKt>15?'↑ Gusty':'Calm'},
+    {icon:'🌧',val:(rainMm>0.05?rainMm.toFixed(1)+'<small> mm</small>':'<small>none</small>'),lbl:'Rain 1h',trend:'Last hour'},
+    {icon:'💧',val:(rh!=null?rh+'<small>%</small>':'—'),lbl:'Humidity',trend:''},
+    {icon:'☀️',val:(uv!=null?String(Math.round(uv)):'—'),lbl:'UV Index',trend:uv!=null&&uv<3?'Low':uv!=null&&uv<6?'Moderate':'High'},
+  ];
+  host.innerHTML=`<div class="dash-violet-wrap">
+  <div class="dash-violet-sidebar">
+    <div class="dash-violet-brand">&#127752; RWC Caribbean<small>ABC Islands · Live Weather</small></div>
+    <div class="dash-violet-time">${timeStr}<small>${dayStr}</small></div>
+    <nav class="dash-violet-nav">
+      <div class="dash-violet-nav-item active">&#128202; Current</div>
+      <div class="dash-violet-nav-item">&#128197; Forecast</div>
+      <div class="dash-violet-nav-item">&#127749; Sunrise</div>
+    </nav>
+    <div class="dash-violet-cond-card">
+      <div class="dash-violet-cond-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+      <div class="dash-violet-cond-ic">${wxIconStyled(wmo.icon,44)}</div>
+      <div class="dash-violet-cond-desc">${wmo.desc}</div>
+      <div class="dash-violet-cond-sub">${feels!=null?'Feels '+feels+'°':''}${hi!=null?' · H '+hi+'°':''}${lo!=null?' L '+lo+'°':''}</div>
+    </div>
+  </div>
+  <div class="dash-violet-main">
+    <div class="dash-violet-card dash-violet-chart-card">
+      <div class="dash-violet-chart-top"><span class="dash-violet-hd">Daily Temperature</span><span class="dash-violet-loc-badge">&#128205; Cura&ccedil;ao</span></div>
+      ${curveHtml}
+    </div>
+    <div class="dash-violet-card dash-violet-stats-card">
+      <div class="dash-violet-hd">Today Overview</div>
+      <div class="dash-violet-stats-row">${stats.map(s=>`<div class="dash-violet-stat"><div class="dash-violet-stat-icon">${s.icon}</div><div class="dash-violet-stat-val">${s.val}</div><div class="dash-violet-stat-lbl">${s.lbl}</div>${s.trend?`<div class="dash-violet-stat-trend">${s.trend}</div>`:''}</div>`).join('')}</div>
+    </div>
+    <div class="dash-violet-card dash-violet-hourly-card"><div class="dash-hours">${hoursHtml}</div></div>
+  </div>
+  <div class="dash-violet-right">
+    <div class="dash-violet-card dash-violet-rain-card">
+      <div class="dash-violet-hd" style="margin-bottom:6px">Chance of Rain</div>
+      ${_violetRainBars(hours)}
+    </div>
+    <div class="dash-violet-card dash-violet-cities-card">
+      <div class="dash-violet-hd" style="margin-bottom:8px">Nearby Islands</div>
+      ${citiesHtml}
+    </div>
+    <div class="dash-violet-card dash-violet-sun-card">
+      <div class="dash-violet-sun-row"><span class="dash-violet-sun-label">&#9728; Sunrise</span><div style="text-align:right"><div class="dash-violet-sun-time">${_fmtClk(sr)}</div><div class="dash-violet-sun-ago">${sunAgo(sr)}</div></div></div>
+      <div class="dash-violet-sun-row"><span class="dash-violet-sun-label">&#127748; Sunset</span><div style="text-align:right"><div class="dash-violet-sun-time">${_fmtClk(ss)}</div><div class="dash-violet-sun-ago">${sunAgo(ss)}</div></div></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ── Airy (light teal) dashboard ── */
+function renderAiryDash(host){
+  const d=__monLastData;if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
+  const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};
+  const fc=(typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
+  const wmo=_monWmoFromData(d);const now=new Date();
+  const temp=p.temp_c!=null?Math.round(p.temp_c):null;
+  const feels=p.temp_c!=null?Math.round(calcFeelsMonitor(p.temp_c,p.rh)):null;
+  const hi=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
+  const lo=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
+  const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
+  const windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
+  const rh=p.rh!=null?Math.round(p.rh):null;
+  const qnh=p.qnh!=null?Math.round(p.qnh):null;
+  let vis=p.vis_m!=null?(p.vis_m>=9999?'> 10 km':(p.vis_m/1000).toFixed(0)+' km'):null;
+  if(!vis){const tnccRaw=(typeof mState==='object'&&mState&&mState.TNCC)?mState.TNCC.lastRaw:null;if(tnccRaw){try{const mp=parseMetar(tnccRaw);if(!isNaN(mp.visM))vis=mp.visM>=9999?'> 10 km':(mp.visM/1000).toFixed(0)+' km';}catch(e){}}}
+  if(!vis)vis='> 10 km';
+  let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,9);if(hours.length<9&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,9-hours.length));}
+  const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
+  const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const hls=[
+    {lbl:'UV Index',val:(uv!=null?Math.round(uv):'—'),unit:'',sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):null,uvGauge:true},
+    {lbl:'Wind Status',val:(windKt!=null?windKt:'—'),unit:' kt',sub:windDir||'Variable',bar:null,uvGauge:false},
+    {lbl:'Sunrise & Sunset',val:_fmtClk(sr),unit:'',sub:'Sunset: '+_fmtClk(ss),bar:null,uvGauge:false},
+    {lbl:'Humidity',val:(rh!=null?rh:'—'),unit:'%',sub:'',bar:rh,uvGauge:false},
+    {lbl:'Visibility',val:vis,unit:'',sub:'',bar:null,uvGauge:false},
+    {lbl:'Pressure',val:(qnh!=null?qnh:'—'),unit:' hPa',sub:'',bar:null,uvGauge:false},
+  ];
+  const hlHtml=hls.map(m=>{
+    if(m.uvGauge){return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div>${_metroUVGauge(uv)}</div>`;}
+    return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div><div class="dash-airy-hl-val">${m.val}<small>${m.unit}</small></div>${m.bar!=null?`<div class="dash-airy-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%"></div></div>`:''}<div class="dash-airy-hl-sub">${m.sub}</div></div>`;
+  }).join('');
+  host.innerHTML=`<div class="dash-airy-wrap">
+  <div class="dash-airy-left">
+    <div class="dash-airy-gauge-wrap">${_airyTempGauge(temp,lo,hi)}</div>
+    <div class="dash-airy-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+    <div class="dash-airy-ic">${wxIconStyled(wmo.icon,64)}</div>
+    <div class="dash-airy-cond">${wmo.desc}</div>
+    <div class="dash-airy-hilos">${hi!=null?'<b>H: '+hi+'°</b> ':''} ${lo!=null?'<b>L: '+lo+'°</b>':''} ${feels!=null?' · Feels <b>'+feels+'°</b>':''}</div>
+    <div class="dash-airy-date">${dayStr} · ${timeStr}</div>
+  </div>
+  <div class="dash-airy-right">
+    <div class="dash-airy-card">
+      <div class="dash-airy-hd">Today</div>
+      ${_airyBarChart(hours)}
+    </div>
+    <div class="dash-airy-card">
+      <div class="dash-airy-hd">Highlights</div>
+      <div class="dash-airy-hl-grid">${hlHtml}</div>
+    </div>
+  </div>
+</div>`;
+}
 
 function renderMetroDash(host){
   const d=__monLastData; if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
@@ -6787,9 +7052,15 @@ function renderDashboardsTab(){
   if(!host) return;
   const d = __monLastData;
 
+  // Apply / remove palette class on host
+  const _DASH_PAL = ['dash-violet','dash-metro','dash-dark','dash-airy'];
+  _DASH_PAL.forEach(c => host.classList.remove(c));
+
   // Glass dashboard styles
-  if(__dashStyle === 'metro') { renderMetroDash(host); return; }
-  if(__dashStyle === 'dark') { renderDarkDash(host); return; }
+  if(__dashStyle === 'metro') { host.classList.add('dash-metro'); renderMetroDash(host); return; }
+  if(__dashStyle === 'dark')  { host.classList.add('dash-dark');  renderDarkDash(host);  return; }
+  if(__dashStyle === 'violet'){ host.classList.add('dash-violet');renderVioletDash(host);return; }
+  if(__dashStyle === 'airy')  { host.classList.add('dash-airy');  renderAiryDash(host);  return; }
 
   // Monitor-style views (sky, home) in Dashboards tab
   if(__dashStyle === 'sky') { renderSkyView(d, host); return; }

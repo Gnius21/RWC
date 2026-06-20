@@ -93,10 +93,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .bp:active{transform:translateY(1px);}
 .bp[disabled]{opacity:.5;cursor:not-allowed;}
 :root.night .bp{background:linear-gradient(180deg,rgba(140,70,0,0.9),rgba(90,40,0,0.9));border-color:rgba(180,90,0,0.3);}
-.bg{padding:5px 9px;border-radius:7px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--acc);cursor:pointer;font-family:var(--cond);font-size:13px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;height:30px;transition:all .15s;}
-.bg.spinning{display:inline-block;animation:bgSpin 0.8s linear infinite;background:rgba(46,201,122,0.12);border-color:rgba(46,201,122,0.4);color:var(--grn);}
+.bg{padding:7px 14px;border-radius:10px;border:1px solid var(--bdr);background:rgba(255,255,255,0.04);color:var(--acc);cursor:pointer;font-family:var(--cond);font-size:15px;letter-spacing:.8px;text-transform:uppercase;font-weight:600;min-height:42px;min-width:42px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.bg.spinning{animation:bgSpin 0.8s linear infinite;background:rgba(46,201,122,0.12);border-color:rgba(46,201,122,0.4);color:var(--grn);}
 @keyframes bgSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-.bg:hover{background:rgba(77,184,255,0.06);border-color:var(--bdrb);}
+.bg:hover{background:rgba(77,184,255,0.10);border-color:var(--bdrb);}
+.bg:active{transform:scale(0.93);}
 .lbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:13px;color:var(--grn);padding:2px 7px;border:1px solid rgba(46,201,122,0.25);border-radius:4px;background:rgba(46,201,122,0.06);}
 .lbadge-d{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 5px var(--grn);animation:pok 2s infinite;}
 
@@ -1433,39 +1434,39 @@ body.tab-hidden *{animation-play-state:paused !important;}
 /* Settings swatches active */
 :root.neon .theme-swatch.active { border-color: #00e5ff; box-shadow: 0 0 12px rgba(0,229,255,0.35); }
 
-/* ── Storm theme (deep purple, warm violet accent) ── */
+/* ── Storm theme (deep blue-purple, electric violet + cobalt blue) ── */
 :root.storm {
-  --bg:    #0c0220;
-  --card:  rgba(30,10,68,0.93);
-  --bdr:   rgba(110,55,210,0.22);
-  --bdrb:  rgba(160,110,255,0.38);
-  --txt:   #f0ebff;
-  --muted: #9b7fd4;
-  --acc:   #a78bfa;
-  --acc2:  #c084fc;
-  --accd:  rgba(167,139,250,0.12);
+  --bg:    #060b20;
+  --card:  rgba(10,22,70,0.94);
+  --bdr:   rgba(70,90,220,0.24);
+  --bdrb:  rgba(110,140,255,0.44);
+  --txt:   #eef0ff;
+  --muted: #7b90d4;
+  --acc:   #60a5fa;
+  --acc2:  #a78bfa;
+  --accd:  rgba(96,165,250,0.13);
   --red:   #fb7185;
   --redd:  rgba(251,113,133,0.12);
   --grn:   #34d399;
   --grnd:  rgba(52,211,153,0.10);
   --ylw:   #fbbf24;
   --ylwd:  rgba(251,191,36,0.10);
-  --pur:   #e879f9;
-  --purd:  rgba(232,121,249,0.10);
+  --pur:   #c084fc;
+  --purd:  rgba(192,132,252,0.12);
 }
-:root.storm body { background: #0c0220 !important; }
+:root.storm body { background: #060b20 !important; }
 :root.storm body::before {
   background:
-    radial-gradient(ellipse 1000px 700px at 8% 0%,   rgba(80,20,160,0.45)  0%, transparent 65%),
-    radial-gradient(ellipse 700px  600px at 94% 98%,  rgba(120,30,190,0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 500px  400px at 50% 48%,  rgba(50,10,110,0.10)  0%, transparent 55%) !important;
+    radial-gradient(ellipse 1100px 750px at 5% 0%,    rgba(30,60,200,0.38) 0%, transparent 65%),
+    radial-gradient(ellipse 800px  650px at 96% 100%,  rgba(100,30,200,0.28) 0%, transparent 62%),
+    radial-gradient(ellipse 600px  500px at 50% 50%,   rgba(20,40,120,0.10) 0%, transparent 55%) !important;
 }
 /* Nav / tabs */
-:root.storm .topbar  { background: rgba(12,2,32,0.88); border-bottom: 1px solid rgba(100,50,200,0.28); }
-:root.storm nav.tabs { background: rgba(10,2,28,0.92); }
-:root.storm .tab     { color: rgba(170,140,255,0.50); }
-:root.storm .tab.active { background: linear-gradient(180deg,rgba(90,30,200,0.88),rgba(55,12,145,0.94)); border-color: rgba(167,139,250,0.45); box-shadow: 0 5px 18px rgba(80,20,180,0.50), 0 0 22px rgba(167,139,250,0.12), inset 0 1px 0 rgba(200,160,255,0.18); color: #f0ebff; }
-:root.storm .tab:hover:not(.active) { background: rgba(90,30,200,0.14); color: #c4b5fd; }
+:root.storm .topbar  { background: rgba(4,10,30,0.90); border-bottom: 1px solid rgba(60,90,210,0.32); }
+:root.storm nav.tabs { background: rgba(4,8,26,0.93); }
+:root.storm .tab     { color: rgba(130,155,255,0.52); }
+:root.storm .tab.active { background: linear-gradient(180deg,rgba(30,80,220,0.90),rgba(15,45,160,0.96)); border-color: rgba(96,165,250,0.50); box-shadow: 0 5px 18px rgba(25,70,200,0.50), 0 0 22px rgba(96,165,250,0.14), inset 0 1px 0 rgba(160,190,255,0.20); color: #eef0ff; }
+:root.storm .tab:hover:not(.active) { background: rgba(30,80,220,0.15); color: #93c5fd; }
 /* Cards */
 :root.storm .mon-tile,
 :root.storm .mcard,
@@ -1484,24 +1485,26 @@ body.tab-hidden *{animation-play-state:paused !important;}
 :root.storm .wdb-fstrip-card,
 :root.storm .sycard,
 :root.storm .sforecast {
-  background: linear-gradient(135deg, rgba(55,18,115,0.52), rgba(20,5,55,0.82));
-  border-color: rgba(110,55,210,0.26);
+  background: linear-gradient(135deg, rgba(20,50,130,0.52), rgba(10,20,70,0.84));
+  border-color: rgba(60,90,220,0.28);
 }
 /* Chips */
-:root.storm .chip      { background: rgba(80,20,180,0.28); border-color: rgba(110,55,210,0.30); }
-:root.storm .chip.cred { background: rgba(180,30,80,0.30); }
-:root.storm .chip.cwrn { background: rgba(140,70,0,0.28); }
-:root.storm .chip.cinf { background: rgba(30,80,200,0.25); }
-/* Header title */
-:root.storm .hdr-ttl { background: linear-gradient(90deg,#a78bfa,#e879f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
+:root.storm .chip      { background: rgba(25,60,190,0.30); border-color: rgba(70,100,220,0.32); }
+:root.storm .chip.cred { background: rgba(160,20,70,0.28); }
+:root.storm .chip.cwrn { background: rgba(130,60,0,0.28); }
+:root.storm .chip.cinf { background: rgba(20,70,200,0.28); }
+/* Header title — cobalt blue → electric violet */
+:root.storm .hdr-ttl { background: linear-gradient(90deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
 /* Mon style buttons */
-:root.storm .mon-style-btn.active { background: linear-gradient(180deg,rgba(90,30,200,0.85),rgba(55,12,145,0.92)); border-color: rgba(167,139,250,0.45); }
+:root.storm .mon-style-btn.active { background: linear-gradient(180deg,rgba(30,80,220,0.88),rgba(15,45,160,0.94)); border-color: rgba(96,165,250,0.50); }
 /* Srow header */
-:root.storm .srow-hd { background: linear-gradient(90deg,rgba(90,30,200,0.10),transparent); border-color: rgba(110,55,210,0.18); }
+:root.storm .srow-hd { background: linear-gradient(90deg,rgba(30,80,220,0.12),transparent); border-color: rgba(60,90,220,0.20); }
 /* Rain bar */
-:root.storm .wdb-rain-bar-fill { background: linear-gradient(90deg,#7c3aed,#c084fc); }
+:root.storm .wdb-rain-bar-fill { background: linear-gradient(90deg,#2563eb,#a78bfa); }
+/* Gauges & arcs — hue-shift to blue-violet */
+:root.storm .mon-gauge { filter: hue-rotate(180deg) saturate(1.25) brightness(1.05); }
 /* Settings swatches active */
-:root.storm .theme-swatch.active { border-color: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.40); }
+:root.storm .theme-swatch.active { border-color: #60a5fa; box-shadow: 0 0 14px rgba(96,165,250,0.40); }
 
 /* ── Theme polish (added depth, sheen & glow) ───────────────────────────── */
 /* Glass: frosted top-edge highlight + soft violet drop shadow for real depth */
@@ -1914,7 +1917,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .theme-swatch[data-theme="navy"]  { background: linear-gradient(160deg,#020c16,#051828); color: #4db8ff; border-color: rgba(77,184,255,0.22); }
 .theme-swatch[data-theme="glass"] { background: linear-gradient(160deg,#1a0a3c,#0d1a4a); color: #c084fc; border-color: rgba(192,132,252,0.22); }
 .theme-swatch[data-theme="neon"]  { background: linear-gradient(160deg,#080318,#1a0050); color: #00e5ff; border-color: rgba(0,229,255,0.22); }
-.theme-swatch[data-theme="storm"] { background: linear-gradient(160deg,#0c0220,#2d1b69); color: #a78bfa; border-color: rgba(167,139,250,0.22); }
+.theme-swatch[data-theme="storm"] { background: linear-gradient(160deg,#060b20,#0f2a7a); color: #60a5fa; border-color: rgba(96,165,250,0.22); }
 .theme-swatch.active { box-shadow: 0 0 14px var(--accd); }
 .theme-swatch:hover:not(.active) { filter: brightness(1.15); }
 .icon-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -2438,7 +2441,6 @@ html,body{max-width:100%;overflow-x:hidden;}
   <button class="tab" role="tab" aria-selected="false" data-tab="weather"><span class="tab-i">&#127777;</span>Weather<span class="tbadge">3</span></button>
   <button class="tab" role="tab" aria-selected="false" data-tab="maps"><span class="tab-i">&#127752;</span>Maps</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="atc"><span class="tab-i">&#127897;</span>ATC</button>
-  <button class="tab" role="tab" aria-selected="false" data-tab="dashboards"><span class="tab-i">&#127753;</span>Dashboards</button>
 </nav>
 
 <div class="content">
@@ -2451,6 +2453,20 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="gauges"><span class="mon-style-btn-ic">&#9201;</span>Gauges</button>
       <button class="mon-style-btn" data-monstyle="graphics"><span class="mon-style-btn-ic">&#128202;</span>Graphics</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
+      <button class="mon-style-btn" data-monstyle="dashboards"><span class="mon-style-btn-ic">&#127753;</span>Dashboards</button>
+    </div>
+    <div class="mon-view" id="monViewDash" style="display:none;">
+      <div class="mon-switcher" id="dashSwitcher" style="margin-bottom:10px;">
+        <span class="mon-switcher-lbl">Style</span>
+        <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
+        <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#127769;</span>Classic</button>
+        <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127749;</span>Metro</button>
+        <button class="mon-style-btn" data-dashstyle="violet" onclick="setDashStyle('violet')"><span class="mon-style-btn-ic">&#128150;</span>Violet</button>
+        <button class="mon-style-btn" data-dashstyle="airy" onclick="setDashStyle('airy')"><span class="mon-style-btn-ic">&#9728;</span>Airy</button>
+        <button class="mon-style-btn" data-dashstyle="storm" onclick="setDashStyle('storm')"><span class="mon-style-btn-ic">&#9928;</span>Storm</button>
+        <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
+      </div>
+      <div id="dashboardsContent"></div>
     </div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
     <div class="mon-view" id="monViewGauges" style="display:none;"></div>
@@ -3050,21 +3066,6 @@ html,body{max-width:100%;overflow-x:hidden;}
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- DASHBOARDS -->
-  <div id="tab-dashboards" class="tpanel hidden">
-    <div class="mon-switcher" id="dashSwitcher">
-      <span class="mon-switcher-lbl">Styles</span>
-      <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
-      <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#127769;</span>Classic</button>
-      <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127749;</span>Metro</button>
-      <button class="mon-style-btn" data-dashstyle="violet" onclick="setDashStyle('violet')"><span class="mon-style-btn-ic">&#128150;</span>Violet</button>
-      <button class="mon-style-btn" data-dashstyle="airy" onclick="setDashStyle('airy')"><span class="mon-style-btn-ic">&#9728;</span>Airy</button>
-      <button class="mon-style-btn" data-dashstyle="storm" onclick="setDashStyle('storm')"><span class="mon-style-btn-ic">&#9928;</span>Storm</button>
-      <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
-    </div>
-    <div id="dashboardsContent"></div>
   </div>
 
   <!-- KNMI -->
@@ -4962,7 +4963,7 @@ const panels = {
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps'),
-  dashboards: byId('tab-dashboards'), knmi: byId('tab-knmi')
+  knmi: byId('tab-knmi')
 };
 let stationsTabOpened = false;
 let weatherTabOpened = false;
@@ -6594,9 +6595,8 @@ function startMonitorRefresh(){
   if(__monitorTimer) clearInterval(__monitorTimer);
   __monitorTimer = setInterval(() => {
     if(testMode || hidden()) return;
-    const monOpen  = byId('tab-monitor')    && !byId('tab-monitor').classList.contains('hidden');
-    const dashOpen = byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden');
-    if(!monOpen && !dashOpen) return;  // only refresh when a data-driven tab is actually on screen
+    const monOpen = byId('tab-monitor') && !byId('tab-monitor').classList.contains('hidden');
+    if(!monOpen) return;  // only refresh when monitor tab is on screen
     updateMonitor();           // fetches fresh live data; renderMonitorViews repaints the open Monitor or Dashboards face
     renderStationsAverage();   // refresh island avg from latest (background-fetched) station data
   }, 60000);
@@ -6628,7 +6628,7 @@ function _persistIsltMinMax(){
 }
 // Dashboard "faces" share the Monitor switcher: each maps to the glass dashboard view.
 const __DASH_FACES = ['aurora','midnight','daylight','metro','dark','aqua'];
-const __MON_FACES = ['sky','gauges','current','graphics','home','power'];
+const __MON_FACES = ['sky','gauges','current','graphics','home','power','dashboards'];
 try { const sv = localStorage.getItem('rwc-monstyle'); if(__MON_FACES.indexOf(sv)>=0 || __DASH_FACES.indexOf(sv)>=0) __monStyle = sv; } catch(e){}
 
 function setMonStyle(style){
@@ -6643,7 +6643,7 @@ function setMonStyle(style){
   if(vgr) vgr.style.display = style === 'graphics' ? '' : 'none';
   if(vh) vh.style.display = style === 'home' ? '' : 'none';
   if(vp) vp.style.display = style === 'power' ? '' : 'none';
-  if(vd) vd.style.display = isDash ? '' : 'none';
+  if(vd) vd.style.display = (isDash || style === 'dashboards') ? '' : 'none';
   // Power sub-view: render + run the clock; stop clock when leaving
   if(style === 'power'){
     if(typeof renderPowerStation === 'function') renderPowerStation();
@@ -6654,6 +6654,11 @@ function setMonStyle(style){
   // Dashboard faces: apply the palette class + render
   if(isDash && typeof setDashStyle === 'function'){
     setDashStyle(style);
+  }
+  // Dashboards sub-tab: render the active dashboard style
+  if(style === 'dashboards' && typeof renderDashboardsTab === 'function'){
+    if(!__lastForecastData) updateForecast().then(()=>renderDashboardsTab()).catch(()=>renderDashboardsTab());
+    else renderDashboardsTab();
   }
   if(__monLastData) renderMonitorViews(__monLastData);
   // if switching into a forecast-backed view and the cache is empty, fetch it now
@@ -6673,8 +6678,8 @@ function renderMonitorViews(data){
   if(__monStyle === 'graphics') renderGraphicsView(data);
   if(__monStyle === 'home')     renderHomeView(data);
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
-  // Keep the Dashboards tab live too — its faces read __monLastData, so repaint when it's the visible tab.
-  try{ var dt = byId('tab-dashboards'); if(dt && !dt.classList.contains('hidden') && typeof renderDashboardsTab === 'function') renderDashboardsTab(); }catch(e){}
+  // Keep the Dashboards sub-tab live too
+  if(__monStyle === 'dashboards' && typeof renderDashboardsTab === 'function') try{ renderDashboardsTab(); }catch(e){}
   try{ var gv = byId('knmi-view-graphs'); if(gv && gv.style.display !== 'none' && !byId('tab-knmi').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
 }
 
@@ -10803,7 +10808,7 @@ function applyTheme(t){
   root.classList.remove('glass','neon','storm');
   if(t === 'glass') root.classList.add('glass');
   else if(t === 'neon') root.classList.add('neon');
-  else if(t === 'storm') root.classList.add('storm');
+  else if(t === 'storm'){ root.classList.add('storm'); if(typeof applyIconStyle==='function') applyIconStyle('glossy'); }
   // Update swatch active state
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
@@ -10866,32 +10871,6 @@ function buildSettingsPanel(){
         </div>
         <div class="theme-swatch ${__currentTheme==='storm'?'active':''}" data-theme="storm" onclick="applyTheme('storm')">
           <div style="font-size:16px;margin-bottom:3px;">&#9928;</div>Storm
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="settings-section-ttl">Dashboard Layout</div>
-      <div class="dash-swatches">
-        <div class="dash-swatch ${__dashStyle==='sky'?'active':''}" data-ds="sky" onclick="setDashStyle('sky')">
-          <span class="dash-swatch-ic">&#9889;</span>SkySense
-        </div>
-        <div class="dash-swatch ${__dashStyle==='dark'?'active':''}" data-ds="dark" onclick="setDashStyle('dark')">
-          <span class="dash-swatch-ic">&#127769;</span>Classic
-        </div>
-        <div class="dash-swatch ${__dashStyle==='metro'?'active':''}" data-ds="metro" onclick="setDashStyle('metro')">
-          <span class="dash-swatch-ic">&#127749;</span>Metro
-        </div>
-        <div class="dash-swatch ${__dashStyle==='violet'?'active':''}" data-ds="violet" onclick="setDashStyle('violet')">
-          <span class="dash-swatch-ic">&#128150;</span>Violet
-        </div>
-        <div class="dash-swatch ${__dashStyle==='airy'?'active':''}" data-ds="airy" onclick="setDashStyle('airy')">
-          <span class="dash-swatch-ic">&#9728;</span>Airy
-        </div>
-        <div class="dash-swatch ${__dashStyle==='storm'?'active':''}" data-ds="storm" onclick="setDashStyle('storm')">
-          <span class="dash-swatch-ic">&#9928;</span>Storm
-        </div>
-        <div class="dash-swatch ${__dashStyle==='home'?'active':''}" data-ds="home" onclick="setDashStyle('home')">
-          <span class="dash-swatch-ic">&#127968;</span>Dashboard
         </div>
       </div>
     </div>

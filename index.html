@@ -1433,6 +1433,76 @@ body.tab-hidden *{animation-play-state:paused !important;}
 /* Settings swatches active */
 :root.neon .theme-swatch.active { border-color: #00e5ff; box-shadow: 0 0 12px rgba(0,229,255,0.35); }
 
+/* ── Storm theme (deep purple, warm violet accent) ── */
+:root.storm {
+  --bg:    #0c0220;
+  --card:  rgba(30,10,68,0.93);
+  --bdr:   rgba(110,55,210,0.22);
+  --bdrb:  rgba(160,110,255,0.38);
+  --txt:   #f0ebff;
+  --muted: #9b7fd4;
+  --acc:   #a78bfa;
+  --acc2:  #c084fc;
+  --accd:  rgba(167,139,250,0.12);
+  --red:   #fb7185;
+  --redd:  rgba(251,113,133,0.12);
+  --grn:   #34d399;
+  --grnd:  rgba(52,211,153,0.10);
+  --ylw:   #fbbf24;
+  --ylwd:  rgba(251,191,36,0.10);
+  --pur:   #e879f9;
+  --purd:  rgba(232,121,249,0.10);
+}
+:root.storm body { background: #0c0220 !important; }
+:root.storm body::before {
+  background:
+    radial-gradient(ellipse 1000px 700px at 8% 0%,   rgba(80,20,160,0.45)  0%, transparent 65%),
+    radial-gradient(ellipse 700px  600px at 94% 98%,  rgba(120,30,190,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 500px  400px at 50% 48%,  rgba(50,10,110,0.10)  0%, transparent 55%) !important;
+}
+/* Nav / tabs */
+:root.storm .topbar  { background: rgba(12,2,32,0.88); border-bottom: 1px solid rgba(100,50,200,0.28); }
+:root.storm nav.tabs { background: rgba(10,2,28,0.92); }
+:root.storm .tab     { color: rgba(170,140,255,0.50); }
+:root.storm .tab.active { background: linear-gradient(180deg,rgba(90,30,200,0.88),rgba(55,12,145,0.94)); border-color: rgba(167,139,250,0.45); box-shadow: 0 5px 18px rgba(80,20,180,0.50), 0 0 22px rgba(167,139,250,0.12), inset 0 1px 0 rgba(200,160,255,0.18); color: #f0ebff; }
+:root.storm .tab:hover:not(.active) { background: rgba(90,30,200,0.14); color: #c4b5fd; }
+/* Cards */
+:root.storm .mon-tile,
+:root.storm .mcard,
+:root.storm .tcard,
+:root.storm .wcard,
+:root.storm .srow,
+:root.storm .gfx-card,
+:root.storm .gfx-tile,
+:root.storm .map-cell,
+:root.storm .wdb-metric,
+:root.storm .wdb-hero,
+:root.storm .wdb-chart-wrap,
+:root.storm .wdb-sunrise,
+:root.storm .wdb-aq-wrap,
+:root.storm .wdb-rain-wrap,
+:root.storm .wdb-fstrip-card,
+:root.storm .sycard,
+:root.storm .sforecast {
+  background: linear-gradient(135deg, rgba(55,18,115,0.52), rgba(20,5,55,0.82));
+  border-color: rgba(110,55,210,0.26);
+}
+/* Chips */
+:root.storm .chip      { background: rgba(80,20,180,0.28); border-color: rgba(110,55,210,0.30); }
+:root.storm .chip.cred { background: rgba(180,30,80,0.30); }
+:root.storm .chip.cwrn { background: rgba(140,70,0,0.28); }
+:root.storm .chip.cinf { background: rgba(30,80,200,0.25); }
+/* Header title */
+:root.storm .hdr-ttl { background: linear-gradient(90deg,#a78bfa,#e879f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
+/* Mon style buttons */
+:root.storm .mon-style-btn.active { background: linear-gradient(180deg,rgba(90,30,200,0.85),rgba(55,12,145,0.92)); border-color: rgba(167,139,250,0.45); }
+/* Srow header */
+:root.storm .srow-hd { background: linear-gradient(90deg,rgba(90,30,200,0.10),transparent); border-color: rgba(110,55,210,0.18); }
+/* Rain bar */
+:root.storm .wdb-rain-bar-fill { background: linear-gradient(90deg,#7c3aed,#c084fc); }
+/* Settings swatches active */
+:root.storm .theme-swatch.active { border-color: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.40); }
+
 /* ── Theme polish (added depth, sheen & glow) ───────────────────────────── */
 /* Glass: frosted top-edge highlight + soft violet drop shadow for real depth */
 :root.glass .mon-tile, :root.glass .mcard, :root.glass .tcard, :root.glass .wcard,
@@ -1844,6 +1914,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .theme-swatch[data-theme="navy"]  { background: linear-gradient(160deg,#020c16,#051828); color: #4db8ff; border-color: rgba(77,184,255,0.22); }
 .theme-swatch[data-theme="glass"] { background: linear-gradient(160deg,#1a0a3c,#0d1a4a); color: #c084fc; border-color: rgba(192,132,252,0.22); }
 .theme-swatch[data-theme="neon"]  { background: linear-gradient(160deg,#080318,#1a0050); color: #00e5ff; border-color: rgba(0,229,255,0.22); }
+.theme-swatch[data-theme="storm"] { background: linear-gradient(160deg,#0c0220,#2d1b69); color: #a78bfa; border-color: rgba(167,139,250,0.22); }
 .theme-swatch.active { box-shadow: 0 0 14px var(--accd); }
 .theme-swatch:hover:not(.active) { filter: brightness(1.15); }
 .icon-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -10729,9 +10800,10 @@ function applyTheme(t){
   localStorage.setItem('rwc-theme', t);
   const root = document.documentElement;
   // Only remove theme classes, never touch 'night'
-  root.classList.remove('glass','neon');
+  root.classList.remove('glass','neon','storm');
   if(t === 'glass') root.classList.add('glass');
   else if(t === 'neon') root.classList.add('neon');
+  else if(t === 'storm') root.classList.add('storm');
   // Update swatch active state
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
@@ -10791,6 +10863,9 @@ function buildSettingsPanel(){
         </div>
         <div class="theme-swatch ${__currentTheme==='neon'?'active':''}" data-theme="neon" onclick="applyTheme('neon')">
           <div style="font-size:16px;margin-bottom:3px;">\u26A1</div>Neon
+        </div>
+        <div class="theme-swatch ${__currentTheme==='storm'?'active':''}" data-theme="storm" onclick="applyTheme('storm')">
+          <div style="font-size:16px;margin-bottom:3px;">&#9928;</div>Storm
         </div>
       </div>
     </div>

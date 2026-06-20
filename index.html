@@ -6470,11 +6470,12 @@ async function updateMonitor(){
 function startMonitorRefresh(){
   if(__monitorTimer) clearInterval(__monitorTimer);
   __monitorTimer = setInterval(() => {
+    if(testMode || hidden()) return;
     const monOpen  = byId('tab-monitor')    && !byId('tab-monitor').classList.contains('hidden');
-    if(!testMode && !hidden() && monOpen){
-      updateMonitor();           // renderMonitorViews keeps the active face (incl. dashboards) fresh
-      renderStationsAverage();   // refresh island avg from latest (background-fetched) station data
-    }
+    const dashOpen = byId('tab-dashboards') && !byId('tab-dashboards').classList.contains('hidden');
+    if(!monOpen && !dashOpen) return;  // only refresh when a data-driven tab is actually on screen
+    updateMonitor();           // fetches fresh live data; renderMonitorViews repaints the open Monitor or Dashboards face
+    renderStationsAverage();   // refresh island avg from latest (background-fetched) station data
   }, 60000);
 }
 function stopMonitorRefresh(){ if(__monitorTimer){ clearInterval(__monitorTimer); __monitorTimer = null; } }
@@ -6549,6 +6550,8 @@ function renderMonitorViews(data){
   if(__monStyle === 'graphics') renderGraphicsView(data);
   if(__monStyle === 'home')     renderHomeView(data);
   if(__monStyle === 'power' && typeof renderPowerStation === 'function') renderPowerStation();
+  // Keep the Dashboards tab live too — its faces read __monLastData, so repaint when it's the visible tab.
+  try{ var dt = byId('tab-dashboards'); if(dt && !dt.classList.contains('hidden') && typeof renderDashboardsTab === 'function') renderDashboardsTab(); }catch(e){}
   try{ var gv = byId('knmi-view-graphs'); if(gv && gv.style.display !== 'none' && !byId('tab-knmi').classList.contains('hidden')) renderGraphsTab(); }catch(e){}
 }
 

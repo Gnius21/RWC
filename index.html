@@ -6250,8 +6250,7 @@ function renderMonitor(data){
     else if(hk.scale >= 6) { hlbl = 'hoog \u2014 drink water';           hcol = '#ff8a3d'; }
     else if(hk.scale >= 4) { hlbl = 'matig';                            hcol = '#f59e0b'; }
     else                   { hlbl = 'laag';                             hcol = 'var(--muted)'; }
-    hEl.innerHTML = '\u{1F321} Hittekracht ' + hk.scale + '/10 \u00b7 ' + hlbl +
-      ' <span style="opacity:.55;">(WBGT ' + Math.round(hk.wbgt) + '\u00b0' + (hk.sun ? '' : ', schaduw') + ')</span>';
+    hEl.innerHTML = '\u{1F321} Hittekracht ' + hk.scale + '/10 \u00b7 ' + hlbl;
     hEl.style.color = hk.scale >= 4 ? hcol : 'var(--muted)';
   })();
   const tnccMetarRaw = (typeof mState === 'object' && mState && mState.TNCC) ? mState.TNCC.lastRaw : null;

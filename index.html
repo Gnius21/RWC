@@ -6642,6 +6642,179 @@ function _metroChartSwitch(metric){
 }
 window._metroChartSwitch=_metroChartSwitch;
 
+/* ── Violet rain bar helper ── */
+function _violetRainBars(hours){
+  if(!hours||!hours.length) return '<div class="dash-violet-rain-bars" style="align-items:center;justify-content:center;"><span style="font-family:var(--cond);font-size:11px;color:var(--dmut);">No forecast data</span></div>';
+  const pts=hours.slice(0,8).map(h=>({pop:h.pop!=null?h.pop:0,hr:h.hour}));
+  const maxPop=Math.max(10,...pts.map(p=>p.pop));
+  return '<div class="dash-violet-rain-bars">'+pts.map(p=>{const pct=Math.max(4,Math.round((p.pop/maxPop)*100));const hr=String(p.hr).padStart(2,'0');return`<div class="dash-violet-rain-bar-wrap"><div class="dash-violet-rain-bar" style="height:${pct}%;opacity:${(0.35+0.65*(p.pop/100)).toFixed(2)}"></div><div class="dash-violet-rain-bar-t">${hr}h</div></div>`;}).join('')+'</div>';
+}
+/* ── Airy temperature dial gauge ── */
+function _airyTempGauge(tempC,loC,hiC){
+  const mn=loC!=null?loC:24,mx=hiC!=null?hiC:34,t=tempC!=null?tempC:28;
+  const pct=Math.max(0,Math.min(1,(t-mn)/Math.max(1,mx-mn)));
+  const cx=110,cy=100,r=80;
+  const angle=Math.PI*(1-pct);
+  const nX=(cx+r*Math.cos(angle)).toFixed(1),nY=(cy-r*Math.sin(angle)).toFixed(1);
+  const nNx=(cx+52*Math.cos(angle)).toFixed(1),nNy=(cy-52*Math.sin(angle)).toFixed(1);
+  const lgf=pct>0.5?1:0;
+  const fillArc=pct>0.01?`<path d="M${cx-r},${cy} A${r},${r} 0 ${lgf},0 ${nX},${nY}" fill="none" stroke="url(#_airyGG)" stroke-width="13" stroke-linecap="round"/>`:'';
+  return`<svg viewBox="0 0 220 116" width="100%" style="max-height:116px"><defs><linearGradient id="_airyGG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#ef4444"/></linearGradient></defs>
+  <path d="M${cx-r},${cy} A${r},${r} 0 0,0 ${cx+r},${cy}" fill="none" stroke="rgba(14,165,233,0.15)" stroke-width="13" stroke-linecap="round"/>
+  ${fillArc}
+  <line x1="${cx}" y1="${cy}" x2="${nNx}" y2="${nNy}" stroke="var(--dtxt)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="6" fill="var(--dtxt)" stroke="var(--dacc)" stroke-width="2"/>
+  <text x="${cx-r+2}" y="${cy+18}" font-size="10" fill="var(--dmut)" font-family="system-ui">${Math.round(mn)}°</text>
+  <text x="${cx+r-22}" y="${cy+18}" font-size="10" fill="var(--dmut)" font-family="system-ui">${Math.round(mx)}°</text>
+  </svg>`;
+}
+/* ── Airy hourly bar chart ── */
+function _airyBarChart(hours){
+  if(!hours||!hours.length) return '<div style="text-align:center;padding:20px;color:var(--dmut);font-family:var(--cond);font-size:11px;">Hourly data loading…</div>';
+  const pts=hours.slice(0,9);
+  const temps=pts.map(p=>p.temp).filter(t=>t!=null);
+  if(!temps.length) return '';
+  const mn=Math.min(...temps)-1,mx=Math.max(...temps)+1;
+  return '<div class="dash-airy-bar-chart">'+pts.map(h=>{
+    const pct=h.temp!=null?Math.max(10,Math.round(((h.temp-mn)/(mx-mn))*90)+5):15;
+    const hrLbl=h.hour%12===0?'12'+(h.hour<12?'A':'P'):(h.hour%12)+(h.hour<12?'A':'P');
+    return`<div class="dash-airy-bar-grp"><div class="dash-airy-bar" style="height:${pct}%">${h.temp!=null?`<span class="dash-airy-bar-tmp">${Math.round(h.temp)}°</span>`:''}</div><div class="dash-airy-bar-hr">${hrLbl}</div></div>`;
+  }).join('')+'</div>';
+}
+
+/* ── Violet dashboard ── */
+function renderVioletDash(host){
+  const d=__monLastData;if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
+  const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};
+  const fc=(typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
+  const wmo=_monWmoFromData(d);const now=new Date();const lh=now.getHours();
+  const temp=p.temp_c!=null?Math.round(p.temp_c):null;
+  const feels=p.temp_c!=null?Math.round(calcFeelsMonitor(p.temp_c,p.rh)):null;
+  const hi=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
+  const lo=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
+  const rh=p.rh!=null?Math.round(p.rh):null;
+  const rainMm=om.rain!=null?+om.rain:(om.precipitation!=null?+om.precipitation:0);
+  let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
+  const hoursHtml=hours.length?hours.slice(0,6).map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19,h.pop),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${wxIconStyled(w.icon,32)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'';
+  let curvePts=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();curvePts=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,10);if(curvePts.length<6&&fc[1]&&fc[1]._hourly)curvePts=curvePts.concat(fc[1]._hourly.slice(0,10-curvePts.length));}
+  const curveHtml=_dashTempCurve(curvePts)||'';
+  const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
+  const cityKeys=[['TNCA','Aruba'],['TNCB','Bonaire'],['TNCM','St Maarten']];
+  const citiesHtml=cityKeys.map(([icao,nm])=>{let t=null,ic2='cloud',desc='—';const raw=mState&&mState[icao]?mState[icao].lastRaw:null;if(raw){try{const mp=parseMetar(raw);if(mp.tempC!=null)t=mp.tempC;const bkn=mp.cldToks.some(x=>/^(BKN|OVC)/.test(x)),sct=mp.cldToks.some(x=>/^(SCT|FEW)/.test(x)),rn=mp.wxToks.some(x=>/RA|SH|TS/.test(x)),nt=lh<6||lh>=19;ic2=rn?'rain':bkn?'cloud':sct?(nt?'cloud-moon':'cloud-sun'):(nt?'moon':'sun');desc=rn?'Rain':bkn?'Cloudy':sct?'Partly cloudy':'Clear';}catch(e){}}return`<div class="dash-violet-city"><span class="dash-violet-city-ic">${wxIconStyled(ic2,26)}</span><span class="dash-violet-city-info"><span class="dash-violet-city-nm">${nm}</span><span class="dash-violet-city-desc">${desc}</span></span><span class="dash-violet-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;}).join('');
+  function sunAgo(iso){if(!iso)return'';try{const diff=Math.round((new Date()-new Date(iso))/60000);if(diff<0)return'in '+(-diff)+'m';if(diff<120)return diff+'m ago';return Math.round(diff/60)+'h ago';}catch(e){return'';}}
+  const stats=[
+    {icon:'💨',val:(windKt!=null?windKt+'<small> kt</small>':'—'),lbl:'Wind Speed',trend:windKt!=null&&windKt>15?'↑ Gusty':'Calm'},
+    {icon:'🌧',val:(rainMm>0.05?rainMm.toFixed(1)+'<small> mm</small>':'<small>none</small>'),lbl:'Rain 1h',trend:'Last hour'},
+    {icon:'💧',val:(rh!=null?rh+'<small>%</small>':'—'),lbl:'Humidity',trend:''},
+    {icon:'☀️',val:(uv!=null?String(Math.round(uv)):'—'),lbl:'UV Index',trend:uv!=null&&uv<3?'Low':uv!=null&&uv<6?'Moderate':'High'},
+  ];
+  host.innerHTML=`<div class="dash-violet-wrap">
+  <div class="dash-violet-sidebar">
+    <div class="dash-violet-brand">&#127752; RWC Caribbean<small>ABC Islands · Live Weather</small></div>
+    <div class="dash-violet-time">${timeStr}<small>${dayStr}</small></div>
+    <nav class="dash-violet-nav">
+      <div class="dash-violet-nav-item active">&#128202; Current</div>
+      <div class="dash-violet-nav-item">&#128197; Forecast</div>
+      <div class="dash-violet-nav-item">&#127749; Sunrise</div>
+    </nav>
+    <div class="dash-violet-cond-card">
+      <div class="dash-violet-cond-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+      <div class="dash-violet-cond-ic">${wxIconStyled(wmo.icon,44)}</div>
+      <div class="dash-violet-cond-desc">${wmo.desc}</div>
+      <div class="dash-violet-cond-sub">${feels!=null?'Feels '+feels+'°':''}${hi!=null?' · H '+hi+'°':''}${lo!=null?' L '+lo+'°':''}</div>
+    </div>
+  </div>
+  <div class="dash-violet-main">
+    <div class="dash-violet-card dash-violet-chart-card">
+      <div class="dash-violet-chart-top"><span class="dash-violet-hd">Daily Temperature</span><span class="dash-violet-loc-badge">&#128205; Cura&ccedil;ao</span></div>
+      ${curveHtml}
+    </div>
+    <div class="dash-violet-card dash-violet-stats-card">
+      <div class="dash-violet-hd">Today Overview</div>
+      <div class="dash-violet-stats-row">${stats.map(s=>`<div class="dash-violet-stat"><div class="dash-violet-stat-icon">${s.icon}</div><div class="dash-violet-stat-val">${s.val}</div><div class="dash-violet-stat-lbl">${s.lbl}</div>${s.trend?`<div class="dash-violet-stat-trend">${s.trend}</div>`:''}</div>`).join('')}</div>
+    </div>
+    <div class="dash-violet-card dash-violet-hourly-card"><div class="dash-hours">${hoursHtml}</div></div>
+  </div>
+  <div class="dash-violet-right">
+    <div class="dash-violet-card dash-violet-rain-card">
+      <div class="dash-violet-hd" style="margin-bottom:6px">Chance of Rain</div>
+      ${_violetRainBars(hours)}
+    </div>
+    <div class="dash-violet-card dash-violet-cities-card">
+      <div class="dash-violet-hd" style="margin-bottom:8px">Nearby Islands</div>
+      ${citiesHtml}
+    </div>
+    <div class="dash-violet-card dash-violet-sun-card">
+      <div class="dash-violet-sun-row"><span class="dash-violet-sun-label">&#9728; Sunrise</span><div style="text-align:right"><div class="dash-violet-sun-time">${_fmtClk(sr)}</div><div class="dash-violet-sun-ago">${sunAgo(sr)}</div></div></div>
+      <div class="dash-violet-sun-row"><span class="dash-violet-sun-label">&#127748; Sunset</span><div style="text-align:right"><div class="dash-violet-sun-time">${_fmtClk(ss)}</div><div class="dash-violet-sun-ago">${sunAgo(ss)}</div></div></div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ── Airy (light teal) dashboard ── */
+function renderAiryDash(host){
+  const d=__monLastData;if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
+  const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};
+  const fc=(typeof __lastForecastData==='object'&&__lastForecastData)?__lastForecastData.days:null;
+  const wmo=_monWmoFromData(d);const now=new Date();
+  const temp=p.temp_c!=null?Math.round(p.temp_c):null;
+  const feels=p.temp_c!=null?Math.round(calcFeelsMonitor(p.temp_c,p.rh)):null;
+  const hi=fc&&fc[0]&&fc[0].tempHigh!=null?Math.round(fc[0].tempHigh):null;
+  const lo=fc&&fc[0]&&fc[0].tempLow!=null?Math.round(fc[0].tempLow):null;
+  const sr=(fc&&fc[0]&&fc[0].sunrise)||(omd.sunrise&&omd.sunrise[0]);
+  const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
+  const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
+  const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
+  const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
+  const windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'';
+  const rh=p.rh!=null?Math.round(p.rh):null;
+  const qnh=p.qnh!=null?Math.round(p.qnh):null;
+  let vis=p.vis_m!=null?(p.vis_m>=9999?'> 10 km':(p.vis_m/1000).toFixed(0)+' km'):null;
+  if(!vis){const tnccRaw=(typeof mState==='object'&&mState&&mState.TNCC)?mState.TNCC.lastRaw:null;if(tnccRaw){try{const mp=parseMetar(tnccRaw);if(!isNaN(mp.visM))vis=mp.visM>=9999?'> 10 km':(mp.visM/1000).toFixed(0)+' km';}catch(e){}}}
+  if(!vis)vis='> 10 km';
+  let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,9);if(hours.length<9&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,9-hours.length));}
+  const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
+  const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const hls=[
+    {lbl:'UV Index',val:(uv!=null?Math.round(uv):'—'),unit:'',sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):null,uvGauge:true},
+    {lbl:'Wind Status',val:(windKt!=null?windKt:'—'),unit:' kt',sub:windDir||'Variable',bar:null,uvGauge:false},
+    {lbl:'Sunrise & Sunset',val:_fmtClk(sr),unit:'',sub:'Sunset: '+_fmtClk(ss),bar:null,uvGauge:false},
+    {lbl:'Humidity',val:(rh!=null?rh:'—'),unit:'%',sub:'',bar:rh,uvGauge:false},
+    {lbl:'Visibility',val:vis,unit:'',sub:'',bar:null,uvGauge:false},
+    {lbl:'Pressure',val:(qnh!=null?qnh:'—'),unit:' hPa',sub:'',bar:null,uvGauge:false},
+  ];
+  const hlHtml=hls.map(m=>{
+    if(m.uvGauge){return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div>${_metroUVGauge(uv)}</div>`;}
+    return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div><div class="dash-airy-hl-val">${m.val}<small>${m.unit}</small></div>${m.bar!=null?`<div class="dash-airy-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%"></div></div>`:''}<div class="dash-airy-hl-sub">${m.sub}</div></div>`;
+  }).join('');
+  host.innerHTML=`<div class="dash-airy-wrap">
+  <div class="dash-airy-left">
+    <div class="dash-airy-gauge-wrap">${_airyTempGauge(temp,lo,hi)}</div>
+    <div class="dash-airy-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
+    <div class="dash-airy-ic">${wxIconStyled(wmo.icon,64)}</div>
+    <div class="dash-airy-cond">${wmo.desc}</div>
+    <div class="dash-airy-hilos">${hi!=null?'<b>H: '+hi+'°</b> ':''} ${lo!=null?'<b>L: '+lo+'°</b>':''} ${feels!=null?' · Feels <b>'+feels+'°</b>':''}</div>
+    <div class="dash-airy-date">${dayStr} · ${timeStr}</div>
+  </div>
+  <div class="dash-airy-right">
+    <div class="dash-airy-card">
+      <div class="dash-airy-hd">Today</div>
+      ${_airyBarChart(hours)}
+    </div>
+    <div class="dash-airy-card">
+      <div class="dash-airy-hd">Highlights</div>
+      <div class="dash-airy-hl-grid">${hlHtml}</div>
+    </div>
+  </div>
+</div>`;
+}
+
 function renderMetroDash(host){
   const d=__monLastData; if(!d){host.innerHTML='<div class="dash-empty">Loading live conditions…</div>';return;}
   const p=d.synopP||{},om=d.omCurrent||{},omd=d.omDaily||{};

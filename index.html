@@ -1851,8 +1851,19 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .icon-swatch.active { border-color: var(--acc); background: var(--accd); }
 .icon-swatch:hover:not(.active) { background: rgba(255,255,255,0.07); }
 .icon-swatch-preview { width: 32px; height: 32px; }
-
-
+/* Dashboard layout swatches */
+.dash-swatches{display:flex;flex-wrap:wrap;gap:7px;}
+.dash-swatch{flex:1;min-width:70px;padding:9px 6px 8px;border-radius:11px;border:2px solid transparent;cursor:pointer;text-align:center;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.4px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px;color:#e0e7ff;}
+.dash-swatch-ic{font-size:18px;line-height:1;}
+.dash-swatch[data-ds="sky"]   {background:linear-gradient(155deg,#020c1e,#0a2545);border-color:rgba(77,184,255,0.22);color:#4db8ff;}
+.dash-swatch[data-ds="dark"]  {background:linear-gradient(155deg,#111,#1c1c1c);border-color:rgba(255,255,255,0.12);color:#aaa;}
+.dash-swatch[data-ds="metro"] {background:linear-gradient(155deg,#07091f,#0d1545);border-color:rgba(79,128,255,0.22);color:#4f80ff;}
+.dash-swatch[data-ds="violet"]{background:linear-gradient(155deg,#1e1b4b,#312e81);border-color:rgba(165,180,252,0.22);color:#a5b4fc;}
+.dash-swatch[data-ds="airy"]  {background:linear-gradient(155deg,#bae6fd,#e0f2fe);border-color:rgba(14,165,233,0.30);color:#0284c7;}
+.dash-swatch[data-ds="storm"] {background:linear-gradient(155deg,#1a0533,#2d1b69);border-color:rgba(167,139,250,0.22);color:#c4b5fd;}
+.dash-swatch[data-ds="home"]  {background:linear-gradient(155deg,#0a1a2e,#112240);border-color:rgba(77,184,255,0.16);color:#6ba8d8;}
+.dash-swatch.active{border-color:currentColor;box-shadow:0 0 14px rgba(255,255,255,0.12);}
+.dash-swatch:hover:not(.active){filter:brightness(1.18);}
 
 /* ═══ HOMEHABIT-STYLE DASHBOARD VIEW ═══ */
 .hh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-items:start;}
@@ -6605,6 +6616,8 @@ function setDashStyle(style, btn){
   try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}
   // Update Dashboards tab buttons
   document.querySelectorAll('#dashSwitcher .mon-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
+  // Update Settings panel swatches (if panel is open)
+  document.querySelectorAll('.dash-swatch').forEach(s=>s.classList.toggle('active', s.dataset.ds === style));
   // Render to Dashboards tab content
   try{ renderDashboardsTab(); }catch(e){}
 }
@@ -10768,7 +10781,7 @@ function buildSettingsPanel(){
         style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">\u00d7</button>
     </div>
     <div>
-      <div class="settings-section-ttl">Dashboard Theme</div>
+      <div class="settings-section-ttl">App Theme</div>
       <div class="theme-swatches">
         <div class="theme-swatch ${__currentTheme==='navy'?'active':''}" data-theme="navy" onclick="applyTheme('navy')">
           <div style="font-size:16px;margin-bottom:3px;">\u{1F30A}</div>Navy
@@ -10778,6 +10791,32 @@ function buildSettingsPanel(){
         </div>
         <div class="theme-swatch ${__currentTheme==='neon'?'active':''}" data-theme="neon" onclick="applyTheme('neon')">
           <div style="font-size:16px;margin-bottom:3px;">\u26A1</div>Neon
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-ttl">Dashboard Layout</div>
+      <div class="dash-swatches">
+        <div class="dash-swatch ${__dashStyle==='sky'?'active':''}" data-ds="sky" onclick="setDashStyle('sky')">
+          <span class="dash-swatch-ic">&#9889;</span>SkySense
+        </div>
+        <div class="dash-swatch ${__dashStyle==='dark'?'active':''}" data-ds="dark" onclick="setDashStyle('dark')">
+          <span class="dash-swatch-ic">&#127769;</span>Classic
+        </div>
+        <div class="dash-swatch ${__dashStyle==='metro'?'active':''}" data-ds="metro" onclick="setDashStyle('metro')">
+          <span class="dash-swatch-ic">&#127749;</span>Metro
+        </div>
+        <div class="dash-swatch ${__dashStyle==='violet'?'active':''}" data-ds="violet" onclick="setDashStyle('violet')">
+          <span class="dash-swatch-ic">&#128150;</span>Violet
+        </div>
+        <div class="dash-swatch ${__dashStyle==='airy'?'active':''}" data-ds="airy" onclick="setDashStyle('airy')">
+          <span class="dash-swatch-ic">&#9728;</span>Airy
+        </div>
+        <div class="dash-swatch ${__dashStyle==='storm'?'active':''}" data-ds="storm" onclick="setDashStyle('storm')">
+          <span class="dash-swatch-ic">&#9928;</span>Storm
+        </div>
+        <div class="dash-swatch ${__dashStyle==='home'?'active':''}" data-ds="home" onclick="setDashStyle('home')">
+          <span class="dash-swatch-ic">&#127968;</span>Dashboard
         </div>
       </div>
     </div>

@@ -5706,20 +5706,31 @@ function calcFeelsMonitor(tempC, rh){
   const e = rh/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC));
   return Math.round((tempC + 0.348 * e - 0.7 * 0 - 4.25) * 10) / 10;
 }
-/* Hittekracht — heat-stress index that, unlike a plain feels-like, weighs
-   four drivers together: air temperature, humidity (vapour pressure),
-   wind (cooling) and absorbed solar radiation (heating in the sun).
-   Steadman apparent-temperature model (the BoM "feels like in the sun"). */
+/* Wet-bulb temperature (Stull 2011 approximation, °C) — the evaporative
+   cooling limit set by temperature + humidity; backbone of the WBGT. */
+function stullWetBulb(T, rh){
+  var R = (rh != null && isFinite(rh)) ? Math.max(1, Math.min(100, rh)) : 50;
+  return T*Math.atan(0.151977*Math.sqrt(R+8.313659))
+       + Math.atan(T+R) - Math.atan(R-1.676331)
+       + 0.00391838*Math.pow(R,1.5)*Math.atan(0.023101*R) - 4.686035;
+}
+/* Hittekracht — WBGT (Wet Bulb Globe Temperature) heat-stress index.
+   WBGT = 0.7·natte-bol + 0.2·zwarte-bol + 0.1·luchttemperatuur
+   - natte bol (70%): verkoeling door zweten  → temperatuur + luchtvochtigheid
+   - zwarte bol (20%): directe zonnestraling op het lichaam → straling + wind
+   - luchttemperatuur (10%): temperatuur in de schaduw
+   Returns { wbgt:°C, scale:1..10, sun:bool } or null. */
 function calcHittekracht(tempC, rh, windKt, radWm2){
   if(tempC == null || !isFinite(tempC)) return null;
-  var rhv = (rh != null && isFinite(rh)) ? rh : 50;
-  var e = rhv/100 * 6.105 * Math.exp(17.27 * tempC / (237.7 + tempC)); // vapour pressure (hPa)
-  var ws = (windKt != null && isFinite(windKt)) ? windKt * 0.514444 : 0; // wind @10 m (m/s)
-  if(radWm2 != null && isFinite(radWm2) && radWm2 > 1){
-    var Q = radWm2 * 0.12; // net radiation absorbed by the body, approx from global irradiance
-    return tempC + 0.348 * e - 0.70 * ws + 0.70 * (Q / (ws + 10)) - 4.25;
-  }
-  return tempC + 0.33 * e - 0.70 * ws - 4.00; // shade version when there is no sun
+  var Tnwb = stullWetBulb(tempC, rh);                                      // natte bol
+  var v = Math.max((windKt != null && isFinite(windKt)) ? windKt*0.514444 : 0, 0.3); // wind m/s (floor)
+  var sun = (radWm2 != null && isFinite(radWm2) && radWm2 > 1);
+  var S = sun ? radWm2 : 0;
+  var Tg = tempC + Math.min(0.1 * S / (v + 4), 25);                        // zwarte bol (zon-opwarming, gedempt door wind)
+  var wbgt = 0.7*Tnwb + 0.2*Tg + 0.1*tempC;
+  // Map WBGT 18 °C → 1 (geen stress) … 32 °C → 10 (extreem), linear & clamped.
+  var scale = Math.max(1, Math.min(10, Math.round(1 + (wbgt - 18) * (9/14))));
+  return { wbgt: wbgt, scale: scale, sun: sun };
 }
 /* ── 6-hour Curaçao weather forecast tile: feels-like, rain, wind, dust ── */
 var __wxFcCache = null;
@@ -6233,15 +6244,15 @@ function renderMonitor(data){
              : (window.__knmiData && window.__knmiData.radiation != null) ? window.__knmiData.radiation : null;
     var hk = calcHittekracht(_temp, _rh, _wKt, _rad);
     if(hk == null){ hEl.textContent = '\u2014'; return; }
-    var hv = Math.round(hk), hlbl, hcol;
-    if(hk >= 44)      { hlbl = 'extreem \u2014 gevaarlijk';            hcol = '#a78bfa'; }
-    else if(hk >= 38) { hlbl = 'zeer heet \u2014 beperk inspanning';   hcol = '#ff4f4f'; }
-    else if(hk >= 32) { hlbl = 'heet \u2014 drink water';             hcol = '#ff8a3d'; }
-    else if(hk >= 27) { hlbl = 'warm';                                hcol = '#f59e0b'; }
-    else              { hlbl = 'comfortabel';                         hcol = 'var(--muted)'; }
-    hEl.innerHTML = '\u{1F321} Hittekracht ' + hv + '\u00b0 \u00b7 ' + hlbl +
-      (_rad != null && isFinite(_rad) && _rad > 1 ? '' : ' <span style="opacity:.55;">(schaduw)</span>');
-    hEl.style.color = hk >= 27 ? hcol : 'var(--muted)';
+    var hlbl, hcol;
+    if(hk.scale >= 10)     { hlbl = 'extreem \u2014 gevaarlijk';          hcol = '#a78bfa'; }
+    else if(hk.scale >= 8) { hlbl = 'zeer hoog \u2014 beperk inspanning'; hcol = '#ff4f4f'; }
+    else if(hk.scale >= 6) { hlbl = 'hoog \u2014 drink water';           hcol = '#ff8a3d'; }
+    else if(hk.scale >= 4) { hlbl = 'matig';                            hcol = '#f59e0b'; }
+    else                   { hlbl = 'laag';                             hcol = 'var(--muted)'; }
+    hEl.innerHTML = '\u{1F321} Hittekracht ' + hk.scale + '/10 \u00b7 ' + hlbl +
+      ' <span style="opacity:.55;">(WBGT ' + Math.round(hk.wbgt) + '\u00b0' + (hk.sun ? '' : ', schaduw') + ')</span>';
+    hEl.style.color = hk.scale >= 4 ? hcol : 'var(--muted)';
   })();
   const tnccMetarRaw = (typeof mState === 'object' && mState && mState.TNCC) ? mState.TNCC.lastRaw : null;
   let metarP = null;

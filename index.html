@@ -1687,6 +1687,42 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-dark-fc-day-hi{font-family:var(--cond);font-size:13px;font-weight:800;color:var(--dtxt);}
 .dash-dark-fc-day.today .dash-dark-fc-day-hi{color:#fff;}
 .dash-dark-fc-day-lo{font-family:var(--mono);font-size:9.5px;color:var(--dmut);}
+/* Dark sidebar gradient */
+#dashboardsContent.dash-dark .dash-dark-left{background:linear-gradient(175deg,rgba(79,158,248,0.10) 0%,rgba(0,0,0,0.46) 100%);border-right:1px solid rgba(79,158,248,0.15);}
+/* Violet colored stat cards */
+.dash-violet-stat.v-wind{background:linear-gradient(135deg,rgba(96,165,250,0.18),rgba(59,130,246,0.06));border-color:rgba(96,165,250,0.3);}
+.dash-violet-stat.v-rain{background:linear-gradient(135deg,rgba(52,211,153,0.18),rgba(16,185,129,0.06));border-color:rgba(52,211,153,0.3);}
+.dash-violet-stat.v-hum{background:linear-gradient(135deg,rgba(192,132,252,0.18),rgba(139,92,246,0.06));border-color:rgba(192,132,252,0.3);}
+.dash-violet-stat.v-uv{background:linear-gradient(135deg,rgba(251,146,60,0.18),rgba(245,158,11,0.06));border-color:rgba(251,146,60,0.3);}
+.dash-violet-stat-bar{height:3px;border-radius:2px;margin-top:5px;}
+.v-wind .dash-violet-stat-bar{background:#60a5fa;width:60%;}
+.v-rain .dash-violet-stat-bar{background:#34d399;width:20%;}
+.v-hum .dash-violet-stat-bar{background:#c084fc;}
+.v-uv .dash-violet-stat-bar{background:#fb923c;}
+/* Violet quick metrics */
+.dash-violet-qm{display:flex;flex-direction:column;gap:5px;}
+.dash-violet-qm-row{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:5px 8px;border-radius:8px;background:var(--dcard2);border:1px solid var(--dbd);}
+.dash-violet-qm-lbl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--dmut);}
+.dash-violet-qm-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--dtxt);}
+/* Rain bar with percentage */
+.dash-violet-rain-bar-wrap{position:relative;}
+.dash-violet-rain-pct{font-family:var(--cond);font-size:8px;font-weight:700;color:var(--dtxt);text-align:center;margin-bottom:2px;height:11px;line-height:11px;}
+/* Airy compact UV */
+.dash-airy-uv-row{display:flex;align-items:center;gap:8px;margin-top:5px;}
+.dash-airy-uv-num{font-family:var(--cond);font-size:26px;font-weight:800;line-height:1;}
+.dash-airy-uv-track{flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#22c55e 0%,#f59e0b 45%,#ef4444 73%,#a855f7 100%);position:relative;}
+.dash-airy-uv-thumb{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid currentColor;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,0.18);}
+/* Metro 6-day improved */
+.dash-metro-day{flex-direction:column;gap:5px;padding:10px 10px 8px;}
+.dash-metro-day-top{display:flex;align-items:center;gap:6px;width:100%;}
+.dash-metro-day-rng{height:3px;border-radius:2px;background:rgba(255,255,255,0.08);position:relative;overflow:hidden;margin-top:1px;}
+.dash-metro-day-rng-fill{position:absolute;top:0;bottom:0;border-radius:2px;background:linear-gradient(90deg,var(--dacc2),var(--dacc));}
+.dash-metro-day-rng-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--dmut);margin-top:2px;}
+/* Metro news improved */
+.dash-metro-news-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--dbd);}
+.dash-metro-news-item:last-child{border-bottom:none;padding-bottom:0;}
+.dash-metro-news-icon{font-size:18px;line-height:1;flex:0 0 auto;margin-top:1px;}
+.dash-metro-news-body{flex:1;min-width:0;}
 
 #dashRoot{border-radius:22px;padding:16px;background:linear-gradient(165deg,var(--db1) 0%,var(--db2) 52%,var(--db3) 100%);color:var(--dtxt);position:relative;overflow:hidden;animation:pin .4s cubic-bezier(.16,1,.3,1) both;}
 #dashRoot::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 600px 400px at 12% -8%,var(--dglow),transparent 60%),radial-gradient(ellipse 500px 360px at 95% 110%,var(--dglow),transparent 55%);opacity:.5;}
@@ -6648,7 +6684,12 @@ function _violetRainBars(hours){
   if(!hours||!hours.length) return '<div class="dash-violet-rain-bars" style="align-items:center;justify-content:center;"><span style="font-family:var(--cond);font-size:11px;color:var(--dmut);">No forecast data</span></div>';
   const pts=hours.slice(0,8).map(h=>({pop:h.pop!=null?h.pop:0,hr:h.hour}));
   const maxPop=Math.max(10,...pts.map(p=>p.pop));
-  return '<div class="dash-violet-rain-bars">'+pts.map(p=>{const pct=Math.max(4,Math.round((p.pop/maxPop)*100));const hr=String(p.hr).padStart(2,'0');return`<div class="dash-violet-rain-bar-wrap"><div class="dash-violet-rain-bar" style="height:${pct}%;opacity:${(0.35+0.65*(p.pop/100)).toFixed(2)}"></div><div class="dash-violet-rain-bar-t">${hr}h</div></div>`;}).join('')+'</div>';
+  return '<div class="dash-violet-rain-bars">'+pts.map(p=>{
+    const pct=Math.max(4,Math.round((p.pop/maxPop)*100));
+    const hr=String(p.hr).padStart(2,'0');
+    const showPct=p.pop>=10?Math.round(p.pop)+'%':'';
+    return`<div class="dash-violet-rain-bar-wrap"><div class="dash-violet-rain-pct">${showPct}</div><div class="dash-violet-rain-bar" style="height:${pct}%;opacity:${(0.35+0.65*(p.pop/100)).toFixed(2)}"></div><div class="dash-violet-rain-bar-t">${hr}h</div></div>`;
+  }).join('')+'</div>';
 }
 /* ── Airy temperature dial gauge ── */
 function _airyTempGauge(tempC,loC,hiC){
@@ -6697,7 +6738,11 @@ function renderVioletDash(host){
   const ss=(fc&&fc[0]&&fc[0].sunset)||(omd.sunset&&omd.sunset[0]);
   const uv=om.uv_index!=null?om.uv_index:(fc&&fc[0]&&fc[0].uvMax!=null?fc[0].uvMax:null);
   const windKt=p.wind_kt!=null?Math.round(p.wind_kt):null;
+  const windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'—';
   const rh=p.rh!=null?Math.round(p.rh):null;
+  const qnh=p.qnh!=null?Math.round(p.qnh):null;
+  const dew=(p.temp_c!=null&&rh!=null)?Math.round(p.temp_c-(100-rh)/5):null;
+  let vis=p.vis_m!=null?(p.vis_m>=9999?'>10 km':(p.vis_m/1000).toFixed(0)+' km'):'>10 km';
   const rainMm=om.rain!=null?+om.rain:(om.precipitation!=null?+om.precipitation:0);
   let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
   const hoursHtml=hours.length?hours.slice(0,6).map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19,h.pop),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${wxIconStyled(w.icon,32)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'';
@@ -6707,22 +6752,24 @@ function renderVioletDash(host){
   const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
   const cityKeys=[['TNCA','Aruba'],['TNCB','Bonaire'],['TNCM','St Maarten']];
   const citiesHtml=cityKeys.map(([icao,nm])=>{let t=null,ic2='cloud',desc='—';const raw=mState&&mState[icao]?mState[icao].lastRaw:null;if(raw){try{const mp=parseMetar(raw);if(mp.tempC!=null)t=mp.tempC;const bkn=mp.cldToks.some(x=>/^(BKN|OVC)/.test(x)),sct=mp.cldToks.some(x=>/^(SCT|FEW)/.test(x)),rn=mp.wxToks.some(x=>/RA|SH|TS/.test(x)),nt=lh<6||lh>=19;ic2=rn?'rain':bkn?'cloud':sct?(nt?'cloud-moon':'cloud-sun'):(nt?'moon':'sun');desc=rn?'Rain':bkn?'Cloudy':sct?'Partly cloudy':'Clear';}catch(e){}}return`<div class="dash-violet-city"><span class="dash-violet-city-ic">${wxIconStyled(ic2,26)}</span><span class="dash-violet-city-info"><span class="dash-violet-city-nm">${nm}</span><span class="dash-violet-city-desc">${desc}</span></span><span class="dash-violet-city-tmp">${t!=null?Math.round(t)+'°':'—'}</span></div>`;}).join('');
-  function sunAgo(iso){if(!iso)return'';try{const diff=Math.round((new Date()-new Date(iso))/60000);if(diff<0)return'in '+(-diff)+'m';if(diff<120)return diff+'m ago';return Math.round(diff/60)+'h ago';}catch(e){return'';}}
+  function sunAgo(iso){if(!iso)return'';try{const diff=Math.round((new Date()-new Date(iso))/60000);if(diff<0)return'in '+Math.abs(diff)+'m';if(diff<120)return diff+'m ago';return Math.round(diff/60)+'h ago';}catch(e){return'';}}
+  const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':'Very High';
   const stats=[
-    {icon:'💨',val:(windKt!=null?windKt+'<small> kt</small>':'—'),lbl:'Wind Speed',trend:windKt!=null&&windKt>15?'↑ Gusty':'Calm'},
-    {icon:'🌧',val:(rainMm>0.05?rainMm.toFixed(1)+'<small> mm</small>':'<small>none</small>'),lbl:'Rain 1h',trend:'Last hour'},
-    {icon:'💧',val:(rh!=null?rh+'<small>%</small>':'—'),lbl:'Humidity',trend:''},
-    {icon:'☀️',val:(uv!=null?String(Math.round(uv)):'—'),lbl:'UV Index',trend:uv!=null&&uv<3?'Low':uv!=null&&uv<6?'Moderate':'High'},
+    {cls:'v-wind',icon:'💨',val:(windKt!=null?windKt+'<small> kt</small>':'—'),lbl:'Wind',trend:windDir,barW:windKt!=null?Math.min(100,Math.round(windKt/40*100))+'%':'0%'},
+    {cls:'v-rain',icon:'🌧',val:(rainMm>0.05?rainMm.toFixed(1)+'<small> mm</small>':'<small style="font-size:11px">None</small>'),lbl:'Rain 1h',trend:'Last hour',barW:'15%'},
+    {cls:'v-hum',icon:'💧',val:(rh!=null?rh+'<small>%</small>':'—'),lbl:'Humidity',trend:dew!=null?'Dew '+dew+'°':'',barW:(rh||0)+'%'},
+    {cls:'v-uv',icon:'☀️',val:(uv!=null?String(Math.round(uv)):'—'),lbl:'UV Index',trend:uvLvl,barW:uv!=null?Math.min(100,Math.round(uv/11*100))+'%':'0%'},
   ];
   host.innerHTML=`<div class="dash-violet-wrap">
   <div class="dash-violet-sidebar">
     <div class="dash-violet-brand">&#127752; RWC Caribbean<small>ABC Islands · Live Weather</small></div>
     <div class="dash-violet-time">${timeStr}<small>${dayStr}</small></div>
-    <nav class="dash-violet-nav">
-      <div class="dash-violet-nav-item active">&#128202; Current</div>
-      <div class="dash-violet-nav-item">&#128197; Forecast</div>
-      <div class="dash-violet-nav-item">&#127749; Sunrise</div>
-    </nav>
+    <div class="dash-violet-qm">
+      <div class="dash-violet-qm-row"><span class="dash-violet-qm-lbl">&#127777; Pressure</span><span class="dash-violet-qm-val">${qnh!=null?qnh+' hPa':'—'}</span></div>
+      <div class="dash-violet-qm-row"><span class="dash-violet-qm-lbl">&#128167; Dew Point</span><span class="dash-violet-qm-val">${dew!=null?dew+'°C':'—'}</span></div>
+      <div class="dash-violet-qm-row"><span class="dash-violet-qm-lbl">&#128065; Visibility</span><span class="dash-violet-qm-val">${vis}</span></div>
+      <div class="dash-violet-qm-row"><span class="dash-violet-qm-lbl">&#128196; Wind Dir</span><span class="dash-violet-qm-val">${windDir}</span></div>
+    </div>
     <div class="dash-violet-cond-card">
       <div class="dash-violet-cond-temp">${temp!=null?temp:'—'}<sup>°C</sup></div>
       <div class="dash-violet-cond-ic">${wxIconStyled(wmo.icon,44)}</div>
@@ -6737,13 +6784,13 @@ function renderVioletDash(host){
     </div>
     <div class="dash-violet-card dash-violet-stats-card">
       <div class="dash-violet-hd">Today Overview</div>
-      <div class="dash-violet-stats-row">${stats.map(s=>`<div class="dash-violet-stat"><div class="dash-violet-stat-icon">${s.icon}</div><div class="dash-violet-stat-val">${s.val}</div><div class="dash-violet-stat-lbl">${s.lbl}</div>${s.trend?`<div class="dash-violet-stat-trend">${s.trend}</div>`:''}</div>`).join('')}</div>
+      <div class="dash-violet-stats-row">${stats.map(s=>`<div class="dash-violet-stat ${s.cls}"><div class="dash-violet-stat-icon">${s.icon}</div><div class="dash-violet-stat-val">${s.val}</div><div class="dash-violet-stat-lbl">${s.lbl}</div>${s.trend?`<div class="dash-violet-stat-trend">${s.trend}</div>`:''}<div class="dash-violet-stat-bar" style="width:${s.barW}"></div></div>`).join('')}</div>
     </div>
     <div class="dash-violet-card dash-violet-hourly-card"><div class="dash-hours">${hoursHtml}</div></div>
   </div>
   <div class="dash-violet-right">
     <div class="dash-violet-card dash-violet-rain-card">
-      <div class="dash-violet-hd" style="margin-bottom:6px">Chance of Rain</div>
+      <div class="dash-violet-hd" style="margin-bottom:4px">Chance of Rain</div>
       ${_violetRainBars(hours)}
     </div>
     <div class="dash-violet-card dash-violet-cities-card">
@@ -6782,18 +6829,17 @@ function renderAiryDash(host){
   let hours=[];if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,9);if(hours.length<9&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,9-hours.length));}
   const dayStr=now.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'});
   const timeStr=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const uvCol=uv==null?'var(--dmut)':uv<3?'#22c55e':uv<6?'#f59e0b':uv<8?'#ef4444':'#a855f7';
+  const uvPct=uv!=null?Math.min(100,(uv/11)*100):0;
+  const uvCard=`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">UV Index</div><div class="dash-airy-uv-row"><div class="dash-airy-uv-num" style="color:${uvCol}">${uv!=null?Math.round(uv):'—'}</div><div style="flex:1"><div class="dash-airy-uv-track"><div class="dash-airy-uv-thumb" style="left:${uvPct}%;color:${uvCol}"></div></div></div></div><div class="dash-airy-hl-sub" style="margin-top:4px">${uvLvl}</div></div>`;
   const hls=[
-    {lbl:'UV Index',val:(uv!=null?Math.round(uv):'—'),unit:'',sub:uvLvl,bar:uv!=null?Math.min(100,(uv/11)*100):null,uvGauge:true},
-    {lbl:'Wind Status',val:(windKt!=null?windKt:'—'),unit:' kt',sub:windDir||'Variable',bar:null,uvGauge:false},
-    {lbl:'Sunrise & Sunset',val:_fmtClk(sr),unit:'',sub:'Sunset: '+_fmtClk(ss),bar:null,uvGauge:false},
-    {lbl:'Humidity',val:(rh!=null?rh:'—'),unit:'%',sub:'',bar:rh,uvGauge:false},
-    {lbl:'Visibility',val:vis,unit:'',sub:'',bar:null,uvGauge:false},
-    {lbl:'Pressure',val:(qnh!=null?qnh:'—'),unit:' hPa',sub:'',bar:null,uvGauge:false},
+    {lbl:'Wind Status',val:(windKt!=null?windKt:'—'),unit:' kt',sub:windDir||'Variable',bar:null},
+    {lbl:'Sunrise',val:_fmtClk(sr),unit:'',sub:'Sunset: '+_fmtClk(ss),bar:null},
+    {lbl:'Humidity',val:(rh!=null?rh:'—'),unit:'%',sub:'',bar:rh},
+    {lbl:'Visibility',val:vis,unit:'',sub:'',bar:null},
+    {lbl:'Pressure',val:(qnh!=null?qnh:'—'),unit:' hPa',sub:'',bar:null},
   ];
-  const hlHtml=hls.map(m=>{
-    if(m.uvGauge){return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div>${_metroUVGauge(uv)}</div>`;}
-    return`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div><div class="dash-airy-hl-val">${m.val}<small>${m.unit}</small></div>${m.bar!=null?`<div class="dash-airy-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%"></div></div>`:''}<div class="dash-airy-hl-sub">${m.sub}</div></div>`;
-  }).join('');
+  const hlHtml=uvCard+hls.map(m=>`<div class="dash-airy-hl"><div class="dash-airy-hl-lbl">${m.lbl}</div><div class="dash-airy-hl-val">${m.val}<small>${m.unit}</small></div>${m.bar!=null?`<div class="dash-airy-hl-bar"><div style="width:${Math.max(3,m.bar||0)}%"></div></div>`:''}<div class="dash-airy-hl-sub">${m.sub}</div></div>`).join('');
   host.innerHTML=`<div class="dash-airy-wrap">
   <div class="dash-airy-left">
     <div class="dash-airy-gauge-wrap">${_airyTempGauge(temp,lo,hi)}</div>
@@ -6831,16 +6877,22 @@ function renderMetroDash(host){
   let hours=[]; if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();hours=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,8);if(hours.length<8&&fc[1]&&fc[1]._hourly)hours=hours.concat(fc[1]._hourly.slice(0,8-hours.length));}
   const hoursHtml=hours.length?hours.map((h,i)=>{const hr12=h.hour%12===0?12:h.hour%12,ap=h.hour<12?'AM':'PM',w=decodeWmoCode(h.code,h.hour<6||h.hour>=19,h.pop),pop=(h.pop!=null&&h.pop>=20)?Math.round(h.pop)+'%':'';return`<div class="dash-hour${i===0?' now':''}"><span class="dash-hour-t">${i===0?'Now':hr12+ap}</span><span class="dash-hour-ic">${wxIconStyled(w.icon,34)}</span><span class="dash-hour-pop">${pop}</span><span class="dash-hour-tmp">${h.temp!=null?Math.round(h.temp)+'°':'—'}</span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:12px;">Hourly data loads with Forecast</div>';
   const days=fc?fc.slice(0,6):[];
-  const daysHtml=days.length?days.map((day,i)=>{const dname=new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false,day.pop),hi=day.tempHigh!=null?Math.round(day.tempHigh):null,lo=day.tempLow!=null?Math.round(day.tempLow):null;return`<div class="dash-metro-day"><span class="dash-metro-day-name">${dname}</span><span class="dash-metro-day-ic">${buildWxIconSvg(wc.icon,26)}</span><span class="dash-metro-day-temps">${hi!=null?hi+'°':'—'}<span>${lo!=null?' / '+lo+'°':''}</span></span></div>`;}).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:6px;">Forecast loading…</div>';
+  const allHi=days.map(d=>d.tempHigh).filter(t=>t!=null),allLo=days.map(d=>d.tempLow).filter(t=>t!=null);
+  const rangeMin=allLo.length?Math.min(...allLo):20,rangeMax=allHi.length?Math.max(...allHi):35,rangeSp=Math.max(1,rangeMax-rangeMin);
+  const daysHtml=days.length?days.map((day,i)=>{
+    const dname=new Date(Date.now()+i*86400000).toLocaleDateString('en-US',{weekday:'short'}),wc=decodeWmoCode(day.code,false,day.pop),hi=day.tempHigh!=null?Math.round(day.tempHigh):null,lo=day.tempLow!=null?Math.round(day.tempLow):null;
+    const barL=lo!=null?Math.round(((lo-rangeMin)/rangeSp)*100):0,barW=hi!=null&&lo!=null?Math.round(((hi-lo)/rangeSp)*100):40;
+    return`<div class="dash-metro-day"><div class="dash-metro-day-top"><span class="dash-metro-day-name">${dname}</span><span class="dash-metro-day-ic">${buildWxIconSvg(wc.icon,24)}</span><span class="dash-metro-day-temps" style="margin-left:auto">${hi!=null?hi+'°':'—'}<span style="color:var(--dmut);font-weight:500;font-size:10px">${lo!=null?' '+lo+'°':''}</span></span></div><div class="dash-metro-day-rng"><div class="dash-metro-day-rng-fill" style="left:${barL}%;width:${barW}%"></div></div></div>`;
+  }).join(''):'<div style="color:var(--dmut);font-family:var(--cond);font-size:12px;padding:6px;">Forecast loading…</div>';
   let chartHrs=[]; if(fc&&fc[0]&&fc[0]._hourly){const cur=now.getHours();chartHrs=fc[0]._hourly.filter(h=>h.hour>=cur).slice(0,10);if(chartHrs.length<10&&fc[1]&&fc[1]._hourly)chartHrs=chartHrs.concat(fc[1]._hourly.slice(0,10-chartHrs.length));}
   const windKt=p.wind_kt!=null?p.wind_kt:null,windDir=p.wind_dir!=null?_MON_COMPASS16[Math.round(p.wind_dir/22.5)%16]:'',rh=p.rh!=null?Math.round(p.rh):null;
   const rain1h=om.rain!=null?om.rain:(om.precipitation!=null?om.precipitation:(p.precip_mm!=null?p.precip_mm:null));
   const uvLvl=uv==null?'—':uv<3?'Low':uv<6?'Moderate':uv<8?'High':uv<11?'Very High':'Extreme';
   const newsItems=[
-    {tag:'UV',title:`UV Index ${uv!=null?Math.round(uv):'—'} — ${uvLvl}. ${uv!=null&&uv>=8?'Apply sunscreen every 2h.':'Standard sun protection advised.'}`,meta:'Today'},
-    {tag:'Wind',title:`${windKt!=null?Math.round(windKt)+' kt':'Calm'} from the ${windDir||'—'}`,meta:'Current conditions'},
-    {tag:'Rain',title:`${rain1h!=null&&rain1h>0.05?rain1h.toFixed(1)+'mm last hour.':'No significant rainfall at this time.'}`,meta:'Last hour'},
-    {tag:'Humidity',title:`Relative humidity ${rh!=null?rh+'%':'data pending'}`,meta:'Current observation'},
+    {icon:'☀️',tag:'UV',title:`UV Index ${uv!=null?Math.round(uv):'—'} — ${uvLvl}`,body:uv!=null&&uv>=8?'Apply sunscreen every 2 hours.':'Standard sun protection advised.',meta:'Today'},
+    {icon:'💨',tag:'Wind',title:`${windKt!=null?Math.round(windKt)+' kt':'Calm'} from ${windDir||'variable'}`,body:'',meta:'Current conditions'},
+    {icon:'🌧',tag:'Rain',title:rain1h!=null&&rain1h>0.05?rain1h.toFixed(1)+' mm last hour':'No significant rainfall',body:'',meta:'Last hour'},
+    {icon:'💧',tag:'Humidity',title:`RH ${rh!=null?rh+'%':'—'}`,body:rh!=null&&rh>80?'High humidity — feels muggy.':rh!=null&&rh<40?'Dry air conditions.':'Comfortable humidity.',meta:'Current'},
   ];
   /* Layout: LEFT = hero + hourly + 6-day grid  |  RIGHT = UV gauge + sun arc + chart + news */
   host.innerHTML=`<div class="dash-metro-wrap">
@@ -6873,7 +6925,7 @@ function renderMetroDash(host){
     </div>
     <div class="dash-metro-card dash-metro-news-card">
       <div class="dash-metro-news-hd">Weather Highlights</div>
-      ${newsItems.map(n=>`<div class="dash-metro-news-item"><span class="dash-metro-news-tag">${n.tag}</span><div class="dash-metro-news-title">${n.title}</div><div class="dash-metro-news-meta">${n.meta}</div></div>`).join('')}
+      ${newsItems.map(n=>`<div class="dash-metro-news-item"><div class="dash-metro-news-icon">${n.icon}</div><div class="dash-metro-news-body"><span class="dash-metro-news-tag">${n.tag}</span><div class="dash-metro-news-title">${n.title}</div>${n.body?`<div style="font-family:var(--mono);font-size:10px;color:var(--dmut);margin-top:1px">${n.body}</div>`:''}<div class="dash-metro-news-meta">${n.meta}</div></div></div>`).join('')}
     </div>
   </div>
 </div>`;

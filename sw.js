@@ -3,18 +3,14 @@
    picked up when the app is opened; cache fallback for offline use.
    Bump CACHE_VERSION on each deploy to force clients to update. */
 
-const CACHE_VERSION = 'rwc-2026-06-20-09';
+const CACHE_VERSION = 'rwc-2026-06-23-1';
 const CACHE_NAME = 'rwc-cache-' + CACHE_VERSION;
 
 // Core assets to pre-cache (the single-file app).
 const CORE = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png',
-  './favicon.png'
+  './rwc_caribbean.html'
 ];
 
 // Install: pre-cache the shell, then activate immediately.

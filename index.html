@@ -968,11 +968,10 @@ body.tab-hidden *{animation-play-state:paused !important;}
 }
 
 /* ═══════════ MONITOR STYLE SWITCHER ═══════════ */
-.mon-switcher{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:2px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;padding-bottom:4px;scroll-padding-left:8px;}
-.mon-switcher::-webkit-scrollbar{display:none;}
+.mon-switcher{display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:6px;margin-bottom:8px;}
 .mon-switcher-lbl{font-family:var(--cond);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:4px;flex:0 0 auto;}
 .mon-switcher-div{flex:0 0 auto;width:1px;height:22px;background:linear-gradient(180deg,transparent,var(--bdrb),transparent);margin:0 3px;}
-.mon-style-btn{flex:0 0 auto;scroll-snap-align:start;padding:6px 14px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;height:32px;white-space:nowrap;}
+.mon-style-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--bdr);background:rgba(255,255,255,0.02);color:var(--muted);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;height:34px;white-space:nowrap;}
 .mon-style-btn:hover{border-color:var(--bdrb);color:var(--acc);background:rgba(77,184,255,0.05);}
 .mon-style-btn.active{background:linear-gradient(180deg,rgba(26,111,255,0.9),rgba(10,80,200,0.9));border-color:rgba(77,184,255,0.5);color:#fff;box-shadow:0 4px 14px rgba(26,111,255,0.28);}
 :root.night .mon-style-btn.active{background:linear-gradient(180deg,rgba(140,70,0,0.9),rgba(90,40,0,0.9));border-color:rgba(180,90,0,0.4);}
@@ -2066,9 +2065,9 @@ html,body{max-width:100%;overflow-x:hidden;}
   /* Settings panel */
   #settings-panel{right:7px;left:7px;width:auto;top:50px;}
   /* Monitor sub-view buttons: scroll horizontally on phones */
-  .mon-switcher{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+  .mon-switcher{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;scroll-snap-type:x proximity;}
   .mon-switcher::-webkit-scrollbar{display:none;}
-  .mon-style-btn{flex:0 0 auto;font-size:13px;padding:5px 10px;}
+  .mon-style-btn{flex:0 0 auto;scroll-snap-align:start;font-size:13px;padding:5px 10px;height:30px;}
   /* Power sub-view inside Monitor */
   .pw-wrap{padding:8px;}
   .pw-hd-clock{font-size:20px;}

@@ -8665,6 +8665,48 @@ async function fetchMultiModelForecast(){
   return {forecasts, daily: json.daily || null};
 }
 
+/* Saharan dust outlook (CAMS, µg/m³ surface dust) for the 5 forecast days.
+   Returns { 'YYYY-MM-DD': {max, avg} } or null if unavailable. The main
+   multi-model forecast endpoint has no dust, so this is a separate CAMS call. */
+async function fetchForecastDust(){
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${ABC_LAT}&longitude=${ABC_LON}&hourly=dust&forecast_days=5&timezone=auto`;
+  let json;
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(url, {signal: ctrl.signal, cache: 'default'});
+    clearTimeout(tid);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    json = await res.json();
+  } catch(e){
+    try { const r = await fetchURL(url); if(!r.ok) return null; json = JSON.parse(r.text); }
+    catch(e2){ return null; }
+  }
+  if(!json || !json.hourly || !json.hourly.time || !json.hourly.dust) return null;
+  const byDay = {};
+  json.hourly.time.forEach((t, i) => {
+    const d = t.split('T')[0];
+    const v = json.hourly.dust[i];
+    if(v == null) return;
+    if(!byDay[d]) byDay[d] = {max: -Infinity, sum: 0, n: 0};
+    if(v > byDay[d].max) byDay[d].max = v;
+    byDay[d].sum += v; byDay[d].n++;
+  });
+  const out = {};
+  Object.keys(byDay).forEach(d => { const o = byDay[d]; if(o.n) out[d] = {max: o.max, avg: o.sum / o.n}; });
+  return out;
+}
+
+/* Categorise a CAMS surface-dust value (µg/m³) for the forecast cards.
+   Thresholds match the Monitor's 6-hour dust strip. */
+function fcDustCat(v){
+  if(v == null) return {label: '—', col: 'var(--muted)', pct: 0};
+  if(v >= 150) return {label: 'Heavy',    col: '#ff4f4f', pct: 100};
+  if(v >= 75)  return {label: 'Moderate', col: '#ff8a3d', pct: 68};
+  if(v >= 25)  return {label: 'Light',    col: '#f59e0b', pct: 38};
+  return {label: 'Clear', col: '#2ec97a', pct: 12};
+}
+
 function hourlyTimeline(forecasts, info){
   if(!info || !info.hours) return [];
   const out = [];
@@ -9066,17 +9108,24 @@ function renderForecast(days, allModels){
     const feels = day.feelsLike != null ? Math.round(day.feelsLike) : null;
     const windDirTxt = day.windDir != null ? COMPASS16[Math.round(day.windDir/22.5)%16] : '\u2014';
     const confC = confColor(day.confidence||0);
+    const dCat = fcDustCat(day.dustMax);
+    const dust = day.dustMax;
     const rangeLow = 16, rangeHigh = 40;
     const lowPct  = Math.max(0, Math.min(100, ((day.tempLow - rangeLow) / (rangeHigh - rangeLow)) * 100));
     const highPct = Math.max(0, Math.min(100, ((day.tempHigh - rangeLow) / (rangeHigh - rangeLow)) * 100));
     let callout = '';
-    if(wmo.sev >= 3 || (day.windGust||0) >= 35){
-      callout = `<div class="fc-callout crit"><span class="fc-callout-icon">\u26a0</span><span>${wmo.sev>=3?wmo.desc.toUpperCase()+' EXPECTED':''}${(day.windGust||0)>=35?(wmo.sev>=3?' \u00b7 ':'')+'GUSTS '+Math.round(day.windGust)+'KT':''}</span></div>`;
-    } else if(wmo.sev >= 2 || (day.windGust||0) >= 25 || (day.pop||0) >= 60){
+    if(wmo.sev >= 3 || (day.windGust||0) >= 35 || (dust||0) >= 150){
+      const bits = [];
+      if(wmo.sev>=3) bits.push(wmo.desc.toUpperCase()+' EXPECTED');
+      if((day.windGust||0)>=35) bits.push('GUSTS '+Math.round(day.windGust)+'KT');
+      if((dust||0)>=150) bits.push('HEAVY SAHARAN DUST');
+      callout = `<div class="fc-callout crit"><span class="fc-callout-icon">\u26a0</span><span>${bits.join(' \u00b7 ')}</span></div>`;
+    } else if(wmo.sev >= 2 || (day.windGust||0) >= 25 || (day.pop||0) >= 60 || (dust||0) >= 75){
       const bits = [];
       if(wmo.sev>=2) bits.push(wmo.desc);
       if((day.windGust||0)>=25) bits.push('gusts '+Math.round(day.windGust)+'kt');
       if((day.pop||0)>=60) bits.push(Math.round(day.pop)+'% rain chance');
+      if((dust||0)>=75) bits.push('moderate dust');
       callout = `<div class="fc-callout warn"><span class="fc-callout-icon">\u26a1</span><span>${bits.join(' \u00b7 ')}</span></div>`;
     }
     const blocksHtml = (day.blocks||[]).map(blk => {
@@ -9127,6 +9176,7 @@ function renderForecast(days, allModels){
             <div class="fc-meta-row"><span class="fc-meta-l">Rain</span><span class="fc-meta-v">${(day.precipTotal||0).toFixed(1)} mm</span></div>
             <div class="fc-meta-row"><span class="fc-meta-l">Rain Chance</span><span class="fc-meta-v">${day.pop!=null?Math.round(day.pop):0}%</span></div>
             <div class="fc-meta-row"><span class="fc-meta-l">UV Max</span><span class="fc-meta-v">${day.uvMax!=null?day.uvMax.toFixed(0):'\u2014'}</span></div>
+            <div class="fc-meta-row"><span class="fc-meta-l">Dust</span><span class="fc-meta-v" style="color:${dCat.col};"><span class="fc-conf-dot" style="background:${dCat.col};"></span>${dust!=null?dCat.label+' \u00b7 '+Math.round(dust)+'\u00b5g':'\u2014'}</span></div>
             <div class="fc-meta-row"><span class="fc-meta-l">Confidence</span><span class="fc-meta-v"><span class="fc-conf-dot" style="background:${confC};"></span>${Math.round(day.confidence||0)}%</span></div>
           </div>
         </div>
@@ -9161,7 +9211,7 @@ function openForecastDetail(idx){
       <button class="fc-detail-close" data-detail-close aria-label="Close detail">\u2715</button>
       <div class="fc-detail-hd">
         <div class="fc-day-name-big" style="font-size:24px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
-        <div style="font-family:var(--cond);color:var(--muted);font-size:13px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence</div>
+        <div style="font-family:var(--cond);color:var(--muted);font-size:13px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
       </div>
       <div class="fc-detail-grid">
         <div>
@@ -9219,7 +9269,10 @@ async function updateForecast(){
   }
   if(status) status.textContent = 'Fetching models\u2026';
   try {
-    const {forecasts, daily} = await fetchMultiModelForecast();
+    const [{forecasts, daily}, dustByDay] = await Promise.all([
+      fetchMultiModelForecast(),
+      fetchForecastDust().catch(() => null)
+    ]);
     if(!forecasts.length){
       if(__lastForecastData){ renderForecast(__lastForecastData.days, __lastForecastData.models); }
       else { renderForecast([], []); }
@@ -9227,6 +9280,9 @@ async function updateForecast(){
       return;
     }
     const days = buildDailyConsensus(forecasts, daily);
+    if(dustByDay){
+      days.forEach(d => { const dd = dustByDay[d.date]; if(dd){ d.dustMax = dd.max; d.dustAvg = dd.avg; } });
+    }
     const models = forecasts.map(f => f.model);
     __lastForecastData = {days, models, t: Date.now()};
     renderForecast(days, models);

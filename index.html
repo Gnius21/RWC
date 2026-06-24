@@ -2334,21 +2334,22 @@ html,body{max-width:100%;overflow-x:hidden;}
 
 
 /* ── ABC Islands conditions strip (header) ── */
-.cstrip{display:flex;align-items:stretch;gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none;}
+.cstrip{display:flex;align-items:stretch;gap:0;background:var(--bdr);border-bottom:1px solid var(--bdr);width:100%;overflow:hidden;}
 .cstrip::-webkit-scrollbar{display:none;}
-.cstrip-isl{flex:1 0 auto;min-width:max-content;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg);white-space:nowrap;}
-.cstrip-flag{font-size:19px;flex:0 0 auto;}
-.cstrip-ic{width:30px;height:30px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;}
-.cstrip-ic svg{width:30px;height:30px;}
-.cstrip-temp{font-family:var(--cond);font-size:17px;font-weight:800;color:var(--txt);flex:0 0 auto;}
-.cstrip-wind,.cstrip-vis{font-family:var(--mono);font-size:16px;color:var(--muted);flex:0 0 auto;}
+.cstrip-isl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--bg);white-space:nowrap;overflow:hidden;border-right:1px solid var(--bdr);}
+.cstrip-isl:last-child{border-right:none;}
+.cstrip-flag{font-size:16px;flex:0 0 auto;}
+.cstrip-ic{width:24px;height:24px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;}
+.cstrip-ic svg{width:24px;height:24px;}
+.cstrip-temp{font-family:var(--cond);font-size:15px;font-weight:800;color:var(--txt);flex:0 0 auto;}
+.cstrip-wind,.cstrip-vis{font-family:var(--mono);font-size:13px;color:var(--muted);flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;}
 .cstrip-vis::before{content:"\1F441\FE0F";font-family:initial;margin-right:2px;opacity:.6;}
 @media(max-width:560px){
-  .cstrip-isl{padding:7px 11px;gap:7px;}
-  .cstrip-flag{font-size:16px;}
-  .cstrip-ic,.cstrip-ic svg{width:25px;height:25px;}
-  .cstrip-temp{font-size:15px;}
-  .cstrip-wind,.cstrip-vis{font-size:14px;}
+  .cstrip-isl{padding:6px 8px;gap:5px;}
+  .cstrip-flag{font-size:14px;}
+  .cstrip-ic,.cstrip-ic svg{width:20px;height:20px;}
+  .cstrip-temp{font-size:14px;}
+  .cstrip-wind,.cstrip-vis{font-size:12px;}
 }
 
 </style>
@@ -2454,19 +2455,10 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="mon-style-btn" data-monstyle="gauges"><span class="mon-style-btn-ic">&#9201;</span>Gauges</button>
       <button class="mon-style-btn" data-monstyle="graphics"><span class="mon-style-btn-ic">&#128202;</span>Graphics</button>
       <button class="mon-style-btn" data-monstyle="power"><span class="mon-style-btn-ic">&#9889;</span>Power</button>
-      <button class="mon-style-btn" data-monstyle="dashboards"><span class="mon-style-btn-ic">&#127753;</span>Dashboards</button>
+      <button class="mon-style-btn" data-monstyle="dashboards" data-dashstyle="sky"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
+      <button class="mon-style-btn" data-monstyle="dashboards" data-dashstyle="home"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
     </div>
     <div class="mon-view" id="monViewDash" style="display:none;">
-      <div class="mon-switcher" id="dashSwitcher" style="margin-bottom:10px;">
-        <span class="mon-switcher-lbl">Style</span>
-        <button class="mon-style-btn active" data-dashstyle="sky" onclick="setDashStyle('sky')"><span class="mon-style-btn-ic">&#9889;</span>SkySense</button>
-        <button class="mon-style-btn" data-dashstyle="dark" onclick="setDashStyle('dark')"><span class="mon-style-btn-ic">&#127769;</span>Classic</button>
-        <button class="mon-style-btn" data-dashstyle="metro" onclick="setDashStyle('metro')"><span class="mon-style-btn-ic">&#127749;</span>Metro</button>
-        <button class="mon-style-btn" data-dashstyle="violet" onclick="setDashStyle('violet')"><span class="mon-style-btn-ic">&#128150;</span>Violet</button>
-        <button class="mon-style-btn" data-dashstyle="airy" onclick="setDashStyle('airy')"><span class="mon-style-btn-ic">&#9728;</span>Airy</button>
-        <button class="mon-style-btn" data-dashstyle="storm" onclick="setDashStyle('storm')"><span class="mon-style-btn-ic">&#9928;</span>Storm</button>
-        <button class="mon-style-btn" data-dashstyle="home" onclick="setDashStyle('home')"><span class="mon-style-btn-ic">&#127968;</span>Dashboard</button>
-      </div>
       <div id="dashboardsContent"></div>
     </div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
@@ -6635,7 +6627,11 @@ try { const sv = localStorage.getItem('rwc-monstyle'); if(__MON_FACES.indexOf(sv
 function setMonStyle(style){
   __monStyle = style;
   try { localStorage.setItem('rwc-monstyle', style); } catch(e){}
-  document.querySelectorAll('.mon-style-btn').forEach(b => b.classList.toggle('active', b.dataset.monstyle === style));
+  document.querySelectorAll('.mon-style-btn').forEach(b => {
+    var mMatch = b.dataset.monstyle === style;
+    var dsMatch = b.dataset.dashstyle && (typeof __dashStyle !== 'undefined') && b.dataset.dashstyle === __dashStyle;
+    b.classList.toggle('active', mMatch && (!b.dataset.dashstyle || dsMatch));
+  });
   const isDash = __DASH_FACES.indexOf(style) >= 0;
   const vc = byId('monViewCurrent'), vs = byId('monViewSky'), vg = byId('monViewGauges'), vgr = byId('monViewGraphics'), vh = byId('monViewHome'), vp = byId('monViewPower'), vd = byId('monViewDash');
   if(vc) vc.style.display = style === 'current' ? '' : 'none';
@@ -6668,7 +6664,10 @@ function setMonStyle(style){
   }
 }
 document.querySelectorAll('.mon-style-btn').forEach(btn => {
-  btn.addEventListener('click', () => setMonStyle(btn.dataset.monstyle));
+  btn.addEventListener('click', () => {
+    if(btn.dataset.monstyle) setMonStyle(btn.dataset.monstyle);
+    if(btn.dataset.dashstyle) setTimeout(()=>{ if(typeof setDashStyle==='function') setDashStyle(btn.dataset.dashstyle); }, 0);
+  });
 });
 
 /* dispatch to whichever alternate view is active (current view is filled by renderMonitor) */
@@ -6691,8 +6690,8 @@ let __dashStyle = (function(){ try{ var s = localStorage.getItem('rwc-dashstyle'
 function setDashStyle(style, btn){
   __dashStyle = style;
   try{ localStorage.setItem('rwc-dashstyle', style); }catch(e){}
-  // Update Dashboards tab buttons
-  document.querySelectorAll('#dashSwitcher .mon-style-btn').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style));
+  // Update face buttons active state to reflect new dashstyle
+  document.querySelectorAll('.mon-style-btn[data-dashstyle]').forEach(b=>b.classList.toggle('active', b.dataset.dashstyle === style && b.dataset.monstyle === 'dashboards'));
   // Update Settings panel swatches (if panel is open)
   document.querySelectorAll('.dash-swatch').forEach(s=>s.classList.toggle('active', s.dataset.ds === style));
   // Render to Dashboards tab content
@@ -9249,12 +9248,12 @@ function initCondMap(){
     version: '1.3.0', attribution: 'NOAA NHC', minZoom: 8, maxZoom: 9
   });
 
-  // ── SATELLITE: NOAA GMGSI longwave IR (fallback while RainViewer loads) ──
-  // No `bounds` raw-array — that would break Leaflet's tile-bounds maths.
+  // ── SATELLITE: GOES-19 East infrared (nowCOAST WMS, 5-min updates, 2km) ──
+  // Primary fallback while RainViewer IR loads; GOES-19 East covers the Caribbean at 75.2°W
   condSatLayer = L.tileLayer.wms('https://nowcoast.noaa.gov/geoserver/satellite/wms', {
-    layers: 'global_longwave_imagery_mosaic', format: 'image/png', transparent: true,
-    opacity: 0.8, className: 'cond-ir-tiles', version: '1.3.0',
-    attribution: 'NOAA GMGSI IR', maxZoom: 9
+    layers: 'goes_east_longwave_imagery', format: 'image/png', transparent: true,
+    opacity: 0.7, className: 'cond-ir-tiles', version: '1.3.0',
+    attribution: 'GOES-19 East · NOAA/NESDIS', maxZoom: 12
   });
 
   // ── RAIN + LIVE INFRARED SATELLITE: RainViewer (free, no key) — same API ──
@@ -9276,8 +9275,8 @@ function initCondMap(){
         var sat = (j.satellite && j.satellite.infrared) ? j.satellite.infrared : [];
         var sframe = sat.length ? sat[sat.length-1] : null;
         if(sframe && j.host){
-          condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/0/0_0.png',
-            {opacity:0.85, className:'cond-ir-tiles', maxZoom:12, attribution:'RainViewer IR', zIndex:200});
+          condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/1/1_1.png',
+            {opacity:0.75, className:'cond-ir-tiles', maxZoom:12, attribution:'RainViewer IR · GOES-19', zIndex:200});
           if(__condMapLayers.satellite && condMap){
             // Swap NOAA WMS fallback out for the live RainViewer IR
             if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
@@ -9316,7 +9315,7 @@ function initCondMap(){
           var sat=(j.satellite&&j.satellite.infrared)?j.satellite.infrared:[];
           var sframe=sat.length?sat[sat.length-1]:null;
           if(sframe&&j.host){
-            var newSat=L.tileLayer(j.host+sframe.path+'/256/{z}/{x}/{y}/0/0_0.png',{opacity:0.85,className:'cond-ir-tiles',maxZoom:12,attribution:'RainViewer IR',zIndex:200});
+            var newSat=L.tileLayer(j.host+sframe.path+'/256/{z}/{x}/{y}/1/1_1.png',{opacity:0.75,className:'cond-ir-tiles',maxZoom:12,attribution:'RainViewer IR · GOES-19',zIndex:200});
             if(condSatLive&&condMap.hasLayer(condSatLive)){ newSat.addTo(condMap); condMap.removeLayer(condSatLive); }
             condSatLive=newSat;
           }

@@ -70,7 +70,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .page{position:relative;z-index:1;padding:10px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:100vh;}
 
 /* TOPBAR */
-.topbar{width:100%;max-width:1420px;display:flex;align-items:center;gap:12px;}
+.topbar{width:100%;max-width:1600px;display:flex;align-items:center;gap:12px;}
 @keyframes pok{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes pal{0%,100%{opacity:1}50%{opacity:.3}}
 
@@ -102,7 +102,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .lbadge-d{width:5px;height:5px;border-radius:50%;background:var(--grn);box-shadow:0 0 5px var(--grn);animation:pok 2s infinite;}
 
 /* TABS */
-.tabs{width:100%;max-width:1420px;display:flex;gap:5px;padding:7px;border-radius:var(--rl);background:linear-gradient(180deg,rgba(5,18,34,0.75),rgba(3,12,24,0.65));border:1px solid var(--bdr);backdrop-filter:blur(12px);}
+.tabs{width:100%;max-width:1600px;display:flex;gap:5px;padding:7px;border-radius:var(--rl);background:linear-gradient(180deg,rgba(5,18,34,0.75),rgba(3,12,24,0.65));border:1px solid var(--bdr);backdrop-filter:blur(12px);}
 .tab{flex:1;padding:17px 16px;min-height:60px;border:none;background:transparent;color:var(--muted);font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;border-radius:10px;transition:all .22s cubic-bezier(.34,1.2,.64,1);display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;outline:none;}
 .tab:focus-visible{background:rgba(77,184,255,0.1);box-shadow:inset 0 0 0 2px var(--acc);}
 .tab:hover{color:var(--acc);background:rgba(77,184,255,0.08);transform:translateY(-2px);box-shadow:0 6px 16px rgba(26,111,255,0.22),inset 0 0 0 1px rgba(77,184,255,0.25);}
@@ -123,15 +123,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @keyframes pin{from{opacity:0;transform:translateY(5px) scale(0.998);}to{opacity:1;transform:none;}}
 
 /* CONTENT */
-.content{width:100%;max-width:1420px;}
+.content{width:100%;max-width:1600px;}
 .shdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
 .stitle{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;}
 .stitle::before{content:'';width:13px;height:2px;background:linear-gradient(90deg,var(--acc2),transparent);border-radius:2px;}
 .hidden{display:none!important;}
 
 /* METAR WIDGETS */
-.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-@media(max-width:1100px){.mgrid{grid-template-columns:repeat(2,1fr);}}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:1300px){.mgrid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:900px){.mgrid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:680px){.mgrid{grid-template-columns:1fr;}}
 @media(max-width:480px){.chip-v{font-size:15px;}.mwind-block{width:80px;}}
 
@@ -906,7 +907,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .sychip.crit .sychip-v{color:var(--red);}
 .sychip.wrn{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);}
 .sychip.wrn .sychip-v{color:var(--ylw);}
-.footer{width:100%;max-width:1420px;margin-top:14px;padding:9px 0;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(55,130,200,0.07);}
+.footer{width:100%;max-width:1600px;margin-top:14px;padding:9px 0;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(55,130,200,0.07);}
 .fbrand{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
 .fnote{font-family:var(--sans);font-size:13px;color:rgba(106,138,170,0.45);}
 @media(max-width:960px){
@@ -1034,7 +1035,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .sky-tom-ic{width:54px;height:54px;flex-shrink:0;}
 .sky-highlight{border-radius:18px;padding:18px 20px;background:linear-gradient(180deg,rgba(18,26,52,0.55),var(--card));border:1px solid var(--bdr);}
 .sky-highlight-hd{font-family:var(--cond);font-size:16px;font-weight:700;color:#e2effb;letter-spacing:.5px;margin-bottom:14px;}
-.sky-hl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+.sky-hl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
 @media(max-width:900px){.sky-hl-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:520px){.sky-hl-grid{grid-template-columns:1fr;}}
 .sky-hl-tile{border-radius:14px;padding:14px 15px;background:rgba(8,14,32,0.7);border:1px solid var(--bdr);min-height:128px;display:flex;flex-direction:column;position:relative;overflow:hidden;}
@@ -1905,7 +1906,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 
 /* ── Theme & Icon settings panel ── */
 #settings-panel {
-  position: fixed; top: 54px; right: 14px; z-index: 9999; width: 288px;
+  position: fixed; top: 54px; right: 14px; z-index: 9999; width: 320px;
   background: var(--card); border: 1px solid var(--bdrb); border-radius: 16px;
   padding: 16px; display: none; flex-direction: column; gap: 14px;
   box-shadow: 0 14px 44px rgba(0,0,0,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -2096,7 +2097,7 @@ html,body{max-width:100%;overflow-x:hidden;}
   .cw-tile.mon-stavg{grid-column:auto !important;}
 }
 /* ── Large desktop ── */
-@media(min-width:1400px){
+@media(min-width:1200px){
   .mon-grid{grid-template-columns:repeat(4,1fr);}
 }
 @media(min-width:1600px){
@@ -6999,7 +7000,7 @@ function renderAiryDash(host){
 /* ── Storm: purple-gloss icon wrapper ── */
 function _stormIcon(key, size){
   const sz=size||36;
-  return '<span style="display:inline-block;width:'+sz+'px;height:'+sz+'px;filter:drop-shadow(0 0 '+Math.round(sz*0.16)+'px rgba(167,139,250,0.7)) drop-shadow(0 2px 6px rgba(0,0,0,0.45));">'+buildGlossyIcon(key, sz)+'</span>';
+  return '<span style="display:inline-block;width:'+sz+'px;height:'+sz+'px;filter:drop-shadow(0 0 '+Math.round(sz*0.16)+'px rgba(167,139,250,0.7)) drop-shadow(0 2px 6px rgba(0,0,0,0.4));">'+buildWxIconSvg(key, sz)+'</span>';
 }
 
 /* ── Storm: donut ring SVG ── */
@@ -8574,219 +8575,8 @@ function _cloudG(cx, cy, sc, variant, extra){
 /* ═══ ICON STYLE SYSTEM ═══ */
 /* Current style stored in localStorage key 'rwc-icon-style' */
 /* Values: 'default' | 'outline' | 'realistic' */
-let __iconStyle = (function(){
-  try {
-    if(!localStorage.getItem('rwc-icon-style-v5')){
-      localStorage.setItem('rwc-icon-style-v5','1');
-      localStorage.setItem('rwc-icon-style','default');
-      return 'default';
-    }
-    const s = localStorage.getItem('rwc-icon-style');
-    return ['default','fluent','glossy','dark3d','minimal','outline','realistic'].indexOf(s)>=0 ? s : 'default';
-  } catch(e){ return 'default'; }
-})();
-
-/* ── Outline gradient icons (IMG_6909 style) ─────────────────────────────
-   Blue→teal gradient stroke, clean geometric paths, no fill */
-function buildOutlineIcon(key, size){
-  const s = size || 36;
-  const grad = `<defs><linearGradient id="og${s}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4db8ff"/><stop offset="1" stop-color="#00e5a0"/></linearGradient></defs>`;
-  const st = `stroke="url(#og${s})" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
-  const sunRays = (cx,cy,r,rr)=>[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return `<line x1="${(cx+r*Math.sin(rad)).toFixed(1)}" y1="${(cy-r*Math.cos(rad)).toFixed(1)}" x2="${(cx+rr*Math.sin(rad)).toFixed(1)}" y2="${(cy-rr*Math.cos(rad)).toFixed(1)}" ${st}/>`; }).join('');
-  const cloud = (x,y,sc)=>`<path d="M${x+4*sc} ${y+8*sc} Q${x+2*sc} ${y+8*sc} ${x+2*sc} ${y+6*sc} Q${x+2*sc} ${y+3*sc} ${x+5*sc} ${y+3*sc} Q${x+6*sc} ${y+1*sc} ${x+9*sc} ${y+1*sc} Q${x+13*sc} ${y+1*sc} ${x+13*sc} ${y+4*sc} Q${x+15*sc} ${y+4*sc} ${x+15*sc} ${y+6*sc} Q${x+15*sc} ${y+8*sc} ${x+13*sc} ${y+8*sc} Z" ${st}/>`;
-  const shapes = {
-    'sun':  `${sunRays(18,18,9,13)}<circle cx="18" cy="18" r="6" ${st}/>`,
-    'cloud': cloud(1,8,2),
-    'cloud-sun': `${sunRays(10,14,6,9)}<circle cx="10" cy="14" r="4.5" ${st}/>${cloud(6,15,1.6)}`,
-    'sun-cloud': `${sunRays(10,12,5,8)}<circle cx="10" cy="12" r="4" ${st}/>${cloud(8,14,1.6)}`,
-    'moon-cloud': `<path d="M10 8 Q6 10 6 14 Q6 18 10 20 Q7 20 5 18 Q2 15 3 11 Q4 7 8 6 Z" ${st}/>${cloud(9,16,1.5)}`,
-    'cloud-moon': `<path d="M8 7 Q5 9 5 12 Q5 16 8 17 Q6 17 4 15 Q2 13 2 10 Q3 7 6 6 Z" ${st}/>${cloud(7,14,1.6)}`,
-    'rain': `${cloud(1,4,2)}<line x1="7" y1="24" x2="5" y2="31" ${st}/><line x1="13" y1="24" x2="11" y2="31" ${st}/><line x1="19" y1="24" x2="17" y2="31" ${st}/>`,
-    'showers': `${cloud(1,4,2)}<line x1="8" y1="24" x2="7" y2="29" ${st}/><line x1="14" y1="24" x2="13" y2="29" ${st}/>`,
-    'thunder': `${cloud(1,4,2)}<path d="M14 22 L10 30 L14 30 L11 38 L20 28 L15 28 L18 22 Z" ${st}/>`,
-    'snow': `${cloud(1,4,2)}<circle cx="8" cy="28" r="1.5" ${st}/><circle cx="14" cy="32" r="1.5" ${st}/><circle cx="20" cy="28" r="1.5" ${st}/>`,
-    'fog': `${cloud(1,4,2)}<line x1="4" y1="26" x2="28" y2="26" ${st}/><line x1="6" y1="30" x2="26" y2="30" ${st}/>`,
-    'drizzle': `${cloud(1,4,2)}<line x1="8" y1="24" x2="7" y2="29" ${st}/><line x1="14" y1="24" x2="13" y2="29" ${st}/><line x1="20" y1="24" x2="19" y2="29" ${st}/>`,
-  };
-  const inner = shapes[key] || shapes['sun'];
-  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}">${grad}${inner}</svg>`;
-}
-
-/* ── Photorealistic icons (IMG_6907 style) ───────────────────────────────
-   Radial-gradient sun orb, wispy painted cloud paths, rain streaks */
-function buildRealisticIcon(key, size){
-  const s = size || 64;
-  // Glowing sun orb
-  const sunOrb = (cx,cy,r,animate)=>{
-    const gid='rs'+cx+cy;
-    return `<defs>
-      <radialGradient id="${gid}" cx="40%" cy="35%" r="60%">
-        <stop offset="0" stop-color="#fff7c0"/><stop offset="30%" stop-color="#ffd23f"/>
-        <stop offset="70%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#c27803"/>
-      </radialGradient>
-    </defs>
-    <circle cx="${cx}" cy="${cy}" r="${r*1.6}" fill="#fbbf24" opacity="0.08"/>
-    <circle cx="${cx}" cy="${cy}" r="${r*1.25}" fill="#fbbf24" opacity="0.12"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${gid})" ${animate?'style="animation:sunGlow 3s ease-in-out infinite;"':''}/>`;
-  };
-  // Wispy cloud path (photorealistic style)
-  const cloudPath = (x,y,sc,dark)=>{
-    const c = dark ? '#6a7080' : '#b8c4d4';
-    const c2 = dark ? '#4a5060' : '#8a9ab0';
-    const c3 = dark ? '#2a2f3a' : '#6a7888';
-    return `<ellipse cx="${x+sc*10}" cy="${y+sc*7}" rx="${sc*9}" ry="${sc*4.5}" fill="${c}" opacity="0.9"/>
-    <ellipse cx="${x+sc*7}"  cy="${y+sc*5}" rx="${sc*6}" ry="${sc*4}" fill="${c}"/>
-    <ellipse cx="${x+sc*14}" cy="${y+sc*4}" rx="${sc*7}" ry="${sc*5}" fill="${c}"/>
-    <ellipse cx="${x+sc*10}" cy="${y+sc*9}" rx="${sc*9}" ry="${sc*3}" fill="${c2}" opacity="0.8"/>
-    <ellipse cx="${x+sc*10}" cy="${y+sc*10}" rx="${sc*8}" ry="${sc*2}" fill="${c3}" opacity="0.5"/>`;
-  };
-  const rainStreak = (x,y,len,op)=>`<line x1="${x}" y1="${y}" x2="${x-2}" y2="${y+len}" stroke="#a0c8e8" stroke-width="1.5" stroke-linecap="round" opacity="${op}" style="animation:rainFall ${0.6+Math.random()*0.4}s linear infinite ${Math.random()*0.5}s;"/>`;
-  const boltPath = `<path d="M0 -8 L-5 4 L0 3 L-3 12 L8 -2 L2 -2 L5 -8 Z" fill="#fde047" filter="url(#bolt)" style="animation:lightningStrike 1.4s ease-in-out infinite;"/>`;
-
-  const views = {
-    'sun': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(32,32,18,true)}</svg>`,
-    'cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,14,2.2)}</svg>`,
-    'cloud-sun': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(20,22,13,true)}${cloudPath(8,22,1.8,false)}</svg>`,
-    'sun-cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${sunOrb(18,20,12,true)}${cloudPath(10,24,1.7,false)}</svg>`,
-    'moon-cloud': `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><path d="M22 10 Q12 14 12 24 Q12 34 22 38 Q12 38 7 32 Q2 24 5 16 Q9 8 18 7 Z" fill="#dce8f8"/><circle cx="22" cy="24" r="8" fill="#c8d8f0" opacity="0.15"/>${cloudPath(10,28,1.6,true)}</svg>`,
-    'cloud-moon': `<svg viewBox="0 0 64 64" width="${s}" height="${s}"><path d="M18 8 Q10 12 10 20 Q10 28 18 32 Q10 32 6 27 Q2 20 4 13 Q7 6 15 5 Z" fill="#dce8f8"/>${cloudPath(8,26,1.7,true)}</svg>`,
-    'rain': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,true)}${[8,14,20,26,32].map((x,i)=>rainStreak(x+3,32+i%2*4,14,0.8)).join('')}</svg>`,
-    'showers': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}${[8,16,24,32].map((x,i)=>rainStreak(x+3,32,12,0.7)).join('')}</svg>`,
-    'drizzle': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}${[10,18,26].map((x)=>rainStreak(x+3,32,10,0.6)).join('')}</svg>`,
-    'thunder': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
-      <defs><filter id="bolt"><feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs>
-      ${cloudPath(6,8,2,true)}
-      <g transform="translate(32,38)">${boltPath}</g>
-      ${rainStreak(14,44,10,0.6)}${rainStreak(42,44,10,0.6)}
-    </svg>`,
-    'snow': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">${cloudPath(6,8,2,false)}
-      ${[10,20,30,15,25].map((x,i)=>`<text x="${x}" y="${36+i%2*8}" font-size="10" fill="#dce8f8" opacity="0.9" style="animation:snowflakeFall ${1+i*0.2}s ease-in-out infinite ${i*0.3}s;">\u2745</text>`).join('')}
-    </svg>`,
-    'fog': `<svg viewBox="0 0 64 64" width="${s}" height="${s}">
-      <ellipse cx="32" cy="22" rx="24" ry="10" fill="#8898aa" opacity="0.4"/>
-      <ellipse cx="32" cy="18" rx="22" ry="8" fill="#aab8c8" opacity="0.5"/>
-      <rect x="4" y="28" width="56" height="6" rx="3" fill="#8898aa" opacity="0.35"/>
-      <rect x="8" y="36" width="48" height="5" rx="2.5" fill="#8898aa" opacity="0.25"/>
-      <rect x="12" y="43" width="40" height="4" rx="2" fill="#8898aa" opacity="0.15"/>
-    </svg>`,
-  };
-  return views[key] || views['sun'];
-}
-
-/* ── Fluent style (IMG_7084 — flat emoji-like, bold colors) ──────────── */
-function buildFluentIcon(key, size){
-  const s = size || 36;
-  const sunY = `<defs><radialGradient id="f-sun" cx="45%" cy="45%"><stop offset="0" stop-color="#FFE066"/><stop offset="100%" stop-color="#FFB800"/></radialGradient></defs><circle cx="18" cy="18" r="10" fill="url(#f-sun)"/><ellipse cx="14" cy="13" rx="4" ry="2.5" fill="#fff" opacity="0.5"/>`;
-  const cld = (x,y,sc) => `<path d="M${x+sc*4} ${y+sc*10} Q${x+sc*2} ${y+sc*9} ${x+sc*2} ${y+sc*7} Q${x+sc*2} ${y+sc*4} ${x+sc*5} ${y+sc*3} Q${x+sc*7} ${y+sc*1} ${x+sc*10} ${y+sc*1} Q${x+sc*14} ${y+sc*1} ${x+sc*15} ${y+sc*4} Q${x+sc*17} ${y+sc*4} ${x+sc*17} ${y+sc*7} Q${x+sc*17} ${y+sc*10} ${x+sc*14} ${y+sc*10} Z" fill="#E3F2FD" stroke="none"/>`;
-  const moon = `<path d="M20 10 Q14 12 14 18 Q14 24 20 26 Q17 24 14 21 Q11 18 11 15 Q11 12 14 9 Q17 12 20 10 Z" fill="#FFE082"/>`;
-  const shapes = {
-    sun: sunY,
-    cloud: cld(0,3,1.5),
-    'cloud-sun': `<circle cx="10" cy="11" r="8" fill="#FFD60A"/><ellipse cx="6" cy="8" rx="3" ry="2" fill="#fff" opacity="0.45"/>${cld(5,17,1.1)}`,
-    'sun-cloud': `<circle cx="9" cy="10" r="7" fill="#FFD60A"/><ellipse cx="5" cy="7" rx="2.5" ry="1.5" fill="#fff" opacity="0.45"/>${cld(6,16,1.1)}`,
-    moon,
-    'moon-cloud': `${moon}${cld(6,20,1.1)}`,
-    'cloud-moon': `<path d="M15 9 Q11 11 11 16 Q11 21 15 23 Q12 21 9 18 Q7 14 9 11 Z" fill="#FFE082"/>${cld(5,19,1.1)}`,
-    rain: `${cld(0,1,1.5)}<path d="M9 27 L8 33 M17 27 L16 33 M25 27 L24 33" stroke="#42A5F5" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>`,
-    showers: `${cld(0,1,1.5)}<path d="M11 27 L10 31 M19 27 L18 31" stroke="#42A5F5" stroke-width="2.5" stroke-linecap="round"/>`,
-    drizzle: `${cld(0,1,1.5)}<circle cx="11" cy="28" r="1.5" fill="#81D4FA" opacity="0.8"/><circle cx="19" cy="28" r="1.5" fill="#81D4FA" opacity="0.8"/>`,
-    thunder: `${cld(0,0,1.5)}<path d="M18 19 L14 27 L18 27 L15 36 L24 22 L19 22 L21 19 Z" fill="#FFEB3B"/>`,
-    snow: `${cld(0,1,1.5)}<text x="6" y="34" font-size="11" fill="#B3E5FC" opacity="0.9">❄</text><text x="19" y="34" font-size="11" fill="#B3E5FC" opacity="0.9">❄</text>`,
-    fog: `<rect x="2" y="12" width="32" height="5" rx="2.5" fill="#B0BEC5" opacity="0.7"/><rect x="4" y="19" width="28" height="4" rx="2" fill="#B0BEC5" opacity="0.6"/><rect x="2" y="25" width="32" height="4" rx="2" fill="#B0BEC5" opacity="0.5"/>`,
-  };
-  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${shapes[key]||shapes.sun}</svg>`;
-}
-
-/* ── Glossy vector style (IMG_7086 — filled blue gradient with sheen) ── */
-function buildGlossyIcon(key, size){
-  const s = size || 36;
-  const gi = 'gloss'+s;
-  const defs = `<defs><radialGradient id="${gi}s" cx="40%" cy="40%" r="60%"><stop offset="0" stop-color="#81D4FF"/><stop offset="100%" stop-color="#0077CC"/></radialGradient><linearGradient id="${gi}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C5E1FF"/><stop offset="100%" stop-color="#3A88B8"/></linearGradient></defs>`;
-  const sunG = `<circle cx="18" cy="18" r="10" fill="url(#${gi}s)"/><ellipse cx="14" cy="13" rx="3.5" ry="2" fill="white" opacity="0.45"/>`;
-  const cld = (x,y,sc) => `<path d="M${x+sc*3} ${y+sc*10} Q${x+sc*1} ${y+sc*8} ${x+sc*1} ${y+sc*6} Q${x+sc*1} ${y+sc*3} ${x+sc*4} ${y+sc*2} Q${x+sc*6} ${y+sc*0.5} ${x+sc*9} ${y+sc*0.5} Q${x+sc*13} ${y+sc*0.5} ${x+sc*14} ${y+sc*3} Q${x+sc*16} ${y+sc*3} ${x+sc*16} ${y+sc*6} Q${x+sc*16} ${y+sc*9} ${x+sc*14} ${y+sc*10} Z" fill="url(#${gi}c)" opacity="0.95"/><ellipse cx="${x+sc*7}" cy="${y+sc*4.5}" rx="${sc*6}" ry="${sc*2}" fill="white" opacity="0.15"/>`;
-  const moonG = `<path d="M21 10 Q13 12 13 18 Q13 24 21 26 Q17 24 13 21 Q10 18 10 15 Q10 12 13 9 Q17 12 21 10 Z" fill="url(#${gi}c)"/><ellipse cx="15" cy="13" rx="2.5" ry="1.5" fill="white" opacity="0.3"/>`;
-  const shapes = {
-    sun: sunG,
-    cloud: cld(0,4,1.5),
-    'cloud-sun': `<circle cx="10" cy="12" r="8" fill="url(#${gi}s)"/><ellipse cx="6" cy="8" rx="3" ry="2" fill="white" opacity="0.4"/>${cld(5,18,1)}`,
-    'sun-cloud': `<circle cx="9" cy="11" r="7" fill="url(#${gi}s)"/><ellipse cx="5" cy="7" rx="2.5" ry="1.5" fill="white" opacity="0.4"/>${cld(6,17,1)}`,
-    moon: moonG,
-    'moon-cloud': `<path d="M20 10 Q12 12 12 17 Q12 23 20 25 Q15 23 12 19 Q9 14 12 10 Z" fill="url(#${gi}c)"/><ellipse cx="14" cy="12" rx="2.5" ry="1.5" fill="white" opacity="0.25"/>${cld(5,19,1)}`,
-    'cloud-moon': `<path d="M17 10 Q10 12 10 17 Q10 22 17 24 Q12 22 9 18 Q7 13 10 10 Z" fill="url(#${gi}c)"/>${cld(5,19,1)}`,
-    rain: `${cld(0,2,1.5)}<path d="M10 27 L9 33 M18 27 L17 33 M26 27 L25 33" stroke="#0288D1" stroke-width="2" stroke-linecap="round" opacity="0.85"/>`,
-    showers: `${cld(0,2,1.5)}<path d="M12 27 L11 32 M20 27 L19 32" stroke="#0288D1" stroke-width="2.5" stroke-linecap="round"/>`,
-    drizzle: `${cld(0,2,1.5)}<circle cx="12" cy="28" r="1.3" fill="#4FC3F7" opacity="0.8"/><circle cx="20" cy="28" r="1.3" fill="#4FC3F7" opacity="0.8"/>`,
-    thunder: `${cld(0,1,1.5)}<path d="M18 20 L14 28 L18 28 L15 37 L24 23 L19 23 L21 20 Z" fill="#FFEB3B"/>`,
-    snow: `${cld(0,2,1.5)}<text x="7" y="34" font-size="11" fill="#81D4FF" opacity="0.9">❄</text><text x="20" y="34" font-size="11" fill="#81D4FF" opacity="0.9">❄</text>`,
-    fog: `<ellipse cx="18" cy="14" rx="15" ry="6" fill="#80DEEA" opacity="0.5"/><ellipse cx="18" cy="21" rx="13" ry="5" fill="#80DEEA" opacity="0.4"/><ellipse cx="18" cy="27" rx="15" ry="5" fill="#80DEEA" opacity="0.3"/>`,
-  };
-  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${defs}${shapes[key]||shapes.sun}</svg>`;
-}
-
-/* ── Dark 3D style (IMG_7088 — dark bg, glossy 3D spheres) ──────────── */
-function buildDark3DIcon(key, size){
-  const s = size || 36;
-  const gi = 'd3d'+s;
-  const bg = `<rect width="36" height="36" rx="8" fill="#0d1117"/>`;
-  const defs = `<defs><radialGradient id="${gi}s" cx="35%" cy="30%" r="65%"><stop offset="0" stop-color="#fff9c4"/><stop offset="40%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b8860b"/></radialGradient><radialGradient id="${gi}c" cx="35%" cy="25%" r="70%"><stop offset="0" stop-color="#e8f4f8"/><stop offset="60%" stop-color="#7cc4dd"/><stop offset="100%" stop-color="#2d5a7a"/></radialGradient><radialGradient id="${gi}m" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#f5f5f5"/><stop offset="50%" stop-color="#c0d8f0"/><stop offset="100%" stop-color="#4a5f7f"/></radialGradient></defs>`;
-  const sunS = (cx,cy,r) => `<circle cx="${cx}" cy="${cy}" r="${r*1.4}" fill="#ffd700" opacity="0.08"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${gi}s)"/><ellipse cx="${cx-r*0.3}" cy="${cy-r*0.35}" rx="${r*0.4}" ry="${r*0.22}" fill="white" opacity="0.5"/>`;
-  const cldB = (x,y,sc) => `<path d="M${x+sc*2} ${y+sc*10} Q${x+sc*0.5} ${y+sc*8} ${x+sc*0.5} ${y+sc*6} Q${x+sc*0.5} ${y+sc*3} ${x+sc*3} ${y+sc*2} Q${x+sc*5} ${y+sc*0.5} ${x+sc*8} ${y+sc*0.5} Q${x+sc*12} ${y+sc*0.5} ${x+sc*13} ${y+sc*3} Q${x+sc*15} ${y+sc*3} ${x+sc*15} ${y+sc*6} Q${x+sc*15} ${y+sc*9} ${x+sc*13} ${y+sc*10} Z" fill="url(#${gi}c)" opacity="0.92"/><ellipse cx="${x+sc*6}" cy="${y+sc*4}" rx="${sc*5}" ry="${sc*1.8}" fill="white" opacity="0.12"/>`;
-  const shapes = {
-    sun: sunS(18,18,10),
-    cloud: cldB(2,6,1.5),
-    'cloud-sun': `${sunS(10,13,8)}${cldB(5,18,1.05)}`,
-    'sun-cloud': `${sunS(9,11,7)}${cldB(6,17,1)}`,
-    moon: `<circle cx="18" cy="18" r="11" fill="url(#${gi}m)"/><circle cx="24" cy="14" r="10" fill="#0d1117"/><ellipse cx="14" cy="15" rx="3" ry="2" fill="white" opacity="0.3"/>`,
-    'moon-cloud': `<circle cx="12" cy="13" r="7" fill="url(#${gi}m)"/><circle cx="17" cy="10" r="6.5" fill="#0d1117"/>${cldB(5,19,1.05)}`,
-    'cloud-moon': `<circle cx="11" cy="13" r="7" fill="url(#${gi}m)"/><circle cx="16" cy="10" r="6.5" fill="#0d1117"/>${cldB(5,19,1.05)}`,
-    rain: `${cldB(2,2,1.5)}<path d="M9 28 L8 34 M17 28 L16 34 M25 28 L24 34" stroke="#5DADE2" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>`,
-    showers: `${cldB(2,2,1.5)}<path d="M12 28 L11 33 M20 28 L19 33" stroke="#5DADE2" stroke-width="2.2" stroke-linecap="round"/>`,
-    drizzle: `${cldB(2,2,1.5)}<circle cx="12" cy="29" r="1.2" fill="#5DADE2" opacity="0.8"/><circle cx="20" cy="29" r="1.2" fill="#5DADE2" opacity="0.8"/>`,
-    thunder: `${cldB(2,1,1.5)}<path d="M17 22 L13 30 L17 30 L14 38 L23 25 L18 25 L20 22 Z" fill="#FFE34A"/>`,
-    snow: `${cldB(2,2,1.5)}<text x="7" y="35" font-size="10" fill="#B0E0E6" opacity="0.85">❄</text><text x="20" y="35" font-size="10" fill="#B0E0E6" opacity="0.85">❄</text>`,
-    fog: `<ellipse cx="18" cy="14" rx="14" ry="5" fill="#5a7a8a" opacity="0.7"/><ellipse cx="18" cy="21" rx="13" ry="5" fill="#5a7a8a" opacity="0.6"/><ellipse cx="18" cy="27" rx="14" ry="4" fill="#5a7a8a" opacity="0.5"/>`,
-  };
-  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${defs}${bg}${shapes[key]||shapes.sun}</svg>`;
-}
-
-/* ── Minimal flat style (IMG_7089 — simple grey/white/yellow) ────────── */
-function buildMinimalIcon(key, size){
-  const s = size || 36;
-  const Y='#FFCC00', G='#8FA5B5', W='#E0E8F0', B='#5B9FD1';
-  const sunRays = [0,45,90,135,180,225,270,315].map(a=>{const r=a*Math.PI/180; return `<line x1="${(18+8.5*Math.sin(r)).toFixed(1)}" y1="${(18-8.5*Math.cos(r)).toFixed(1)}" x2="${(18+12.5*Math.sin(r)).toFixed(1)}" y2="${(18-12.5*Math.cos(r)).toFixed(1)}" stroke="${Y}" stroke-width="2.2" stroke-linecap="round"/>`;}).join('');
-  const sunFull = `${sunRays}<circle cx="18" cy="18" r="6.5" fill="${Y}"/>`;
-  const cld = (x,y) => `<path d="M${x+3} ${y+10} Q${x+1} ${y+8} ${x+1} ${y+6} Q${x+1} ${y+3} ${x+4} ${y+2} Q${x+6} ${y+0.5} ${x+9} ${y+0.5} Q${x+13} ${y+0.5} ${x+14} ${y+3} Q${x+16} ${y+3} ${x+16} ${y+6} Q${x+16} ${y+9} ${x+14} ${y+10} Z" fill="${G}" opacity="0.8"/><ellipse cx="${x+10}" cy="${y+4}" rx="6" ry="2" fill="${W}"/>`;
-  const smSun = (cx,cy,r) => [0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180; return `<line x1="${(cx+(r+3)*Math.sin(rad)).toFixed(1)}" y1="${(cy-(r+3)*Math.cos(rad)).toFixed(1)}" x2="${(cx+(r+5)*Math.sin(rad)).toFixed(1)}" y2="${(cy-(r+5)*Math.cos(rad)).toFixed(1)}" stroke="${Y}" stroke-width="1.8" stroke-linecap="round"/>`;}).join('')+`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${Y}"/>`;
-  const moonM = `<path d="M22 8 Q13 10 13 18 Q13 26 22 28 Q16 26 13 22 Q10 16 13 11 Z" fill="${W}"/>`;
-  const shapes = {
-    sun: sunFull,
-    cloud: cld(2,7),
-    'cloud-sun': `${smSun(10,12,6)}${cld(5,18)}`,
-    'sun-cloud': `${smSun(9,11,5.5)}${cld(6,17)}`,
-    moon: moonM,
-    'moon-cloud': `${moonM}${cld(5,21)}`,
-    'cloud-moon': `<path d="M17 8 Q10 10 10 16 Q10 22 17 24 Q12 22 9 18 Q7 13 10 10 Z" fill="${W}"/>${cld(4,20)}`,
-    rain: `${cld(2,4)}<path d="M9 27 L8 32 M17 27 L16 32 M25 27 L24 32" stroke="${B}" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>`,
-    showers: `${cld(2,4)}<path d="M11 27 L10 31 M19 27 L18 31" stroke="${B}" stroke-width="2.2" stroke-linecap="round"/>`,
-    drizzle: `${cld(2,4)}<circle cx="11" cy="28" r="1.2" fill="${B}" opacity="0.75"/><circle cx="19" cy="28" r="1.2" fill="${B}" opacity="0.75"/>`,
-    thunder: `${cld(2,1)}<path d="M17 20 L13 27 L17 27 L14 35 L23 23 L18 23 L20 20 Z" fill="${Y}"/>`,
-    snow: `${cld(2,4)}<text x="6" y="34" font-size="11" fill="${W}" opacity="0.9">❄</text><text x="20" y="34" font-size="11" fill="${W}" opacity="0.9">❄</text>`,
-    fog: `<ellipse cx="18" cy="14" rx="14" ry="5" fill="${G}" opacity="0.65"/><ellipse cx="18" cy="21" rx="13" ry="4" fill="${G}" opacity="0.55"/><ellipse cx="18" cy="27" rx="14" ry="4" fill="${G}" opacity="0.45"/>`,
-  };
-  return `<svg viewBox="0 0 36 36" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">${shapes[key]||shapes.sun}</svg>`;
-}
-
-/* ── Main icon dispatcher ─────────────────────────────────────────────── */
-const _origBuildWxIconSvg = buildWxIconSvg;
-function wxIconStyled(key, size){
-  if(__iconStyle === 'fluent')    return buildFluentIcon(key, size);
-  if(__iconStyle === 'glossy')    return buildGlossyIcon(key, size);
-  if(__iconStyle === 'dark3d')    return buildDark3DIcon(key, size);
-  if(__iconStyle === 'minimal')   return buildMinimalIcon(key, size);
-  if(__iconStyle === 'outline')   return buildOutlineIcon(key, size);
-  if(__iconStyle === 'realistic') return buildRealisticIcon(key, size);
-  return buildWxIconSvg(key, size);
-}
+/* ── Icon dispatcher — always uses animated SVG icons ── */
+function wxIconStyled(key, size){ return buildWxIconSvg(key, size); }
 
 /* ═══ MULTI-MODEL FORECAST ═══ */
 const FORECAST_MODELS = [
@@ -10808,7 +10598,7 @@ function applyTheme(t){
   root.classList.remove('glass','neon','storm');
   if(t === 'glass') root.classList.add('glass');
   else if(t === 'neon') root.classList.add('neon');
-  else if(t === 'storm'){ root.classList.add('storm'); if(typeof applyIconStyle==='function') applyIconStyle('glossy'); }
+  else if(t === 'storm') root.classList.add('storm');
   // Update swatch active state
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
@@ -10818,36 +10608,15 @@ function applyTheme(t){
   requestAnimationFrame(()=>document.documentElement.style.removeProperty('--_r'));
 }
 
-function applyIconStyle(style){
-  __iconStyle = style;
-  localStorage.setItem('rwc-icon-style', style);
-  document.querySelectorAll('.icon-swatch').forEach(s=>{
-    s.classList.toggle('active', s.dataset.style === style);
-  });
-  // Re-render Monitor if open to refresh icons
-  if(__monLastData) renderMonitor(__monLastData);
-  // Re-render weather cards
-  ['aruba','curacao','bonaire'].forEach(k=>{
-    const last = WX_HISTORY[k] && WX_HISTORY[k].length ? WX_HISTORY[k][WX_HISTORY[k].length-1] : null;
-    if(last) renderWxCard(k, last);
-  });
-}
-
 // Expose settings functions to global scope for inline onclick handlers
 window.applyTheme = applyTheme;
-window.applyIconStyle = applyIconStyle;
 window.switchWxKey = switchWxKey;
 
 function buildSettingsPanel(){
   const existing = document.getElementById('settings-panel');
   if(existing) return;
 
-  // Preview SVGs for icon swatches
-  const previewDefault   = buildWxIconSvg('cloud-sun', 32);
-  const previewFluent    = buildFluentIcon('cloud-sun', 32);
-  const previewGlossy    = buildGlossyIcon('cloud-sun', 32);
-  const previewDark3D    = buildDark3DIcon('cloud-sun', 32);
-  const previewMinimal   = buildMinimalIcon('cloud-sun', 32);
+
 
   const panel = document.createElement('div');
   panel.id = 'settings-panel';
@@ -10871,31 +10640,6 @@ function buildSettingsPanel(){
         </div>
         <div class="theme-swatch ${__currentTheme==='storm'?'active':''}" data-theme="storm" onclick="applyTheme('storm')">
           <div style="font-size:16px;margin-bottom:3px;">&#9928;</div>Storm
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="settings-section-ttl">Weather Icon Style</div>
-      <div class="icon-swatches">
-        <div class="icon-swatch ${__iconStyle==='default'?'active':''}" data-style="default" onclick="applyIconStyle('default')">
-          <div class="icon-swatch-preview">${previewDefault}</div>
-          Animated
-        </div>
-        <div class="icon-swatch ${__iconStyle==='fluent'?'active':''}" data-style="fluent" onclick="applyIconStyle('fluent')">
-          <div class="icon-swatch-preview">${previewFluent}</div>
-          Fluent
-        </div>
-        <div class="icon-swatch ${__iconStyle==='glossy'?'active':''}" data-style="glossy" onclick="applyIconStyle('glossy')">
-          <div class="icon-swatch-preview">${previewGlossy}</div>
-          Glossy
-        </div>
-        <div class="icon-swatch ${__iconStyle==='dark3d'?'active':''}" data-style="dark3d" onclick="applyIconStyle('dark3d')">
-          <div class="icon-swatch-preview">${previewDark3D}</div>
-          3D Dark
-        </div>
-        <div class="icon-swatch ${__iconStyle==='minimal'?'active':''}" data-style="minimal" onclick="applyIconStyle('minimal')">
-          <div class="icon-swatch-preview">${previewMinimal}</div>
-          Minimal
         </div>
       </div>
     </div>

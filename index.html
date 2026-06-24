@@ -2139,9 +2139,12 @@ html,body{max-width:100%;overflow-x:hidden;}
 .wx-svg{width:100%;height:100%;display:block;overflow:visible}
 .wx-sun-rays{transform-origin:40px 40px;animation:wxSunSpin 20s linear infinite}
 @keyframes wxSunSpin{to{transform:rotate(360deg)}}
-.wx-sun circle:nth-of-type(1){animation:wxSunPulse 3s ease-in-out infinite}
-@keyframes wxSunPulse{0%,100%{opacity:.85;transform-origin:40px 40px;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-.wx-sun-rays-small{transform-origin:28px 28px;animation:wxSunSpin 20s linear infinite}
+.wx-sun-halo{transform-origin:40px 40px;animation:wxSunPulse 3.4s ease-in-out infinite}
+@keyframes wxSunPulse{0%,100%{opacity:.12;transform:scale(.9)}50%{opacity:.30;transform:scale(1.14)}}
+.wx-sun-rays-small{transform-origin:27px 26px;animation:wxSunSpin 18s linear infinite}
+.wx-flake{animation:wxFlakeSpin 7s linear infinite}
+.wx-flake-r{animation-direction:reverse;animation-duration:9s}
+@keyframes wxFlakeSpin{to{transform:rotate(360deg)}}
 .wx-cloud-drift{animation:wxCloudDrift 4s ease-in-out infinite}
 .wx-cloud-float{animation:wxCloudFloat 3.5s ease-in-out infinite}
 @keyframes wxCloudDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
@@ -2379,6 +2382,20 @@ html,body{max-width:100%;overflow-x:hidden;}
     <stop offset="0%" style="stop-color:var(--wx-drop)" stop-opacity="0.5"/>
     <stop offset="100%" style="stop-color:var(--wx-drop)"/>
   </linearGradient>
+  <!-- Soft glow for sun core / showers sun -->
+  <filter id="wxGlow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="1.7" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Bright glow for lightning bolt -->
+  <filter id="wxBoltGlow" x="-90%" y="-90%" width="280%" height="280%">
+    <feGaussianBlur stdDeviation="2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Soft drop shadow under clouds for depth -->
+  <filter id="wxShadow" x="-40%" y="-40%" width="180%" height="190%">
+    <feDropShadow dx="0" dy="2.4" stdDeviation="2.2" flood-color="#0b1220" flood-opacity="0.30"/>
+  </filter>
 </defs></svg>
 
 <!-- Reload countdown bar — fills over 30s METAR cycle, flashes on refresh -->
@@ -8784,14 +8801,32 @@ function decodeWmoCode(code, isNight, pop){
 
 /* ═══ NEW ANIMATED WEATHER ICONS (class-based CSS animation) ═══ */
 function animatedWeatherSVG(code){
-  var sun='<svg class="wx-svg wx-sun" viewBox="0 0 80 80"><g class="wx-sun-rays">'+[0,45,90,135,180,225,270,315].map(function(a){return '<line x1="40" y1="10" x2="40" y2="20" stroke="var(--wx-sun)" stroke-width="2.5" stroke-linecap="round" transform="rotate('+a+' 40 40)"/>';}).join('')+'</g><circle cx="40" cy="40" r="14" fill="var(--wx-sun)" filter="url(#sunBlur)"/><circle cx="40" cy="40" r="11.5" fill="url(#wxSunGrad)"/><ellipse cx="35.5" cy="35" rx="4.2" ry="3" fill="var(--wx-sun-hi)" opacity="0.55"/><defs><filter id="sunBlur"><feGaussianBlur stdDeviation="1.8"/></filter></defs></svg>';
-  var sunCloud='<svg class="wx-svg wx-sun-cloud" viewBox="0 0 80 80"><g class="wx-sun-rays-small">'+[0,90,180,270].map(function(a){return '<line x1="28" y1="14" x2="28" y2="20" stroke="var(--wx-sun)" stroke-width="2" stroke-linecap="round" transform="rotate('+a+' 28 28)"/>';}).join('')+'</g><circle cx="28" cy="28" r="10" fill="var(--wx-sun)" filter="url(#sc-blur)"/><circle cx="28" cy="28" r="8" fill="url(#wxSunGrad)"/><g class="wx-cloud-drift"><ellipse cx="48" cy="50" rx="20" ry="11" fill="url(#wxCloudGrad)"/><ellipse cx="38" cy="46" rx="11" ry="9" fill="var(--wx-cloud-hi)" opacity="0.92"/><ellipse cx="56" cy="47" rx="11" ry="8" fill="var(--wx-cloud-hi)" opacity="0.78"/></g><defs><filter id="sc-blur"><feGaussianBlur stdDeviation="1.5"/></filter></defs></svg>';
-  var cloud='<svg class="wx-svg wx-cloud" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="46" rx="26" ry="13" fill="url(#wxCloudGrad)"/><ellipse cx="28" cy="42" rx="14" ry="11" fill="var(--wx-cloud-hi)" opacity="0.95"/><ellipse cx="50" cy="40" rx="15" ry="12" fill="var(--wx-cloud-hi)"/><ellipse cx="46" cy="36" rx="8" ry="5.5" fill="var(--wx-cloud-hi)" opacity="0.6"/></g></svg>';
-  var rain='<svg class="wx-svg wx-rain" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="32" rx="24" ry="11" fill="url(#wxCloudDarkGrad)"/><ellipse cx="28" cy="28" rx="12" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="50" cy="26" rx="14" ry="10" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="46" cy="23" rx="7" ry="5" fill="var(--wx-cloud-dark-hi)" opacity="0.6"/></g><g class="wx-drops"><line x1="26" y1="48" x2="22" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="40" y1="48" x2="36" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="54" y1="48" x2="50" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="33" y1="55" x2="29" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-4"/><line x1="47" y1="55" x2="43" y2="69" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
-  var showers='<svg class="wx-svg wx-showers" viewBox="0 0 80 80"><circle cx="60" cy="22" r="9" fill="url(#wxSunGrad)" opacity="0.95"/><g class="wx-cloud-float"><ellipse cx="35" cy="34" rx="22" ry="11" fill="url(#wxCloudDarkGrad)"/><ellipse cx="24" cy="30" rx="11" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="44" cy="28" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="34" y1="50" x2="30" y2="62" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/><line x1="46" y1="48" x2="42" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-5"/></g></svg>';
-  var tstorm='<svg class="wx-svg wx-tstorm" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="26" ry="12" fill="url(#wxStormGrad)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-storm-hi)"/><ellipse cx="52" cy="24" rx="15" ry="11" fill="var(--wx-storm-hi)"/></g><g class="wx-bolt"><polygon points="38,42 48,42 42,54 50,54 36,72 40,58 32,58" fill="var(--wx-sun)" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></g><g class="wx-drops"><line x1="22" y1="48" x2="18" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-1"/><line x1="58" y1="48" x2="54" y2="60" stroke="var(--wx-drop)" stroke-width="2" stroke-linecap="round" class="wx-drop wx-drop-3"/></g></svg>';
-  var fog='<svg class="wx-svg wx-fog" viewBox="0 0 80 80"><g><line x1="14" y1="32" x2="66" y2="32" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-1"/><line x1="10" y1="42" x2="62" y2="42" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-2"/><line x1="16" y1="52" x2="70" y2="52" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-3"/></g></svg>';
-  var snow='<svg class="wx-svg wx-snow" viewBox="0 0 80 80"><g class="wx-cloud-float"><ellipse cx="40" cy="30" rx="24" ry="11" fill="url(#wxCloudDarkGrad)"/><ellipse cx="28" cy="26" rx="12" ry="9" fill="var(--wx-cloud-hi)"/><ellipse cx="50" cy="24" rx="14" ry="10" fill="var(--wx-cloud-hi)"/></g><circle cx="26" cy="52" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-1"/><circle cx="40" cy="50" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-2"/><circle cx="54" cy="52" r="2.5" fill="var(--wx-snow)" class="wx-drop wx-drop-3"/><circle cx="33" cy="62" r="2" fill="var(--wx-snow)" class="wx-drop wx-drop-4"/><circle cx="47" cy="64" r="2" fill="var(--wx-snow)" class="wx-drop wx-drop-5"/><line x1="40" y1="47" x2="40" y2="55" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="37" y1="49" x2="43" y2="53" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/><line x1="43" y1="49" x2="37" y2="53" stroke="var(--wx-snow)" stroke-width="1.5" stroke-linecap="round" class="wx-drop wx-drop-2"/></svg>';
+  // Sunburst rays around (cx,cy): alternating long/short for a fuller sun.
+  function _rays(cx, cy, inner, lng, shrt, w){
+    return [0,30,60,90,120,150,180,210,240,270,300,330].map(function(a){
+      var L = ((a/30)%2===0) ? lng : shrt;
+      return '<line x1="'+cx+'" y1="'+(cy-inner-L).toFixed(1)+'" x2="'+cx+'" y2="'+(cy-inner).toFixed(1)+'" stroke="var(--wx-sun)" stroke-width="'+w+'" stroke-linecap="round" transform="rotate('+a+' '+cx+' '+cy+')"/>';
+    }).join('');
+  }
+  // Falling raindrop streak with depth gradient.
+  function _drop(x, y, len, cls){
+    return '<line x1="'+x+'" y1="'+y+'" x2="'+(x-3).toFixed(1)+'" y2="'+(y+len).toFixed(1)+'" stroke="url(#wxDropGrad)" stroke-width="2.4" stroke-linecap="round" class="'+cls+'"/>';
+  }
+  // Six-spoke snowflake centred at (x,y); spins inside its falling group.
+  function _flake(x, y, r, fall, spinCls){
+    var spokes = [0,60,120].map(function(a){
+      return '<line x1="'+x+'" y1="'+(y-r).toFixed(1)+'" x2="'+x+'" y2="'+(y+r).toFixed(1)+'" stroke="var(--wx-snow)" stroke-width="1.4" stroke-linecap="round" transform="rotate('+a+' '+x+' '+y+')"/>';
+    }).join('');
+    return '<g class="'+fall+'"><g class="wx-flake'+(spinCls?' '+spinCls:'')+'" style="transform-origin:'+x+'px '+y+'px">'+spokes+'</g></g>';
+  }
+  var sun='<svg class="wx-svg wx-sun" viewBox="0 0 80 80"><circle class="wx-sun-halo" cx="40" cy="40" r="19" fill="var(--wx-sun)" opacity="0.18"/><g class="wx-sun-rays">'+_rays(40,40,20,9,5.5,2.6)+'</g><circle cx="40" cy="40" r="14.5" fill="var(--wx-sun)" filter="url(#wxGlow)"/><circle cx="40" cy="40" r="12" fill="url(#wxSunGrad)"/><ellipse cx="35" cy="34.5" rx="4.6" ry="3.2" fill="var(--wx-sun-hi)" opacity="0.6"/></svg>';
+  var sunCloud='<svg class="wx-svg wx-sun-cloud" viewBox="0 0 80 80"><g class="wx-sun-rays-small">'+_rays(27,26,11,6.5,4,1.9)+'</g><circle cx="27" cy="26" r="9.5" fill="var(--wx-sun)" filter="url(#wxGlow)"/><circle cx="27" cy="26" r="7.5" fill="url(#wxSunGrad)"/><ellipse cx="24.5" cy="23" rx="2.8" ry="2" fill="var(--wx-sun-hi)" opacity="0.6"/><g class="wx-cloud-drift" filter="url(#wxShadow)"><ellipse cx="48" cy="52" rx="21" ry="12" fill="url(#wxCloudGrad)"/><ellipse cx="37" cy="47" rx="12" ry="10" fill="var(--wx-cloud-hi)"/><ellipse cx="55" cy="48" rx="13" ry="10" fill="var(--wx-cloud-hi)" opacity="0.9"/><ellipse cx="50" cy="43" rx="7" ry="5" fill="var(--wx-cloud-hi)" opacity="0.55"/></g></svg>';
+  var cloud='<svg class="wx-svg wx-cloud" viewBox="0 0 80 80"><g class="wx-cloud-float" filter="url(#wxShadow)"><ellipse cx="40" cy="48" rx="27" ry="13" fill="url(#wxCloudGrad)"/><ellipse cx="27" cy="43" rx="15" ry="12" fill="var(--wx-cloud-hi)" opacity="0.96"/><ellipse cx="50" cy="41" rx="16" ry="13" fill="var(--wx-cloud-hi)"/><ellipse cx="45" cy="36" rx="9" ry="6" fill="var(--wx-cloud-hi)" opacity="0.55"/></g></svg>';
+  var rain='<svg class="wx-svg wx-rain" viewBox="0 0 80 80"><g class="wx-cloud-float" filter="url(#wxShadow)"><ellipse cx="40" cy="34" rx="25" ry="12" fill="url(#wxCloudDarkGrad)"/><ellipse cx="28" cy="29" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="51" cy="27" rx="14" ry="11" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="46" cy="23" rx="7" ry="5" fill="var(--wx-cloud-dark-hi)" opacity="0.6"/></g><g class="wx-drops">'+_drop(25,46,14,'wx-drop wx-drop-1')+_drop(34,48,14,'wx-drop wx-drop-2')+_drop(43,46,14,'wx-drop wx-drop-3')+_drop(52,48,14,'wx-drop wx-drop-4')+_drop(31,55,13,'wx-drop wx-drop-5')+_drop(48,55,13,'wx-drop wx-drop-2')+'</g></svg>';
+  var showers='<svg class="wx-svg wx-showers" viewBox="0 0 80 80"><circle cx="60" cy="22" r="8" fill="var(--wx-sun)" filter="url(#wxGlow)"/><circle cx="60" cy="22" r="6.5" fill="url(#wxSunGrad)"/><g class="wx-cloud-float" filter="url(#wxShadow)"><ellipse cx="35" cy="35" rx="23" ry="11" fill="url(#wxCloudDarkGrad)"/><ellipse cx="24" cy="30" rx="11" ry="9" fill="var(--wx-cloud-dark-hi)"/><ellipse cx="44" cy="28" rx="13" ry="10" fill="var(--wx-cloud-dark-hi)"/></g><g class="wx-drops">'+_drop(24,48,13,'wx-drop wx-drop-1')+_drop(35,50,13,'wx-drop wx-drop-3')+_drop(46,48,13,'wx-drop wx-drop-5')+'</g></svg>';
+  var tstorm='<svg class="wx-svg wx-tstorm" viewBox="0 0 80 80"><g class="wx-cloud-float" filter="url(#wxShadow)"><ellipse cx="40" cy="31" rx="26" ry="12" fill="url(#wxStormGrad)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-storm-hi)"/><ellipse cx="52" cy="25" rx="15" ry="11" fill="var(--wx-storm-hi)"/></g><g class="wx-bolt"><polygon points="38,40 49,40 42,53 50,53 35,73 39,57 31,57" fill="var(--wx-sun)" stroke="#fff" stroke-width="0.5" stroke-linejoin="round" filter="url(#wxBoltGlow)"/></g><g class="wx-drops">'+_drop(23,49,12,'wx-drop wx-drop-1')+_drop(57,49,12,'wx-drop wx-drop-3')+'</g></svg>';
+  var fog='<svg class="wx-svg wx-fog" viewBox="0 0 80 80"><g class="wx-cloud-float" opacity="0.85"><ellipse cx="40" cy="26" rx="23" ry="10" fill="url(#wxCloudGrad)"/><ellipse cx="29" cy="22" rx="11" ry="8" fill="var(--wx-cloud-hi)" opacity="0.9"/><ellipse cx="50" cy="21" rx="12" ry="8" fill="var(--wx-cloud-hi)" opacity="0.8"/></g><g><line x1="16" y1="44" x2="64" y2="44" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-1"/><line x1="12" y1="54" x2="60" y2="54" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-2"/><line x1="18" y1="64" x2="68" y2="64" stroke="var(--wx-cloud)" stroke-width="4" stroke-linecap="round" class="wx-fog-line wx-fog-3"/></g></svg>';
+  var snow='<svg class="wx-svg wx-snow" viewBox="0 0 80 80"><g class="wx-cloud-float" filter="url(#wxShadow)"><ellipse cx="40" cy="31" rx="25" ry="12" fill="url(#wxCloudDarkGrad)"/><ellipse cx="28" cy="26" rx="13" ry="10" fill="var(--wx-cloud-hi)"/><ellipse cx="51" cy="25" rx="14" ry="11" fill="var(--wx-cloud-hi)"/></g>'+_flake(26,52,4.2,'wx-drop wx-drop-1','')+_flake(40,50,4.8,'wx-drop wx-drop-2','wx-flake-r')+_flake(54,53,3.8,'wx-drop wx-drop-3','')+_flake(33,63,3.5,'wx-drop wx-drop-4','wx-flake-r')+_flake(47,64,3.5,'wx-drop wx-drop-5','')+'</svg>';
   if(code===0||code===1) return sun;
   if(code===2)           return sunCloud;
   if(code===3)           return cloud;

@@ -2594,6 +2594,12 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
     </div>
     <div class="mon-view" id="monViewCurrent">
+    <!-- ═══ FORECAST HEADER ═══ -->
+    <div class="shdr" style="margin-bottom:6px;">
+      <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
+      <span id="fcStatusHome" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &bull; GFS + ECMWF + ICON</span>
+    </div>
+    <div id="fcGridHome" class="fcgrid" style="margin-bottom:18px;"></div>
     <div class="mon-grid">
       <div class="mon-tile mon-vis">
         <div class="mon-row">
@@ -2796,13 +2802,6 @@ html,body{max-width:100%;overflow-x:hidden;}
       </div>
 
     </div>
-
-    <!-- ═══ FORECAST ON MAIN TAB ═══ -->
-    <div class="shdr" style="margin-top:18px;">
-      <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
-      <span id="fcStatusHome" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &bull; GFS + ECMWF + ICON</span>
-    </div>
-    <div id="fcGridHome" class="fcgrid"></div>
 
     </div><!-- /#monViewCurrent -->
     <div class="sbar" style="margin-top:7px;">

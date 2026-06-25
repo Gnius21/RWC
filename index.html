@@ -9219,46 +9219,67 @@ function renderForecast(days, allModels){
 function openForecastDetail(idx){
   if(!__lastForecastData || !__lastForecastData.days[idx]) return;
   const day = __lastForecastData.days[idx];
-  const models = __lastForecastData.models || [];
   const hourly = day._hourly || [];
+  function tCol(t){ return t>=33?'#ff4f4f':t>=30?'#ff8a3d':t>=27?'#f59e0b':t>=22?'#2ec97a':'#4db8ff'; }
+  function wCol(w){ return w>=34?'#ff4f4f':w>=22?'#ff8a3d':w>=11?'#f59e0b':'#6bdbf7'; }
+  function rCol(p){ return p>=60?'#4db8ff':p>=30?'#7dd3fc':p>=10?'rgba(77,184,255,0.65)':'rgba(140,180,220,0.4)'; }
+  function uvCol(u){ return u>=8?'#ff4f4f':u>=6?'#ff8a3d':u>=3?'#f59e0b':'#2ec97a'; }
+  function rhCol(h){ return h>=80?'#4db8ff':h>=65?'#7dd3fc':'#2ec97a'; }
+  function cCol(c){ return c>=80?'rgba(180,210,255,0.9)':c>=40?'rgba(180,210,255,0.6)':'rgba(180,210,255,0.35)'; }
   const hourRows = hourly.filter((_,i)=>i%2===0).map(hr => {
     const wmo = decodeWmoCode(hr.code, hr.hour<6||hr.hour>=19, hr.pop);
-    return `<tr><td>${String(hr.hour).padStart(2,'0')}:00</td><td>${hr.temp!=null?Math.round(hr.temp)+'\u00b0':'\u2014'}</td><td>${hr.pop!=null?Math.round(hr.pop)+'%':'\u2014'}</td><td>${hr.precip>0.05?hr.precip.toFixed(1)+'mm':'\u2014'}</td><td style="font-size:13px;">${wmo.desc}</td></tr>`;
-  }).join('');
-  const modelRows = models.map(m =>
-    `<tr><td><span style="color:${m.color};font-weight:700;">${m.name}</span></td><td style="font-size:13px;color:var(--muted);">${m.org}</td></tr>`
-  ).join('');
+    const isNight = hr.hour<6||hr.hour>=20;
+    const tC = hr.temp!=null ? tCol(Math.round(hr.temp)) : 'inherit';
+    const pC = hr.pop!=null ? rCol(hr.pop) : 'inherit';
+    const sevC = wmo.sev>=3?'#ff4f4f':wmo.sev>=2?'#f59e0b':'#cce4ff';
+    const timeC = isNight ? '#a0b4cc' : '#e2effb';
+    const icon = wxIconStyled(wmo.icon, 30);
+    return `<tr>
+      <td style="color:${timeC};font-weight:700;">${String(hr.hour).padStart(2,'0')}:00</td>
+      <td style="text-align:center;vertical-align:middle;padding:4px 8px;">${icon}</td>
+      <td style="color:${tC};font-weight:800;">${hr.temp!=null?Math.round(hr.temp)+'\u00b0':'\u2014'}</td>
+      <td style="color:${pC};font-weight:700;">${hr.pop!=null?Math.round(hr.pop)+'%':'\u2014'}</td>
+      <td style="color:#7dd3fc;">${hr.precip>0.05?hr.precip.toFixed(1)+' mm':'\u2014'}</td>
+      <td style="color:${sevC};">${wmo.desc}</td>
+    </tr>`; }).join('');
+  const d = day;
+  const wmoDay = decodeWmoCode(d.code,false,d.pop);
+  const dIcon = wxIconStyled(wmoDay.icon, 48);
+  const dustCat = d.dustMax!=null ? fcDustCat(d.dustMax) : null;
   const overlay = document.createElement('div');
   overlay.className = 'fc-detail-overlay';
   overlay.innerHTML = `
-    <div class="fc-detail-card" role="dialog" aria-modal="true" aria-label="Forecast detail for ${fcDayName(day.date,idx)}">
+    <div class="fc-detail-card" role="dialog" aria-modal="true" aria-label="Forecast detail for ${fcDayName(d.date,idx)}">
       <button class="fc-detail-close" data-detail-close aria-label="Close detail">\u2715</button>
-      <div class="fc-detail-hd">
-        <div class="fc-day-name-big" style="font-size:34px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
-        <div style="font-family:var(--cond);color:var(--muted);font-size:19px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
+      <div class="fc-detail-hd" style="display:flex;align-items:center;gap:14px;">
+        <div style="flex-shrink:0;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">${dIcon}</div>
+        <div>
+          <div class="fc-day-name-big" style="font-size:34px;">${fcDayName(d.date, idx)} \u00b7 ${fcDateLabel(d.date)}</div>
+          <div style="font-family:var(--cond);color:var(--muted);font-size:19px;margin-top:3px;">${wmoDay.desc} \u00b7 <span style="color:${tCol(d.tempLow||22)};">${d.tempLow!=null?Math.round(d.tempLow):'\u2014'}\u00b0</span>\u2013<span style="color:${tCol(d.tempHigh||28)};">${d.tempHigh!=null?Math.round(d.tempHigh):'\u2014'}\u00b0C</span> \u00b7 ${Math.round(d.confidence||0)}% confidence${dustCat?' \u00b7 <span style="color:'+dustCat.col+';">'+dustCat.label+' dust '+Math.round(d.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
+        </div>
       </div>
       <div class="fc-detail-grid">
         <div>
           <h4>Hourly breakdown</h4>
           <table class="fc-detail-hourly">
-            <thead><tr><th>Time</th><th>Temp</th><th>Rain%</th><th>mm</th><th>Conditions</th></tr></thead>
-            <tbody>${hourRows||'<tr><td colspan="5" style="color:var(--muted);">No hourly data</td></tr>'}</tbody>
+            <thead><tr><th>Time</th><th></th><th>Temp</th><th>Rain%</th><th>mm</th><th>Conditions</th></tr></thead>
+            <tbody>${hourRows||'<tr><td colspan="6" style="color:var(--muted);">No hourly data</td></tr>'}</tbody>
           </table>
         </div>
         <div>
           <h4>Day statistics</h4>
           <div class="fc-detail-stats">
-            <div><span>Avg temp</span><b>${day.temp!=null?day.temp.toFixed(1)+'\u00b0C':'\u2014'}</b></div>
-            <div><span>Feels like</span><b>${day.feelsLike!=null?day.feelsLike.toFixed(1)+'\u00b0C':'\u2014'}</b></div>
-            <div><span>Humidity</span><b>${day.rh!=null?Math.round(day.rh)+'%':'\u2014'}</b></div>
-            <div><span>Wind avg</span><b>${day.wind!=null?Math.round(day.wind)+' kt':'\u2014'}</b></div>
-            <div><span>Wind gusts</span><b>${day.windGust!=null?Math.round(day.windGust)+' kt':'\u2014'}</b></div>
-            <div><span>Cloud cover</span><b>${day.cloud!=null?Math.round(day.cloud)+'%':'\u2014'}</b></div>
-            <div><span>Total rain</span><b>${(day.precipTotal||0).toFixed(1)} mm</b></div>
-            <div><span>Rain chance</span><b>${day.pop!=null?Math.round(day.pop)+'%':'\u2014'}</b></div>
-            <div><span>UV index max</span><b>${day.uvMax!=null?day.uvMax.toFixed(0):'\u2014'}</b></div>
-            <div><span>Sunrise</span><b>${fmtClock(day.sunrise)}</b></div>
-            <div><span>Sunset</span><b>${fmtClock(day.sunset)}</b></div>
+            <div><span>Avg temp</span><b style="color:${d.temp!=null?tCol(Math.round(d.temp)):'inherit'};">${d.temp!=null?d.temp.toFixed(1)+'\u00b0C':'\u2014'}</b></div>
+            <div><span>Feels like</span><b style="color:${d.feelsLike!=null?tCol(Math.round(d.feelsLike)):'inherit'};">${d.feelsLike!=null?d.feelsLike.toFixed(1)+'\u00b0C':'\u2014'}</b></div>
+            <div><span>Humidity</span><b style="color:${d.rh!=null?rhCol(d.rh):'inherit'};">${d.rh!=null?Math.round(d.rh)+'%':'\u2014'}</b></div>
+            <div><span>Wind avg</span><b style="color:${d.wind!=null?wCol(d.wind):'inherit'};">${d.wind!=null?Math.round(d.wind)+' kt':'\u2014'}</b></div>
+            <div><span>Wind gusts</span><b style="color:${d.windGust!=null?wCol(d.windGust):'inherit'};">${d.windGust!=null?Math.round(d.windGust)+' kt':'\u2014'}</b></div>
+            <div><span>Cloud cover</span><b style="color:${d.cloud!=null?cCol(d.cloud):'inherit'};">${d.cloud!=null?Math.round(d.cloud)+'%':'\u2014'}</b></div>
+            <div><span>Total rain</span><b style="color:#7dd3fc;">${(d.precipTotal||0).toFixed(1)} mm</b></div>
+            <div><span>Rain chance</span><b style="color:${d.pop!=null?rCol(d.pop):'inherit'};">${d.pop!=null?Math.round(d.pop)+'%':'\u2014'}</b></div>
+            <div><span>UV index max</span><b style="color:${d.uvMax!=null?uvCol(d.uvMax):'inherit'};">${d.uvMax!=null?d.uvMax.toFixed(0):'\u2014'}</b></div>
+            <div><span>Sunrise</span><b style="color:#fbbf24;">\u2600 ${fmtClock(d.sunrise)}</b></div>
+            <div><span>Sunset</span><b style="color:#f97316;">\u{1F307} ${fmtClock(d.sunset)}</b></div>
           </div>
         </div>
       </div>

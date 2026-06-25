@@ -771,7 +771,7 @@ tr:last-child td{border-bottom:none;}
 .fc-day-name-big{font-family:var(--cond);font-weight:900;font-size:22px;background:linear-gradient(135deg,var(--acc),#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1.5px;text-transform:uppercase;line-height:1;}
 .fc-day-date-big{font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:.8px;}
 .fc-day-summary{display:flex;align-items:center;gap:14px;flex:1;justify-content:center;}
-.fc-summary-icon{width:78px;height:78px;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.45));transition:transform .35s cubic-bezier(0.22,0.61,0.36,1);}
+.fc-summary-icon{width:94px;height:94px;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.45));transition:transform .35s cubic-bezier(0.22,0.61,0.36,1);}
 .fc-day-card:hover .fc-summary-icon{transform:scale(1.08);}
 .fc-summary-icon svg{width:100%;height:100%;}
 .fc-summary-text{display:flex;flex-direction:column;gap:2px;text-align:left;}
@@ -796,7 +796,7 @@ tr:last-child td{border-bottom:none;}
 .fc-block.block-crit{border-color:rgba(255,79,79,0.4);background:rgba(255,79,79,0.06);}
 .fc-block-hd{display:flex;align-items:center;gap:5px;font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;}
 .fc-block-icon{font-size:13px;line-height:1;}
-.fc-block-wx{width:64px;height:64px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));transition:transform .3s ease;}
+.fc-block-wx{width:74px;height:74px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));transition:transform .3s ease;}
 .fc-block:hover .fc-block-wx{transform:scale(1.1) rotate(-3deg);}
 .fc-block-wx svg{width:100%;height:100%;}
 .fc-block-temp{font-family:var(--cond);font-weight:900;font-size:28px;line-height:1;letter-spacing:-0.3px;}
@@ -811,19 +811,17 @@ tr:last-child td{border-bottom:none;}
 @media(max-width:900px){
   .fc-day-head{grid-template-columns:1fr;grid-template-areas:'titles' 'summary' 'meta';}
   .fc-blocks{grid-template-columns:repeat(2,1fr);}
-  .fc-day-name-big{font-size:20px;}
-  .fc-summary-icon{width:54px;height:54px;}
+  .fc-day-name-big{font-size:24px;}
+  .fc-summary-icon{width:70px;height:70px;}
 }
 @media(max-width:520px){
   .fc-blocks{grid-template-columns:1fr 1fr;gap:5px;}
   .fc-day-card{padding:10px;}
   .fc-summary{gap:8px;padding:10px;}
-  .fc-conf-val{font-size:20px;}
   .fc-block{padding:7px 6px;}
-  .fc-block-wx{width:52px;height:52px;}
-  .fc-block-temp{font-size:22px;}
+  .fc-block-wx{width:64px;height:64px;}
 }
-.fc-sun-times{display:flex;gap:8px;margin-top:7px;font-family:var(--mono);font-size:14px;color:#e2effb;letter-spacing:.4px;font-weight:600;}
+.fc-sun-times{display:flex;gap:8px;margin-top:7px;font-family:var(--mono);font-size:16px;color:#e2effb;letter-spacing:.4px;font-weight:600;}
 .fc-sun-times span{padding:2px 8px;border-radius:6px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);display:inline-flex;align-items:center;gap:3px;}
 .fc-best-badge{display:inline-block;margin-left:8px;padding:3px 11px;border-radius:11px;background:linear-gradient(135deg,rgba(46,201,122,0.45),rgba(46,201,122,0.15));border:1px solid var(--grn);color:#fff;font-family:var(--cond);font-size:13px;font-weight:900;letter-spacing:1.3px;text-shadow:0 0 8px rgba(46,201,122,0.8),0 1px 0 rgba(0,0,0,0.3);animation:fcBestPop 0.7s cubic-bezier(0.34,1.56,0.64,1) backwards 0.6s, bestPulse 2.2s ease-in-out infinite 1.3s;vertical-align:middle;box-shadow:0 2px 8px rgba(46,201,122,0.2);position:relative;}
 .fc-best-badge::before{content:"";position:absolute;top:-3px;right:6px;width:4px;height:4px;background:#fff;border-radius:50%;box-shadow:0 0 6px #fff;animation:fcSparkle 2s ease-in-out infinite;}
@@ -846,12 +844,12 @@ tr:last-child td{border-bottom:none;}
 .fc-detail-hd{border-bottom:1px solid var(--bdr);padding-bottom:14px;margin-bottom:16px;}
 .fc-detail-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;}
 @media(max-width:700px){.fc-detail-grid{grid-template-columns:1fr;gap:16px;}}
-.fc-detail-grid h4{font-family:var(--cond);font-size:14px;color:var(--acc);letter-spacing:1.3px;text-transform:uppercase;margin:0 0 9px 0;font-weight:800;}
-.fc-detail-hourly,.fc-detail-models{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:15px;}
-.fc-detail-hourly th,.fc-detail-models th{text-align:left;padding:6px 9px;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:700;}
-.fc-detail-hourly td,.fc-detail-models td{padding:6px 9px;border-bottom:1px solid rgba(255,255,255,0.02);color:#cce4ff;}
+.fc-detail-grid h4{font-family:var(--cond);font-size:17px;color:var(--acc);letter-spacing:1.3px;text-transform:uppercase;margin:0 0 9px 0;font-weight:800;}
+.fc-detail-hourly,.fc-detail-models{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:17px;}
+.fc-detail-hourly th,.fc-detail-models th{text-align:left;padding:7px 10px;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:700;}
+.fc-detail-hourly td,.fc-detail-models td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.02);color:#cce4ff;}
 .fc-detail-hourly tr:hover td,.fc-detail-models tr:hover td{background:rgba(77,184,255,0.04);}
-.fc-detail-stats{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-size:15px;}
+.fc-detail-stats{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-size:17px;}
 .fc-detail-stats > div{display:flex;justify-content:space-between;padding:6px 9px;border-radius:6px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);}
 .fc-detail-stats span{color:var(--muted);letter-spacing:.5px;}
 .fc-detail-stats b{color:#fff;font-weight:800;}
@@ -876,22 +874,22 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .fc-callout-icon{font-size:18px;line-height:1;display:inline-block;}
 .fc-wind-arr{width:14px;height:14px;display:inline-block;color:var(--acc);transition:transform .8s cubic-bezier(0.22,0.61,0.36,1);filter:drop-shadow(0 0 2px currentColor);}
 .fc-block-icon-sun{display:inline-block;animation:sunSpin 9s linear infinite;}
-.fc-day-name-big{font-size:28px;}
-.fc-day-date-big{font-size:15px;}
-.fc-summary-desc{font-size:18px;}
-.fc-summary-tempo{font-size:38px;}
-.fc-summary-feels{font-size:15px;}
-.fc-meta-row{font-size:15px;}
-.fc-meta-l{font-size:15px;}
-.fc-meta-v{font-size:15px;}
-.fc-block-hd{font-size:15px;}
-.fc-block-temp{font-size:32px;}
-.fc-block-feels{font-size:15px;}
-.fc-block-stats{font-size:15px;}
-.fc-summary-t{font-size:15px;}
-.fc-conf-val{font-size:32px;}
-.fc-conf-lbl{font-size:15px;}
-.fc-model-badge{font-size:14px;padding:3px 9px;}
+.fc-day-name-big{font-size:33px;}
+.fc-day-date-big{font-size:17px;}
+.fc-summary-desc{font-size:22px;}
+.fc-summary-tempo{font-size:44px;}
+.fc-summary-feels{font-size:17px;}
+.fc-meta-row{font-size:17px;}
+.fc-meta-l{font-size:17px;}
+.fc-meta-v{font-size:17px;}
+.fc-block-hd{font-size:16px;}
+.fc-block-temp{font-size:38px;}
+.fc-block-feels{font-size:16px;}
+.fc-block-stats{font-size:16px;}
+.fc-summary-t{font-size:16px;}
+.fc-conf-val{font-size:38px;}
+.fc-conf-lbl{font-size:16px;}
+.fc-model-badge{font-size:15px;padding:4px 10px;}
 .chip-v{font-size:16px;}
 .chip-l{font-size:13px;}
 .chip-s{font-size:14px;}
@@ -8755,6 +8753,20 @@ function buildDailyConsensus(forecasts, dailyMeta){
   function modeOf(arr){ if(!arr || !arr.length) return null; const f = {}; arr.forEach(c => f[c] = (f[c]||0)+1); return parseInt(Object.keys(f).reduce((a,b)=>f[a]>f[b]?a:b)); }
   function spread(arr){ if(!arr || arr.length<2) return 0; const vals=arr.map(x=>typeof x==='number'?x:x.val).filter(x=>x!=null); if(vals.length<2) return 0; return Math.max(...vals) - Math.min(...vals); }
   function circAvg(arr){ if(!arr || !arr.length) return null; let sx=0, sy=0; arr.forEach(v => { const val = typeof v==='number'?v:v.val; if(val==null) return; sx += Math.sin(val * Math.PI/180); sy += Math.cos(val * Math.PI/180); }); let dir = Math.atan2(sx, sy) * 180/Math.PI; if(dir < 0) dir += 360; return dir; }
+  // When multiple models are requested, Open-Meteo suffixes daily fields with the
+  // model key (e.g. sunrise_gfs_seamless). Resolve the value for `day` by matching
+  // the exact base name first, then the first suffixed variant.
+  function metaVal(base, day){
+    if(!dailyMeta) return null;
+    let timeArr = dailyMeta.time;
+    if(!timeArr){ const tk = Object.keys(dailyMeta).find(key => key.indexOf('time') === 0); timeArr = tk ? dailyMeta[tk] : null; }
+    if(!timeArr) return null;
+    const i = timeArr.indexOf(day);
+    if(i < 0) return null;
+    let arr = dailyMeta[base];
+    if(!arr){ const k = Object.keys(dailyMeta).find(key => key.indexOf('time') !== 0 && key.indexOf(base) === 0); arr = k ? dailyMeta[k] : null; }
+    return (arr && arr[i] != null) ? arr[i] : null;
+  }
   function collectAtHour(hourIdx, refTime){
     const out = {}; const codes = [];
     for(const fc of forecasts){
@@ -8826,9 +8838,9 @@ function buildDailyConsensus(forecasts, dailyMeta){
       cloud: avg(aC), code: modeOf(aCode), models: forecasts.map(f => f.model),
       modelCount: forecasts.length, confidence: Math.max(0, Math.min(100, 100 - tempSpread * 10)),
       blocks: blocks,
-      sunrise: (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunrise ? dailyMeta.sunrise[i] : null; })(),
-      sunset:  (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunset ? dailyMeta.sunset[i] : null; })(),
-      uvMax:   (function(){ const fromMeta = (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.uv_index_max ? dailyMeta.uv_index_max[i] : null; })(); return fromMeta != null ? fromMeta : maxOf(aUV); })(),
+      sunrise: metaVal('sunrise', day),
+      sunset:  metaVal('sunset', day),
+      uvMax:   (function(){ const fromMeta = metaVal('uv_index_max', day); return fromMeta != null ? fromMeta : maxOf(aUV); })(),
       _hourly: hourlyTimeline(forecasts, info)
     });
   }
@@ -9149,7 +9161,7 @@ function renderForecast(days, allModels){
       return `
         <div class="fc-block ${blockCls}">
           <div class="fc-block-hd"><span>${blk.icon}</span> ${blk.label}</div>
-          <div class="fc-block-wx">${wxIconStyled(bWmo.icon, 64)}</div>
+          <div class="fc-block-wx">${wxIconStyled(bWmo.icon, 74)}</div>
           <div class="fc-block-temp" style="color:${bTemp>=33?'#ff8a3d':bTemp>=28?'#f59e0b':bTemp>=22?'#2ec97a':'#4db8ff'};">${bTemp}\u00b0</div>
           ${bFeels!=null ? `<div class="fc-block-feels">feels ${bFeels}\u00b0</div>` : '<div class="fc-block-feels">&nbsp;</div>'}
           <div class="fc-block-stats">
@@ -9174,7 +9186,7 @@ function renderForecast(days, allModels){
             </div>
           </div>
           <div class="fc-day-summary">
-            <div class="fc-summary-icon">${wxIconStyled(wmo.icon, 78)}</div>
+            <div class="fc-summary-icon">${wxIconStyled(wmo.icon, 94)}</div>
             <div class="fc-summary-text">
               <div class="fc-summary-desc">${wmo.desc}</div>
               <div class="fc-summary-feels">${feels!=null?'Feels like '+feels+'\u00b0 \u00b7 ':''}${day.rh!=null?Math.round(day.rh)+'% RH':''}</div>
@@ -9222,8 +9234,8 @@ function openForecastDetail(idx){
     <div class="fc-detail-card" role="dialog" aria-modal="true" aria-label="Forecast detail for ${fcDayName(day.date,idx)}">
       <button class="fc-detail-close" data-detail-close aria-label="Close detail">\u2715</button>
       <div class="fc-detail-hd">
-        <div class="fc-day-name-big" style="font-size:24px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
-        <div style="font-family:var(--cond);color:var(--muted);font-size:13px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
+        <div class="fc-day-name-big" style="font-size:30px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
+        <div style="font-family:var(--cond);color:var(--muted);font-size:16px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
       </div>
       <div class="fc-detail-grid">
         <div>

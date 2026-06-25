@@ -796,10 +796,10 @@ tr:last-child td{border-bottom:none;}
 .fc-block.block-crit{border-color:rgba(255,79,79,0.4);background:rgba(255,79,79,0.06);}
 .fc-block-hd{display:flex;align-items:center;gap:5px;font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;}
 .fc-block-icon{font-size:13px;line-height:1;}
-.fc-block-wx{width:48px;height:48px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));transition:transform .3s ease;}
+.fc-block-wx{width:64px;height:64px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.4));transition:transform .3s ease;}
 .fc-block:hover .fc-block-wx{transform:scale(1.1) rotate(-3deg);}
 .fc-block-wx svg{width:100%;height:100%;}
-.fc-block-temp{font-family:var(--cond);font-weight:900;font-size:22px;line-height:1;letter-spacing:-0.3px;}
+.fc-block-temp{font-family:var(--cond);font-weight:900;font-size:28px;line-height:1;letter-spacing:-0.3px;}
 .fc-block-feels{font-family:var(--cond);font-size:13px;color:var(--muted);letter-spacing:.3px;}
 .fc-block-stats{display:flex;flex-direction:column;gap:1px;margin-top:3px;font-family:var(--mono);font-size:13px;color:#cce4ff;width:100%;}
 .fc-block-stats span{display:flex;justify-content:flex-start;gap:4px;align-items:baseline;}
@@ -820,7 +820,8 @@ tr:last-child td{border-bottom:none;}
   .fc-summary{gap:8px;padding:10px;}
   .fc-conf-val{font-size:20px;}
   .fc-block{padding:7px 6px;}
-  .fc-block-temp{font-size:18px;}
+  .fc-block-wx{width:52px;height:52px;}
+  .fc-block-temp{font-size:22px;}
 }
 .fc-sun-times{display:flex;gap:8px;margin-top:7px;font-family:var(--mono);font-size:14px;color:#e2effb;letter-spacing:.4px;font-weight:600;}
 .fc-sun-times span{padding:2px 8px;border-radius:6px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);display:inline-flex;align-items:center;gap:3px;}
@@ -884,7 +885,7 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .fc-meta-l{font-size:15px;}
 .fc-meta-v{font-size:15px;}
 .fc-block-hd{font-size:15px;}
-.fc-block-temp{font-size:27px;}
+.fc-block-temp{font-size:32px;}
 .fc-block-feels{font-size:15px;}
 .fc-block-stats{font-size:15px;}
 .fc-summary-t{font-size:15px;}
@@ -8759,7 +8760,7 @@ function buildDailyConsensus(forecasts, dailyMeta){
     for(const fc of forecasts){
       const h = fc.data.hourly;
       if(!h || h.time[hourIdx] !== refTime) continue;
-      for(const p of ['temperature_2m','relative_humidity_2m','precipitation','wind_speed_10m','wind_direction_10m','wind_gusts_10m','cloud_cover','apparent_temperature','precipitation_probability']){
+      for(const p of ['temperature_2m','relative_humidity_2m','precipitation','wind_speed_10m','wind_direction_10m','wind_gusts_10m','cloud_cover','apparent_temperature','precipitation_probability','uv_index']){
         if(h[p] && h[p][hourIdx] != null){ if(!out[p]) out[p] = []; out[p].push(h[p][hourIdx]); }
       }
       if(h.weather_code && h.weather_code[hourIdx] != null) codes.push(h.weather_code[hourIdx]);
@@ -8799,7 +8800,7 @@ function buildDailyConsensus(forecasts, dailyMeta){
         code: modeOf(bCode), hourCount: matchingHours.length
       };
     }).filter(b => b);
-    const aT=[],aP=[],aCode=[],aW=[],aG=[],aC=[],aRH=[],aPop=[],aF=[],aD=[];
+    const aT=[],aP=[],aCode=[],aW=[],aG=[],aC=[],aRH=[],aPop=[],aF=[],aD=[],aUV=[];
     const midday = [];
     for(const hr of info.hours){
       const c = collectAtHour(hr.i, hr.t);
@@ -8812,6 +8813,7 @@ function buildDailyConsensus(forecasts, dailyMeta){
       if(c.data.precipitation_probability) aPop.push(...c.data.precipitation_probability);
       if(c.data.apparent_temperature) aF.push(...c.data.apparent_temperature);
       if(c.data.wind_direction_10m) aD.push(...c.data.wind_direction_10m);
+      if(c.data.uv_index) aUV.push(...c.data.uv_index);
       if(c.codes.length) aCode.push(...c.codes);
       if(hr.hour === 12 && c.data.temperature_2m) midday.push(...c.data.temperature_2m);
     }
@@ -8826,7 +8828,7 @@ function buildDailyConsensus(forecasts, dailyMeta){
       blocks: blocks,
       sunrise: (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunrise ? dailyMeta.sunrise[i] : null; })(),
       sunset:  (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.sunset ? dailyMeta.sunset[i] : null; })(),
-      uvMax:   (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.uv_index_max ? dailyMeta.uv_index_max[i] : null; })(),
+      uvMax:   (function(){ const fromMeta = (function(){ if(!dailyMeta || !dailyMeta.time) return null; const i = dailyMeta.time.indexOf(day); return i>=0 && dailyMeta.uv_index_max ? dailyMeta.uv_index_max[i] : null; })(); return fromMeta != null ? fromMeta : maxOf(aUV); })(),
       _hourly: hourlyTimeline(forecasts, info)
     });
   }
@@ -9147,9 +9149,9 @@ function renderForecast(days, allModels){
       return `
         <div class="fc-block ${blockCls}">
           <div class="fc-block-hd"><span>${blk.icon}</span> ${blk.label}</div>
-          <div class="fc-block-wx">${wxIconStyled(bWmo.icon, 48)}</div>
+          <div class="fc-block-wx">${wxIconStyled(bWmo.icon, 64)}</div>
           <div class="fc-block-temp" style="color:${bTemp>=33?'#ff8a3d':bTemp>=28?'#f59e0b':bTemp>=22?'#2ec97a':'#4db8ff'};">${bTemp}\u00b0</div>
-          ${bFeels!=null && Math.abs(bFeels-bTemp)>=2 ? `<div class="fc-block-feels">feels ${bFeels}\u00b0</div>` : '<div class="fc-block-feels">&nbsp;</div>'}
+          ${bFeels!=null ? `<div class="fc-block-feels">feels ${bFeels}\u00b0</div>` : '<div class="fc-block-feels">&nbsp;</div>'}
           <div class="fc-block-stats">
             <span>\u{1F4A7} ${bPop}%${bPrecip>0.1?' \u00b7 '+bPrecip.toFixed(1)+'mm':''}</span>
             <span>\u{1F4A8} ${blk.wind!=null?Math.round(blk.wind):'\u2014'}kt</span>

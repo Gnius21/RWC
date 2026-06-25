@@ -8622,19 +8622,13 @@ function wxIconStyled(key, size){ return buildWxIconSvg(key, size); }
 
 /* ═══ MULTI-MODEL FORECAST ═══ */
 const FORECAST_MODELS = [
-  {key:'gfs_seamless',         name:'GFS',     org:'NOAA \u00b7 USA',          color:'#4db8ff'},
-  {key:'gfs_graphcast025',     name:'GRAPH',   org:'DeepMind AI',         color:'#60a5fa'},
-  {key:'ecmwf_ifs025',         name:'ECMWF',   org:'ECMWF \u00b7 EU',          color:'#a78bfa'},
-  {key:'ecmwf_aifs025',        name:'AIFS',    org:'ECMWF AI \u00b7 EU',       color:'#c084fc'},
-  {key:'icon_seamless',        name:'ICON',    org:'DWD \u00b7 Germany',       color:'#56c596'},
-  {key:'gem_seamless',         name:'GEM',     org:'MSC \u00b7 Canada',        color:'#ff8a3d'},
-  {key:'jma_seamless',         name:'JMA',     org:'JMA \u00b7 Japan',         color:'#ffe44d'},
-  {key:'bom_access_global',    name:'ACCESS',  org:'BOM \u00b7 Australia',     color:'#fb7185'},
-  {key:'metno_nordic',         name:'METNO',   org:'MET \u00b7 Norway',        color:'#22d3ee'},
-  {key:'meteofrance_seamless', name:'MFRANCE', org:'M\u00e9t\u00e9o-France',        color:'#f472b6'},
-  {key:'ukmo_seamless',        name:'UKMO',    org:'UK Met Office',       color:'#06b6d4'},
-  {key:'knmi_seamless',        name:'KNMI',    org:'KNMI \u00b7 Netherlands',  color:'#fb923c'},
-  {key:'dmi_seamless',         name:'DMI',     org:'DMI \u00b7 Denmark',       color:'#a3e635'}
+  {key:'gfs_seamless',     name:'GFS',   org:'NOAA \u00b7 USA',      color:'#4db8ff'},
+  {key:'ecmwf_ifs025',     name:'ECMWF', org:'ECMWF \u00b7 EU',      color:'#a78bfa'},
+  {key:'ecmwf_aifs025',    name:'AIFS',  org:'ECMWF AI \u00b7 EU',   color:'#c084fc'},
+  {key:'icon_seamless',    name:'ICON',  org:'DWD \u00b7 Germany',   color:'#56c596'},
+  {key:'gem_seamless',     name:'GEM',   org:'MSC \u00b7 Canada',    color:'#ff8a3d'},
+  {key:'ukmo_seamless',    name:'UKMO',  org:'UK Met Office',   color:'#06b6d4'},
+  {key:'meteofrance_seamless',name:'MF', org:'M\u00e9t\u00e9o-France',    color:'#f472b6'}
 ];
 
 async function fetchMultiModelForecast(){
@@ -8645,7 +8639,7 @@ async function fetchMultiModelForecast(){
   let json;
   try {
     const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 3000);
+    const timeoutId = setTimeout(() => ctrl.abort(), 9000);
     const res = await fetch(url, {signal: ctrl.signal, cache: 'default'});
     clearTimeout(timeoutId);
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -9303,20 +9297,49 @@ byId('fcGrid').addEventListener('click', _fcClickHandler);
 const _fcGridHome = byId('fcGridHome');
 if(_fcGridHome) _fcGridHome.addEventListener('click', _fcClickHandler);
 
+/* LocalStorage cache \u2014 survives page reload, max 2 hours old shown immediately */
+const _FC_LS_KEY = 'rwc_fc_v2';
+function _fcSave(data){
+  try { localStorage.setItem(_FC_LS_KEY, JSON.stringify(data)); } catch(e){}
+}
+function _fcLoad(){
+  try {
+    const raw = localStorage.getItem(_FC_LS_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(!d || !d.days || !d.days.length) return null;
+    if(Date.now() - d.t > 7200000) return null; // discard if >2h old
+    return d;
+  } catch(e){ return null; }
+}
+
 async function updateForecast(){
   const status = byId('fcStatus');
   const grid = byId('fcGrid');
-  if(__lastForecastData && Date.now() - __lastForecastData.t < 300000){
+  const gridHome2 = byId('fcGridHome');
+  function setStatus(txt){ if(status) status.textContent = txt; const sh=byId('fcStatusHome'); if(sh) sh.textContent = txt; }
+
+  // 1. In-memory hit (15 min) \u2014 instant, no network
+  if(__lastForecastData && Date.now() - __lastForecastData.t < 900000){
     renderForecast(__lastForecastData.days, __lastForecastData.models);
     return;
   }
-  const loadHtml = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading multi-model forecast</div><div class="fc-loading-sub">Fetching GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 JMA + more\u2026</div></div>`;
-  if(!grid.querySelector('.fc-day-card')) grid.innerHTML = loadHtml;
-  const gridHome2 = byId('fcGridHome');
-  if(gridHome2 && !gridHome2.querySelector('.fc-day-card')) gridHome2.innerHTML = loadHtml;
-  if(status) status.textContent = 'Fetching models\u2026';
-  const statusHome = byId('fcStatusHome');
-  if(statusHome) statusHome.textContent = 'Fetching models\u2026';
+
+  // 2. localStorage hit \u2014 show immediately while fresh data loads in background
+  const lsData = !__lastForecastData && _fcLoad();
+  if(lsData){
+    __lastForecastData = lsData;
+    renderForecast(lsData.days, lsData.models);
+    setStatus(`${lsData.models.length} models \u00b7 cached \u00b7 refreshing\u2026`);
+    // fall through to fetch fresh
+  } else {
+    // No cache \u2014 show spinner only if grid is empty
+    const loadHtml = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading forecast</div><div class="fc-loading-sub">GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 UKMO \u00b7 MF\u2026</div></div>`;
+    if(!grid.querySelector('.fc-day-card')) grid.innerHTML = loadHtml;
+    if(gridHome2 && !gridHome2.querySelector('.fc-day-card')) gridHome2.innerHTML = loadHtml;
+    setStatus('Fetching models\u2026');
+  }
+
   try {
     const [{forecasts, daily}, dustByDay] = await Promise.all([
       fetchMultiModelForecast(),
@@ -9325,7 +9348,7 @@ async function updateForecast(){
     if(!forecasts.length){
       if(__lastForecastData){ renderForecast(__lastForecastData.days, __lastForecastData.models); }
       else { renderForecast([], []); }
-      if(status) status.textContent = 'Models unavailable \u00b7 will retry';
+      setStatus('Models unavailable \u00b7 will retry');
       return;
     }
     const days = buildDailyConsensus(forecasts, daily);
@@ -9334,17 +9357,14 @@ async function updateForecast(){
     }
     const models = forecasts.map(f => f.model);
     __lastForecastData = {days, models, t: Date.now()};
+    _fcSave(__lastForecastData);
     renderForecast(days, models);
-    const updTxt = `${models.length} models \u00b7 updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false})}`;
-    if(status) status.textContent = updTxt;
-    const sh = byId('fcStatusHome'); if(sh) sh.textContent = updTxt;
+    setStatus(`${models.length} models \u00b7 updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false})}`);
   } catch(e){
     console.error('Forecast error:', e);
     if(__lastForecastData){ renderForecast(__lastForecastData.days, __lastForecastData.models); }
     else { renderForecast([], []); }
-    const errTxt = 'Error \u00b7 will retry next cycle';
-    if(status) status.textContent = errTxt;
-    const sh2 = byId('fcStatusHome'); if(sh2) sh2.textContent = errTxt;
+    setStatus('Error \u00b7 will retry next cycle');
   }
 }
 window.__fcDebug = () => __lastForecastData;

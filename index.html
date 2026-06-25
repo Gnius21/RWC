@@ -10316,46 +10316,16 @@ function addMapMarkers(filter){
   });
 }
 
-/* Robust station-timestamp parser. Tries native Date parsing first (handles
-   ISO 8601 with T/Z and the US slash/dash formats most engines accept), then
-   falls back to explicit field parsing for formats native Date rejects on some
-   browsers (notably iOS Safari): "YYYY-MM-DD HH:MM:SS", "MM-DD-YYYY HH:MM:SS",
-   "MM/DD/YYYY HH:MM:SS", "DD-MM-YYYY HH:MM:SS". Returns a Date or null. */
-function parseStationTs(s){
-  if(!s) return null;
-  if(typeof s !== 'string'){ var dn=new Date(s); return isNaN(dn)?null:dn; }
-  s = s.trim();
-  var d = new Date(s);                 // native first — don't break what already works
-  if(!isNaN(d)) return d;
-  d = new Date(s.replace(' ','T'));    // "YYYY-MM-DD HH:MM:SS" → ISO (Safari-safe)
-  if(!isNaN(d)) return d;
-  var m;
-  // YYYY-MM-DD or YYYY/MM/DD, optional time
-  if((m = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/))){
-    d = new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
-    return isNaN(d)?null:d;
-  }
-  // MM-DD-YYYY / MM/DD/YYYY (US, as shown on the station hardware), optional time
-  if((m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/))){
-    var a=+m[1], b=+m[2];
-    // If the first field can't be a month (>12) but the second can, it's DD-MM-YYYY.
-    var mo = a, day = b;
-    if(a>12 && b<=12){ mo=b; day=a; }
-    d = new Date(+m[3], mo-1, day, +(m[4]||0), +(m[5]||0), +(m[6]||0));
-    return isNaN(d)?null:d;
-  }
-  return null;
-}
-
 function renderStationsAverage(){
   if(!stationData || !stationData.length) return;
   function safeNum(v){ return (v===null||v===undefined||v==='')?null:Number(v); }
-  var parseIso = parseStationTs;
+  function parseIso(s){ if(!s)return null; var d=new Date(s); return isNaN(d)?null:d; }
+  function sameDay(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
   var now=new Date();
-  // Only count ACTIVE stations: data within the last 4 hours
+  // Only count ACTIVE stations: reporting today (not stale) and with a usable wind-dir text
   function isActive(r){
     var last = parseIso(r.last_updated_iso || r.last_updated);
-    if(!last || (now-last) > 4*60*60*1000) return false;
+    if(!last || !sameDay(now,last)) return false;          // stale / not from today
     return true;
   }
   var temps=[], windSpds=[], windDirs=[], hums=[], rains=[], heats=[];
@@ -10483,11 +10453,12 @@ function renderStations(){
   }
   function safeNum(v){ return (v===null||v===undefined||v==='')?null:Number(v); }
   function escHtml(s){ return String(s||'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);}); }
-  var parseIso = parseStationTs;
+  function parseIso(s){ if(!s)return null; var d=new Date(s); return isNaN(d)?null:d; }
+  function sameDay(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
   var alertCount=0, staleCount=0, mostRecent=null;
   list.innerHTML = stationData.map(function(r){
     var now=new Date(), last=parseIso(r.last_updated_iso||r.last_updated);
-    var isStale = !last || (now-last) > 4*60*60*1000;
+    var isStale = !last || !sameDay(now,last);
     if(isStale) staleCount++;
     var temp  = r.temperature_c   != null ? safeNum(r.temperature_c)   : null;
     var heat  = r.heat_index_c    != null ? safeNum(r.heat_index_c)    : null;

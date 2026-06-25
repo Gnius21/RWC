@@ -2474,6 +2474,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 <!-- TABS -->
 <nav class="tabs" role="tablist">
   <button class="tab active" role="tab" aria-selected="true" data-tab="monitor"><span class="tab-i">&#9889;</span>Monitor</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="forecast"><span class="tab-i">&#127782;</span>Forecast</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="knmi"><span class="tab-i">&#127788;</span>KNMI</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="aviation"><span class="tab-i">&#9992;</span>Aviation</button>
   <button class="tab" role="tab" aria-selected="false" data-tab="stations"><span class="tab-i">&#8862;</span>Stations</button>
@@ -2594,12 +2595,6 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
     </div>
     <div class="mon-view" id="monViewCurrent">
-    <!-- ═══ FORECAST HEADER ═══ -->
-    <div class="shdr" style="margin-bottom:6px;">
-      <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
-      <span id="fcStatusHome" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &bull; GFS + ECMWF + ICON</span>
-    </div>
-    <div id="fcGridHome" class="fcgrid" style="margin-bottom:18px;"></div>
     <div class="mon-grid">
       <div class="mon-tile mon-vis">
         <div class="mon-row">
@@ -2951,13 +2946,13 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
   </div>
 
-  <!-- FORECAST (moved into Weather tab) -->
-  <div id="tab-forecast" class="tpanel hidden" style="display:none!important;">
+  <!-- FORECAST TAB -->
+  <div id="tab-forecast" class="tpanel hidden">
     <div class="shdr">
       <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
-      <span id="fcStatus" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &middot; GFS + ECMWF + ICON</span>
+      <span id="fcStatusHome" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &middot; GFS + ECMWF + ICON</span>
     </div>
-    <div id="fcGrid" class="fcgrid"></div>
+    <div id="fcGridHome" class="fcgrid"></div>
     <div class="sbar" style="margin-top:4px;">
       <span><span class="sdot"></span>Mesoscale models for ABC Islands &middot; Auto-reload 10 min</span>
       <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:rgba(106,138,170,0.3);">&#128274; Tap to interact</span>
@@ -4997,6 +4992,7 @@ document.querySelectorAll('[data-climview]').forEach(btn => {
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   monitor: byId('tab-monitor'),
+  forecast: byId('tab-forecast'),
   aviation: byId('tab-aviation'),
   stations: byId('tab-stations'),
   weather: byId('tab-weather'), atc: byId('tab-atc'), maps: byId('tab-maps'),
@@ -5029,6 +5025,10 @@ function switchTab(name){
   if(name==='stations'){
     if(!stationsTabOpened){ stationsTabOpened = true; fetchStationsData(); }
     setTimeout(()=>{if(leafMap&&!byId('mapCard').classList.contains('hidden'))leafMap.invalidateSize(); if(condMap) condMap.invalidateSize();},250);
+  }
+  if(name==='forecast'){
+    if(!forecastTabOpened){ forecastTabOpened = true; updateForecast(); }
+    else if(__lastForecastData){ renderForecast(__lastForecastData.days, __lastForecastData.models); }
   }
   if(name==='weather'){
     if(!weatherTabOpened){ weatherTabOpened = true; updateWeatherTab(); }
@@ -5096,7 +5096,7 @@ tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 
 /* PWA shortcut deep-linking — manifest shortcuts pass a #hash */
 (function(){
-  const validTabs = ['monitor','aviation','stations','weather','maps','atc','knmi'];
+  const validTabs = ['monitor','forecast','aviation','stations','weather','maps','atc','knmi'];
   const hash = (location.hash||'').replace('#','').toLowerCase();
   if(hash && validTabs.includes(hash)) switchTab(hash);
 })();

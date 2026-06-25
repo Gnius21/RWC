@@ -2796,6 +2796,14 @@ html,body{max-width:100%;overflow-x:hidden;}
       </div>
 
     </div>
+
+    <!-- ═══ FORECAST ON MAIN TAB ═══ -->
+    <div class="shdr" style="margin-top:18px;">
+      <div class="stitle">4-Day Forecast &mdash; ABC Islands</div>
+      <span id="fcStatusHome" style="color:var(--muted);font-size:13px;font-family:var(--mono);">Multi-model consensus &bull; GFS + ECMWF + ICON</span>
+    </div>
+    <div id="fcGridHome" class="fcgrid"></div>
+
     </div><!-- /#monViewCurrent -->
     <div class="sbar" style="margin-top:7px;">
       <span><span class="sdot"></span>Live &middot; refreshing every 60s &middot; TNCC SYNOP 78988 + KNMI Bonaire + Open-Meteo</span>
@@ -9069,8 +9077,11 @@ let __lastForecastData = null;
 
 function renderForecast(days, allModels){
   const grid = byId('fcGrid');
+  const gridHome = byId('fcGridHome');
   if(!days || !days.length){
-    grid.innerHTML = `<div class="fc-error">\u26a0 Forecast data unavailable. Open-Meteo may be unreachable \u2014 retrying on next cycle.</div>`;
+    const errHtml = `<div class="fc-error">\u26a0 Forecast data unavailable. Open-Meteo may be unreachable \u2014 retrying on next cycle.</div>`;
+    grid.innerHTML = errHtml;
+    if(gridHome) gridHome.innerHTML = errHtml;
     return;
   }
   const showDays = days.slice(0, 4);
@@ -9189,6 +9200,7 @@ function renderForecast(days, allModels){
       </div>`;
   });
   grid.innerHTML = summaryHtml + cardsHtml;
+  if(gridHome) gridHome.innerHTML = summaryHtml + cardsHtml;
 }
 
 function openForecastDetail(idx){
@@ -9251,10 +9263,13 @@ function openForecastDetail(idx){
 }
 
 /* Event delegation for forecast detail buttons */
-byId('fcGrid').addEventListener('click', e => {
+function _fcClickHandler(e){
   const btn = e.target.closest('.fc-detail-btn');
   if(btn){ const idx = parseInt(btn.dataset.detailIdx, 10); if(!isNaN(idx)) openForecastDetail(idx); }
-});
+}
+byId('fcGrid').addEventListener('click', _fcClickHandler);
+const _fcGridHome = byId('fcGridHome');
+if(_fcGridHome) _fcGridHome.addEventListener('click', _fcClickHandler);
 
 async function updateForecast(){
   const status = byId('fcStatus');
@@ -9263,10 +9278,13 @@ async function updateForecast(){
     renderForecast(__lastForecastData.days, __lastForecastData.models);
     return;
   }
-  if(!grid.querySelector('.fc-day-card')){
-    grid.innerHTML = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading multi-model forecast</div><div class="fc-loading-sub">Fetching GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 JMA + more\u2026</div></div>`;
-  }
+  const loadHtml = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading multi-model forecast</div><div class="fc-loading-sub">Fetching GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 JMA + more\u2026</div></div>`;
+  if(!grid.querySelector('.fc-day-card')) grid.innerHTML = loadHtml;
+  const gridHome2 = byId('fcGridHome');
+  if(gridHome2 && !gridHome2.querySelector('.fc-day-card')) gridHome2.innerHTML = loadHtml;
   if(status) status.textContent = 'Fetching models\u2026';
+  const statusHome = byId('fcStatusHome');
+  if(statusHome) statusHome.textContent = 'Fetching models\u2026';
   try {
     const [{forecasts, daily}, dustByDay] = await Promise.all([
       fetchMultiModelForecast(),
@@ -9285,12 +9303,16 @@ async function updateForecast(){
     const models = forecasts.map(f => f.model);
     __lastForecastData = {days, models, t: Date.now()};
     renderForecast(days, models);
-    if(status) status.textContent = `${models.length} models \u00b7 updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false})}`;
+    const updTxt = `${models.length} models \u00b7 updated ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false})}`;
+    if(status) status.textContent = updTxt;
+    const sh = byId('fcStatusHome'); if(sh) sh.textContent = updTxt;
   } catch(e){
     console.error('Forecast error:', e);
     if(__lastForecastData){ renderForecast(__lastForecastData.days, __lastForecastData.models); }
     else { renderForecast([], []); }
-    if(status) status.textContent = 'Error \u00b7 will retry next cycle';
+    const errTxt = 'Error \u00b7 will retry next cycle';
+    if(status) status.textContent = errTxt;
+    const sh2 = byId('fcStatusHome'); if(sh2) sh2.textContent = errTxt;
   }
 }
 window.__fcDebug = () => __lastForecastData;

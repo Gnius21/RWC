@@ -838,18 +838,18 @@ tr:last-child td{border-bottom:none;}
 .fc-detail-overlay{position:fixed;inset:0;z-index:9999;background:rgba(2,8,15,0.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s;overflow-y:auto;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .fc-detail-card{position:relative;max-width:880px;width:100%;max-height:90vh;overflow-y:auto;border-radius:var(--rl);background:var(--card);border:1px solid var(--bdrb);box-shadow:0 30px 80px rgba(0,0,0,0.6);padding:24px;}
-@media(max-width:640px){.fc-detail-overlay{padding:8px;}.fc-detail-card{padding:14px;max-height:96vh;}.fc-detail-hourly,.fc-detail-models{font-size:13px;}.fc-detail-hourly th,.fc-detail-hourly td,.fc-detail-models th,.fc-detail-models td{padding:4px 6px;}}
+@media(max-width:640px){.fc-detail-overlay{padding:8px;}.fc-detail-card{padding:14px;max-height:96vh;}.fc-detail-hourly,.fc-detail-models{font-size:16px;}.fc-detail-hourly th,.fc-detail-hourly td,.fc-detail-models th,.fc-detail-models td{padding:7px 8px;}.fc-detail-stats{font-size:17px;}}
 .fc-detail-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--bdr);background:rgba(255,255,255,0.05);color:var(--acc);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .fc-detail-close:hover{background:rgba(255,79,79,0.15);border-color:var(--red);color:var(--red);}
 .fc-detail-hd{border-bottom:1px solid var(--bdr);padding-bottom:14px;margin-bottom:16px;}
 .fc-detail-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;}
 @media(max-width:700px){.fc-detail-grid{grid-template-columns:1fr;gap:16px;}}
-.fc-detail-grid h4{font-family:var(--cond);font-size:17px;color:var(--acc);letter-spacing:1.3px;text-transform:uppercase;margin:0 0 9px 0;font-weight:800;}
-.fc-detail-hourly,.fc-detail-models{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:17px;}
-.fc-detail-hourly th,.fc-detail-models th{text-align:left;padding:7px 10px;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:700;}
-.fc-detail-hourly td,.fc-detail-models td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.02);color:#cce4ff;}
+.fc-detail-grid h4{font-family:var(--cond);font-size:20px;color:var(--acc);letter-spacing:1.3px;text-transform:uppercase;margin:0 0 11px 0;font-weight:800;}
+.fc-detail-hourly,.fc-detail-models{width:100%;border-collapse:collapse;font-family:var(--cond);font-size:20px;}
+.fc-detail-hourly th,.fc-detail-models th{text-align:left;padding:9px 12px;font-size:17px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:700;}
+.fc-detail-hourly td,.fc-detail-models td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.02);color:#cce4ff;}
 .fc-detail-hourly tr:hover td,.fc-detail-models tr:hover td{background:rgba(77,184,255,0.04);}
-.fc-detail-stats{display:flex;flex-direction:column;gap:5px;font-family:var(--cond);font-size:17px;}
+.fc-detail-stats{display:flex;flex-direction:column;gap:6px;font-family:var(--cond);font-size:20px;}
 .fc-detail-stats > div{display:flex;justify-content:space-between;padding:6px 9px;border-radius:6px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);}
 .fc-detail-stats span{color:var(--muted);letter-spacing:.5px;}
 .fc-detail-stats b{color:#fff;font-weight:800;}
@@ -9234,8 +9234,8 @@ function openForecastDetail(idx){
     <div class="fc-detail-card" role="dialog" aria-modal="true" aria-label="Forecast detail for ${fcDayName(day.date,idx)}">
       <button class="fc-detail-close" data-detail-close aria-label="Close detail">\u2715</button>
       <div class="fc-detail-hd">
-        <div class="fc-day-name-big" style="font-size:30px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
-        <div style="font-family:var(--cond);color:var(--muted);font-size:16px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
+        <div class="fc-day-name-big" style="font-size:34px;">${fcDayName(day.date, idx)} \u00b7 ${fcDateLabel(day.date)}</div>
+        <div style="font-family:var(--cond);color:var(--muted);font-size:19px;margin-top:3px;">${decodeWmoCode(day.code,false,day.pop).desc} \u00b7 ${day.tempLow!=null?Math.round(day.tempLow):'\u2014'}\u2013${day.tempHigh!=null?Math.round(day.tempHigh):'\u2014'}\u00b0C \u00b7 ${Math.round(day.confidence||0)}% confidence${day.dustMax!=null?' \u00b7 <span style="color:'+fcDustCat(day.dustMax).col+';">'+fcDustCat(day.dustMax).label+' dust '+Math.round(day.dustMax)+'\u00b5g/m\u00b3</span>':''}</div>
       </div>
       <div class="fc-detail-grid">
         <div>
@@ -9260,8 +9260,6 @@ function openForecastDetail(idx){
             <div><span>Sunrise</span><b>${fmtClock(day.sunrise)}</b></div>
             <div><span>Sunset</span><b>${fmtClock(day.sunset)}</b></div>
           </div>
-          <h4 style="margin-top:16px;">Contributing models (${models.length})</h4>
-          <table class="fc-detail-models"><tbody>${modelRows}</tbody></table>
         </div>
       </div>
     </div>`;

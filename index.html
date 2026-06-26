@@ -728,6 +728,13 @@ tr:last-child td{border-bottom:none;}
 /* FORECAST */
 #wxViewForecast{display:flex;flex-direction:column;gap:11px;}
 .fcgrid{display:flex;flex-direction:column;gap:9px;}
+/* Forecast tab — break out of the centered content column and use the full viewport width */
+#tab-forecast{width:100vw;margin-left:calc(50% - 50vw);padding:0 16px;box-sizing:border-box;}
+@media(max-width:700px){#tab-forecast{padding:0 9px;}}
+/* On wide screens lay day cards side-by-side to fill the horizontal space */
+.fcgrid > .fc-summary,.fcgrid > .fc-loading,.fcgrid > .fc-error{grid-column:1 / -1;}
+@media(min-width:1500px){#tab-forecast .fcgrid{display:grid;grid-template-columns:repeat(2,1fr);align-items:start;gap:14px;}}
+@media(min-width:2200px){#tab-forecast .fcgrid{grid-template-columns:repeat(3,1fr);}}
 .fc-loading{padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;border-radius:var(--rl);background:var(--card);border:1px solid var(--bdr);}
 .fc-loading-spin{width:36px;height:36px;border-radius:50%;border:3px solid rgba(77,184,255,0.15);border-top-color:var(--acc);animation:fcSpin 0.9s linear infinite;}
 @keyframes fcSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
@@ -8622,20 +8629,36 @@ function wxIconStyled(key, size){ return buildWxIconSvg(key, size); }
 
 /* ═══ MULTI-MODEL FORECAST ═══ */
 const FORECAST_MODELS = [
-  {key:'gfs_seamless',     name:'GFS',   org:'NOAA \u00b7 USA',      color:'#4db8ff'},
-  {key:'ecmwf_ifs025',     name:'ECMWF', org:'ECMWF \u00b7 EU',      color:'#a78bfa'},
-  {key:'ecmwf_aifs025',    name:'AIFS',  org:'ECMWF AI \u00b7 EU',   color:'#c084fc'},
-  {key:'icon_seamless',    name:'ICON',  org:'DWD \u00b7 Germany',   color:'#56c596'},
-  {key:'gem_seamless',     name:'GEM',   org:'MSC \u00b7 Canada',    color:'#ff8a3d'},
-  {key:'ukmo_seamless',    name:'UKMO',  org:'UK Met Office',   color:'#06b6d4'},
-  {key:'meteofrance_seamless',name:'MF', org:'M\u00e9t\u00e9o-France',    color:'#f472b6'}
+  {key:'gfs_seamless',               name:'GFS',      org:'NOAA \u00b7 USA',          color:'#4db8ff'},
+  {key:'gfs_graphcast025',           name:'GRAPH',    org:'DeepMind AI',         color:'#60a5fa'},
+  {key:'ecmwf_ifs025',               name:'ECMWF',    org:'ECMWF \u00b7 EU',          color:'#a78bfa'},
+  {key:'ecmwf_aifs025',              name:'AIFS',     org:'ECMWF AI \u00b7 EU',       color:'#c084fc'},
+  {key:'icon_seamless',              name:'ICON',     org:'DWD \u00b7 Germany',       color:'#56c596'},
+  {key:'gem_seamless',               name:'GEM',      org:'MSC \u00b7 Canada',        color:'#ff8a3d'},
+  {key:'jma_seamless',               name:'JMA',      org:'JMA \u00b7 Japan',         color:'#ffe44d'},
+  {key:'meteofrance_seamless',       name:'MF',       org:'M\u00e9t\u00e9o-France',        color:'#f472b6'},
+  {key:'meteofrance_arome_france',   name:'AROME',    org:'MF AROME',            color:'#fb7185'},
+  {key:'meteofrance_arome_france_hd',name:'AROME-HD', org:'MF AROME HD',         color:'#f9a8d4'},
+  {key:'knmi_seamless',              name:'KNMI',     org:'KNMI \u00b7 Caribbean',    color:'#fb923c'},
+  {key:'knmi_harmonie_arome_europe', name:'KNMI-AR',  org:'KNMI HARMONIE',       color:'#fdba74'},
+  {key:'ukmo_seamless',              name:'UKMO',     org:'UK Met Office',       color:'#06b6d4'},
+  {key:'metno_nordic',               name:'METNO',    org:'MET \u00b7 Norway',        color:'#22d3ee'},
+  {key:'dmi_seamless',               name:'DMI',      org:'DMI \u00b7 Denmark',       color:'#a3e635'},
+  {key:'bom_access_global',          name:'ACCESS',   org:'BOM \u00b7 Australia',     color:'#fde047'},
+  {key:'cma_grapes_global',          name:'CMA',      org:'CMA \u00b7 China',         color:'#fca5a5'}
 ];
+/* Rock-solid global models guaranteed to cover the Caribbean \u2014 used as a
+   fallback if the full request errors (e.g. an unsupported model key). */
+const FORECAST_CORE_KEYS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ukmo_seamless'];
 
-async function fetchMultiModelForecast(){
-  const vars = 'temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,apparent_temperature,uv_index';
-  const modelKeys = FORECAST_MODELS.map(m => m.key).join(',');
-  const daily = 'sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max';
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${ABC_LAT}&longitude=${ABC_LON}&hourly=${vars}&daily=${daily}&models=${modelKeys}&timezone=auto&forecast_days=5&wind_speed_unit=kn`;
+const FORECAST_VARS = 'temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,apparent_temperature,uv_index';
+const FORECAST_DAILY = 'sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max';
+
+/* One attempt with a given model list. Returns {forecasts, daily} or null on
+   hard failure (network error, or the API rejecting an invalid model key). */
+async function _fetchForecastAttempt(models){
+  const modelKeys = models.map(m => m.key).join(',');
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${ABC_LAT}&longitude=${ABC_LON}&hourly=${FORECAST_VARS}&daily=${FORECAST_DAILY}&models=${modelKeys}&timezone=auto&forecast_days=5&wind_speed_unit=kn`;
   let json;
   try {
     const ctrl = new AbortController();
@@ -8646,22 +8669,36 @@ async function fetchMultiModelForecast(){
     json = await res.json();
   } catch(e){
     console.warn('Direct Open-Meteo fetch failed, falling back to proxy:', e.message);
-    try { const r = await fetchURL(url); if(!r.ok) return {forecasts:[], daily:null}; json = JSON.parse(r.text); }
-    catch(e2){ return {forecasts:[], daily:null}; }
+    try { const r = await fetchURL(url); if(!r.ok) return null; json = JSON.parse(r.text); }
+    catch(e2){ return null; }
   }
-  if(!json || !json.hourly || !json.hourly.time) return {forecasts:[], daily:null};
+  // json.error is true when the API rejects a request (e.g. an invalid model key)
+  if(!json || json.error || !json.hourly || !json.hourly.time) return null;
   const forecasts = [];
-  for(const m of FORECAST_MODELS){
+  for(const m of models){
     const suffix = '_' + m.key;
     const modelHourly = {time: json.hourly.time};
     let hasAnyData = false;
-    for(const v of vars.split(',')){
+    for(const v of FORECAST_VARS.split(',')){
       const key = v + suffix;
       if(json.hourly[key]){ modelHourly[v] = json.hourly[key]; hasAnyData = true; }
     }
     if(hasAnyData) forecasts.push({model: m, data: {hourly: modelHourly}});
   }
   return {forecasts, daily: json.daily || null};
+}
+
+async function fetchMultiModelForecast(){
+  // Try the full multi-model consensus first.
+  let r = await _fetchForecastAttempt(FORECAST_MODELS);
+  // If the whole request failed (a bad key 400s the entire call) or yielded no
+  // usable model data, retry with the guaranteed-good core set so the forecast
+  // still works.
+  if(!r || !r.forecasts.length){
+    const core = FORECAST_MODELS.filter(m => FORECAST_CORE_KEYS.includes(m.key));
+    r = await _fetchForecastAttempt(core);
+  }
+  return r || {forecasts:[], daily:null};
 }
 
 /* Saharan dust outlook (CAMS, µg/m³ surface dust) for the 5 forecast days.
@@ -9334,7 +9371,7 @@ async function updateForecast(){
     // fall through to fetch fresh
   } else {
     // No cache \u2014 show spinner only if grid is empty
-    const loadHtml = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading forecast</div><div class="fc-loading-sub">GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 UKMO \u00b7 MF\u2026</div></div>`;
+    const loadHtml = `<div class="fc-loading"><div class="fc-loading-spin"></div><div class="fc-loading-txt">Loading forecast</div><div class="fc-loading-sub">GFS \u00b7 ECMWF \u00b7 ICON \u00b7 GEM \u00b7 UKMO \u00b7 KNMI \u00b7 AROME + more\u2026</div></div>`;
     if(!grid.querySelector('.fc-day-card')) grid.innerHTML = loadHtml;
     if(gridHome2 && !gridHome2.querySelector('.fc-day-card')) gridHome2.innerHTML = loadHtml;
     setStatus('Fetching models\u2026');

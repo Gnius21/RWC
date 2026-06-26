@@ -3,14 +3,13 @@
    picked up when the app is opened; cache fallback for offline use.
    Bump CACHE_VERSION on each deploy to force clients to update. */
 
-const CACHE_VERSION = 'rwc-2026-06-26-03';
+const CACHE_VERSION = 'rwc-2026-06-26-04';
 const CACHE_NAME = 'rwc-cache-' + CACHE_VERSION;
 
 // Core assets to pre-cache (the single-file app).
 const CORE = [
   './',
-  './index.html',
-  './rwc_caribbean.html'
+  './index.html'
 ];
 
 // Install: pre-cache the shell, then activate immediately.
@@ -57,8 +56,11 @@ self.addEventListener('fetch', (event) => {
 
   if (isHTML) {
     // Network-first: newest HTML wins; fall back to cache offline.
+    // cache:'reload' bypasses the browser/CDN HTTP cache so a fresh deploy is
+    // always fetched from the server (GitHub Pages serves HTML with a max-age,
+    // which would otherwise let "network-first" return stale HTML for minutes).
     event.respondWith(
-      fetch(req).then((res) => {
+      fetch(req, { cache: 'reload' }).then((res) => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
         return res;

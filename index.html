@@ -9534,13 +9534,13 @@ window.__cmapMetars = {};
 function initCondMap(){
   if(condMap || typeof L==='undefined') return;
   // Locked view: ABC islands + eastern Caribbean out to Barbados / San Juan.
-  var VIEW_BOUNDS = [[9.0,-72.0],[19.5,-58.5]];
+  var VIEW_BOUNDS = [[9.0,-76.0],[19.5,-58.5]];
   condMap = L.map('condMap', {
     zoomControl:true, attributionControl:true,
     maxBounds: VIEW_BOUNDS,           // cannot pan outside this region
     maxBoundsViscosity: 1.0,          // hard edge
     minZoom: 6, maxZoom: 9
-  }).fitBounds([[10.0,-70.8],[13.2,-67.5]]);
+  }).fitBounds([[9.5,-75.5],[17.5,-59.0]]);
   condMap.setMaxBounds(VIEW_BOUNDS);
   // Real-colour satellite basemap (Windy-style: blue sea, green islands)
   // with a transparent place-name layer on top so the towns stay readable.
@@ -9653,7 +9653,7 @@ function condMapToggle(layer, btn){
 }
 window.condMapToggle = condMapToggle;
 function condMapReset(){
-  if(condMap) condMap.fitBounds([[10.0,-70.8],[13.2,-67.5]]);
+  if(condMap) condMap.fitBounds([[9.5,-75.5],[17.5,-59.0]]);
 }
 window.condMapReset = condMapReset;
 var __rainAnimTimer=null, __rainAnimIdx=0;
@@ -9747,6 +9747,7 @@ window.fetchCondFlights = fetchCondFlights;
 /* NDBC buoys — nearest reporting stations to the ABC islands.
    Coords are the real buoy positions; many are far (no buoys sit right by the ABCs). */
 var NDBC_BUOYS = [
+  {id:'42058', name:'C Caribbean', lat:14.92, lon:-74.92},
   {id:'42059', name:'E Caribbean', lat:15.01, lon:-67.48},
   {id:'42058', name:'C Caribbean', lat:14.92, lon:-74.92},
   {id:'42057', name:'W Caribbean', lat:16.91, lon:-81.42},
@@ -9839,7 +9840,7 @@ function renderBuoys(){
       return;
     }
     buoys.forEach(function(b){
-      if(b.lat < 9.0 || b.lat > 19.5 || b.lon < -72.0 || b.lon > -58.5) return;
+      if(b.lat < 9.0 || b.lat > 19.5 || b.lon < -76.0 || b.lon > -58.5) return;
       var d = b.data;
       var wspdKt = d.wspd!=null ? Math.round(d.wspd*1.94384) : null;
       var gstKt  = d.gst!=null  ? Math.round(d.gst*1.94384)  : null;

@@ -409,19 +409,18 @@ tr:last-child td{border-bottom:none;}
 
 /* Live ATC — radar fills the whole screen; audio floats as an overlay */
 #tab-atc{height:calc(100dvh - 100px);min-height:460px;display:flex;flex-direction:column;overflow:hidden;margin-left:-14px;margin-right:-14px;width:calc(100% + 28px);}
-#tab-atc .atc-layout{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:0;}
-#tab-atc .adsbcard{flex:1;min-height:0;display:flex;flex-direction:column;border:none;border-radius:0;background:#000;}
+#tab-atc .atc-layout{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;}
+#tab-atc .adsbcard{flex:0 0 50%;min-height:0;display:flex;flex-direction:column;border:none;border-radius:0;background:#000;}
 #tab-atc .adsb-hd{display:none;}
 #tab-atc .adsb-wrap{flex:1;height:auto;min-height:0;}
-
-/* ATC audio overlay — floats over the bottom of the radar */
-.atc-audio-overlay{position:absolute;left:0;right:0;bottom:0;z-index:13;pointer-events:none;display:flex;flex-direction:column;}
-.atc-audio-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:rgba(5,18,34,0.94);border-top:1px solid var(--bdrb);backdrop-filter:blur(10px);pointer-events:auto;}
+#tab-atc .atc-audio-section{flex:1;min-height:0;overflow-y:auto;background:rgba(5,18,34,0.97);border-top:1px solid var(--bdrb);}
+/* ATC audio section */
+.atc-audio-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:rgba(5,18,34,0.94);border-bottom:1px solid var(--bdrb);}
 .atc-audio-bar-ttl{font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .atc-audio-collapse{flex-shrink:0;background:rgba(77,184,255,0.12);border:1px solid var(--bdrb);color:var(--acc);border-radius:6px;font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;padding:4px 12px;cursor:pointer;text-transform:uppercase;transition:all .18s;-webkit-tap-highlight-color:transparent;}
 .atc-audio-collapse:hover{background:rgba(77,184,255,0.25);border-color:var(--acc);}
-.atc-audio-panel{pointer-events:auto;background:rgba(5,18,34,0.94);backdrop-filter:blur(10px);border-top:1px solid var(--bdr);padding:9px 11px;max-height:42vh;overflow-y:auto;}
-.atc-audio-overlay.collapsed .atc-audio-panel{display:none;}
+.atc-audio-panel{padding:9px 11px;}
+.atc-audio-section.collapsed .atc-audio-panel{display:none;}
 #tab-atc .atcplayers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 #tab-atc .atcplayer{grid-template-columns:auto 1fr;grid-template-areas:"pb i" "s v";grid-template-rows:auto auto;gap:5px 8px;padding:8px 10px;}
 #tab-atc .atcpbtn{grid-area:pb;}
@@ -3090,39 +3089,38 @@ html,body{max-width:100%;overflow-x:hidden;}
           </button>
           <div class="adsb-blocker" id="adsbBlocker"></div>
           <iframe id="adsbFrame" src="https://globe.adsbexchange.com/?zoom=8&lat=12.3&lon=-69.1&hideSidebar&hideButtons" title="ADS-B Exchange" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-          <!-- ATC audio floats over the radar so the map keeps the whole screen -->
-          <div class="atc-audio-overlay" id="atcAudioOverlay">
-            <div class="atc-audio-bar">
-              <span class="atc-audio-bar-ttl">&#127911; Live ATC Audio &mdash; Cura&ccedil;ao &middot; Aruba &middot; Bonaire</span>
-              <button class="atc-audio-collapse" id="atcAudioCollapse" type="button" aria-expanded="true">Hide</button>
+        </div>
+      </div>
+      <div class="atc-audio-section" id="atcAudioOverlay">
+        <div class="atc-audio-bar">
+          <span class="atc-audio-bar-ttl">&#127911; Live ATC Audio &mdash; Cura&ccedil;ao &middot; Aruba &middot; Bonaire</span>
+          <button class="atc-audio-collapse" id="atcAudioCollapse" type="button" aria-expanded="true">Hide</button>
+        </div>
+        <div class="atc-audio-panel">
+          <div class="atcplayers">
+            <div class="atcplayer" data-stream="https://d.liveatc.net/tncc3_twr">
+              <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
+              <div class="atcinfo"><div class="atclbl"><span>&#127464;&#127484;</span> TNCC &middot; Hato Tower</div><div class="atcfreq">118.300 MHz &middot; Cura&ccedil;ao</div></div>
+              <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
+              <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
             </div>
-            <div class="atc-audio-panel">
-              <div class="atcplayers">
-                <div class="atcplayer" data-stream="https://d.liveatc.net/tncc3_twr">
-                  <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
-                  <div class="atcinfo"><div class="atclbl"><span>&#127464;&#127484;</span> TNCC &middot; Hato Tower</div><div class="atcfreq">118.300 MHz &middot; Cura&ccedil;ao</div></div>
-                  <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
-                  <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
-                </div>
-                <div class="atcplayer" data-stream="https://d.liveatc.net/tncc3_rdr1">
-                  <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
-                  <div class="atcinfo"><div class="atclbl"><span>&#127464;&#127484;</span> TNCC &middot; Hato Approach</div><div class="atcfreq">APP / RDR &middot; Cura&ccedil;ao</div></div>
-                  <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
-                  <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
-                </div>
-                <div class="atcplayer" data-stream="https://d.liveatc.net/tnca">
-                  <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
-                  <div class="atcinfo"><div class="atclbl"><span>&#127462;&#127484;</span> TNCA &middot; Aruba Tower</div><div class="atcfreq">118.000 MHz &middot; Queen Beatrix</div></div>
-                  <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
-                  <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
-                </div>
-                <div class="atcplayer" data-stream="https://d.liveatc.net/tncb">
-                  <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
-                  <div class="atcinfo"><div class="atclbl"><span>&#127463;&#127478;</span> TNCB &middot; Bonaire Tower</div><div class="atcfreq">118.700 MHz &middot; Flamingo</div></div>
-                  <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
-                  <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
-                </div>
-              </div>
+            <div class="atcplayer" data-stream="https://d.liveatc.net/tncc3_rdr1">
+              <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
+              <div class="atcinfo"><div class="atclbl"><span>&#127464;&#127484;</span> TNCC &middot; Hato Approach</div><div class="atcfreq">APP / RDR &middot; Cura&ccedil;ao</div></div>
+              <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
+              <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
+            </div>
+            <div class="atcplayer" data-stream="https://d.liveatc.net/tnca">
+              <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
+              <div class="atcinfo"><div class="atclbl"><span>&#127462;&#127484;</span> TNCA &middot; Aruba Tower</div><div class="atcfreq">118.000 MHz &middot; Queen Beatrix</div></div>
+              <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
+              <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
+            </div>
+            <div class="atcplayer" data-stream="https://d.liveatc.net/tncb">
+              <button class="atcpbtn"><span class="atcpi">&#9654;</span></button>
+              <div class="atcinfo"><div class="atclbl"><span>&#127463;&#127478;</span> TNCB &middot; Bonaire Tower</div><div class="atcfreq">118.700 MHz &middot; Flamingo</div></div>
+              <div class="atcst"><span class="atcsd"></span><span class="atcst-t">Idle</span></div>
+              <div class="atcvol"><span class="atcvol-i">&#128266;</span><input type="range" min="0" max="100" value="80" class="atcvol-s"/></div>
             </div>
           </div>
         </div>

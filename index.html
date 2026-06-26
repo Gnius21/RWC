@@ -5233,7 +5233,8 @@ async function fetchWxExtra(key){
   const s = WX_STNS[key]; if(!s) return;
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}`+
-      `&current=uv_index&daily=sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto&forecast_days=7`;
+      `&current=uv_index&hourly=temperature_2m,apparent_temperature,precipitation_probability,weathercode`+
+      `&daily=sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto&forecast_days=2`;
     const ctrl = new AbortController(); const wxTimer = setTimeout(()=>ctrl.abort(), 8000);
     const res = await fetch(url, {signal:ctrl.signal, cache:'default'});
     clearTimeout(wxTimer);
@@ -5241,7 +5242,7 @@ async function fetchWxExtra(key){
     const j = await res.json();
     const uv = (j.current && j.current.uv_index != null) ? j.current.uv_index
              : (j.daily && j.daily.uv_index_max ? j.daily.uv_index_max[0] : null);
-    // Build 7-day forecast array
+    // Build 7-day forecast array (kept for any daily consumers)
     const fc = [];
     if(j.daily && j.daily.time){
       j.daily.time.forEach((dateStr,i)=>{
@@ -5254,11 +5255,29 @@ async function fetchWxExtra(key){
         });
       });
     }
+    // Build hourly forecast array, keeping only upcoming hours
+    const hourly = [];
+    if(j.hourly && j.hourly.time){
+      const nowMs = Date.now();
+      j.hourly.time.forEach((ts,i)=>{
+        const d = new Date(ts);
+        if(d.getTime() < nowMs - 3600000) return; // skip past hours (keep current hour)
+        hourly.push({
+          time:        ts,
+          hour:        d.getHours(),
+          temp:        j.hourly.temperature_2m         ? j.hourly.temperature_2m[i]         : null,
+          feels:       j.hourly.apparent_temperature   ? j.hourly.apparent_temperature[i]   : null,
+          precip_prob: j.hourly.precipitation_probability ? j.hourly.precipitation_probability[i] : null,
+          wmo:         j.hourly.weathercode            ? j.hourly.weathercode[i]            : null,
+        });
+      });
+    }
     WX_EXTRA[key] = {
       uv,
       sunrise: j.daily && j.daily.sunrise ? j.daily.sunrise[0] : null,
       sunset:  j.daily && j.daily.sunset  ? j.daily.sunset[0]  : null,
-      forecast: fc
+      forecast: fc,
+      hourly: hourly
     };
     // Fetch air quality separately (Open-Meteo Air Quality API)
     try {
@@ -5420,7 +5439,8 @@ function renderWxCard(key, P){
   if(P.time && timeEl) timeEl.textContent = P.time;
 
   const extra  = WX_EXTRA[key] || {};
-  const fc     = extra.forecast || null;          // 7-day daily forecast array
+  const fc     = extra.forecast || null;          // daily forecast array (kept for compatibility)
+  const hr     = extra.hourly   || null;          // upcoming hourly forecast array
   const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const now    = new Date();
@@ -5448,16 +5468,19 @@ function renderWxCard(key, P){
   const sunset  = fmtTime(extra.sunset);
 
   // ── 7-day forecast strip ─────────────────────────────────────────────────
+  // hour label helper: 0->'12AM', 13->'1PM', etc.
+  function hrLabel(h){ const ap=h<12?'AM':'PM'; let hh=h%12||12; return hh+ap; }
+
   let forecastStrip = '';
-  if(fc && fc.length){
-    forecastStrip = fc.slice(0,7).map((d,i)=>{
-      const dt  = new Date(d.date + 'T12:00:00'); // local noon: avoids UTC-midnight day shift
-      const day = i===0?'Today':DAYS[dt.getDay()];
-      const t   = d.temp_max!=null ? Math.round(d.temp_max) : '\u2014';
-      const ico = wxIconStyled(d.wmo!=null ? wmoToIcon(d.wmo) : 'sun', 40);
+  if(hr && hr.length){
+    forecastStrip = hr.slice(0,8).map((d,i)=>{
+      const isNight = d.hour>=20 || d.hour<6;
+      const lbl = i===0?'Now':hrLabel(d.hour);
+      const t   = d.temp!=null ? Math.round(d.temp) : '\u2014';
+      const ico = wxIconStyled(d.wmo!=null ? wmoToIcon(d.wmo, isNight) : 'sun', 40);
       return `<div class="wdb-fstrip-card">
         <div class="wdb-fstrip-ico">${ico}</div>
-        <div class="wdb-fstrip-day">${day}</div>
+        <div class="wdb-fstrip-day">${lbl}</div>
         <div class="wdb-fstrip-temp">${t} \u00b0C</div>
       </div>`;
     }).join('');
@@ -5465,17 +5488,17 @@ function renderWxCard(key, P){
 
   // ── Forecast line chart ──────────────────────────────────────────────────
   let chartSvg = '';
-  if(fc && fc.length >= 2){
+  if(hr && hr.length >= 2){
     const W=480, H=120, padL=32, padR=20, padT=28, padB=28;
-    const vals = fc.slice(0,7).map(d=>d.temp_max!=null?d.temp_max:null).filter(v=>v!=null);
+    const CH = hr.slice(0,12);
+    const vals = CH.map(d=>d.temp!=null?d.temp:null).filter(v=>v!=null);
     if(vals.length >= 2){
       const mn = Math.min(...vals)-0.5, mx = Math.max(...vals)+0.5;
-      const pts = fc.slice(0,7).map((d,i,arr)=>{
+      const pts = CH.map((d,i,arr)=>{
         const x = padL + (i/(arr.length-1))*(W-padL-padR);
-        const v = d.temp_max!=null?d.temp_max:null;
+        const v = d.temp!=null?d.temp:null;
         const y = v!=null ? padT + (1-(v-mn)/(mx-mn))*(H-padT-padB) : null;
-        const dt= new Date(d.date + 'T12:00:00');
-        return {x, y, v, day:i===0?'Today':DAYS[dt.getDay()]};
+        return {x, y, v, day:i===0?'Now':hrLabel(d.hour)};
       });
       const linePts = pts.filter(p=>p.y!=null);
       const path = 'M'+linePts.map(p=>p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' L');
@@ -5505,13 +5528,12 @@ function renderWxCard(key, P){
 
   // ── Rain probability bars ────────────────────────────────────────────────
   let rainBars = '';
-  if(fc && fc.length){
-    rainBars = fc.slice(0,7).map((d,i)=>{
-      const dt  = new Date(d.date + 'T12:00:00');
-      const day = i===0?'Today':DAYS[dt.getDay()];
+  if(hr && hr.length){
+    rainBars = hr.slice(0,8).map((d,i)=>{
+      const lbl = i===0?'Now':hrLabel(d.hour);
       const pct = d.precip_prob!=null ? Math.round(d.precip_prob) : 0;
       return `<div class="wdb-rain-row">
-        <span class="wdb-rain-day">${day}</span>
+        <span class="wdb-rain-day">${lbl}</span>
         <div class="wdb-rain-bar-bg"><div class="wdb-rain-bar-fill" style="width:${pct}%"></div></div>
         <span class="wdb-rain-pct">${pct}%</span>
       </div>`;
@@ -5593,7 +5615,7 @@ function renderWxCard(key, P){
     <!-- Forecast chart + Sunrise -->
     <div class="wdb-mid">
       <div class="wdb-chart-wrap">
-        <div class="wdb-section-ttl">Weather Forecast</div>
+        <div class="wdb-section-ttl">Hourly Forecast</div>
         ${chartSvg||'<div class="wdb-loading">Loading chart\u2026</div>'}
       </div>
       <div class="wdb-sunrise">
@@ -5644,16 +5666,16 @@ function renderWxCard(key, P){
 }
 
 /* helper: WMO code → icon key */
-function wmoToIcon(wmo){
-  if(wmo==null) return 'sun';
-  if(wmo<=1)  return 'sun';
-  if(wmo<=3)  return 'cloud-sun';
+function wmoToIcon(wmo, isNight){
+  if(wmo==null) return isNight ? 'moon' : 'sun';
+  if(wmo<=1)  return isNight ? 'moon' : 'sun';
+  if(wmo<=3)  return isNight ? 'cloud-moon' : 'cloud-sun';
   if(wmo<=49) return 'fog';
   if(wmo<=67) return 'rain';
   if(wmo<=77) return 'snow';
   if(wmo<=82) return 'showers';
   if(wmo<=99) return 'thunder';
-  return 'sun';
+  return isNight ? 'moon' : 'sun';
 }
 function cloudOktasToIcon(n){
   if(n<=1) return 'sun';

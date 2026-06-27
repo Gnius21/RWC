@@ -1574,6 +1574,158 @@ body.tab-hidden *{animation-play-state:paused !important;}
 /* Settings swatches active */
 :root.storm .theme-swatch.active { border-color: #60a5fa; box-shadow: 0 0 14px rgba(96,165,250,0.40); }
 
+/* ── Aurora theme (tropical emerald / teal sea) ── */
+:root.aurora {
+  --bg:    #04140f;
+  --card:  rgba(8,32,26,0.92);
+  --bdr:   rgba(45,212,191,0.18);
+  --bdrb:  rgba(94,234,212,0.42);
+  --txt:   #e4fff5;
+  --muted: #5fae9a;
+  --acc:   #2dd4bf;
+  --acc2:  #10b981;
+  --accd:  rgba(45,212,191,0.13);
+  --red:   #fb7185;
+  --redd:  rgba(251,113,133,0.12);
+  --grn:   #4ade80;
+  --grnd:  rgba(74,222,128,0.10);
+  --ylw:   #fbbf24;
+  --ylwd:  rgba(251,191,36,0.10);
+  --pur:   #22d3ee;
+  --purd:  rgba(34,211,238,0.12);
+  --gauge-track: rgba(45,212,191,0.16);
+  --gauge-halo:  rgba(16,185,129,0.24);
+}
+:root.aurora body { background: linear-gradient(140deg,#04140f 0%,#062a22 55%,#04201f 100%) !important; }
+:root.aurora body::before {
+  background:
+    radial-gradient(ellipse 1050px 720px at 8% 0%,   rgba(16,185,129,0.30) 0%, transparent 62%),
+    radial-gradient(ellipse 820px  640px at 94% 96%,  rgba(34,211,238,0.18) 0%, transparent 58%),
+    radial-gradient(ellipse 560px  460px at 52% 48%,  rgba(13,148,136,0.10) 0%, transparent 55%) !important;
+}
+:root.aurora .topbar  { background: rgba(4,22,17,0.90); border-bottom: 1px solid rgba(45,212,191,0.28); }
+:root.aurora nav.tabs { background: rgba(3,18,14,0.93); }
+:root.aurora .tab     { color: rgba(120,210,190,0.55); }
+:root.aurora .tab.active { background: linear-gradient(180deg,rgba(16,185,129,0.90),rgba(6,120,90,0.95)); border-color: rgba(94,234,212,0.50); box-shadow: 0 5px 18px rgba(13,148,136,0.50), 0 0 22px rgba(45,212,191,0.16), inset 0 1px 0 rgba(180,255,235,0.20); color: #eafff8; }
+:root.aurora .tab:hover:not(.active) { background: rgba(16,185,129,0.14); color: #5eead4; }
+:root.aurora .mon-tile,:root.aurora .mcard,:root.aurora .tcard,:root.aurora .wcard,:root.aurora .srow,:root.aurora .gfx-card,:root.aurora .gfx-tile,:root.aurora .map-cell,:root.aurora .wdb-metric,:root.aurora .wdb-hero,:root.aurora .wdb-chart-wrap,:root.aurora .wdb-sunrise,:root.aurora .wdb-aq-wrap,:root.aurora .wdb-rain-wrap,:root.aurora .wdb-fstrip-card,:root.aurora .sycard,:root.aurora .sforecast {
+  background: linear-gradient(135deg, rgba(12,55,44,0.55), rgba(5,26,21,0.84));
+  border-color: rgba(45,212,191,0.26);
+}
+:root.aurora .chip      { background: rgba(16,120,95,0.28); border-color: rgba(45,212,191,0.30); }
+:root.aurora .chip.cred { background: rgba(160,30,70,0.28); }
+:root.aurora .chip.cwrn { background: rgba(130,80,0,0.28); }
+:root.aurora .chip.cinf { background: rgba(13,120,140,0.26); }
+:root.aurora .hdr-ttl { background: linear-gradient(90deg,#2dd4bf,#4ade80); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
+:root.aurora .mon-style-btn.active { background: linear-gradient(180deg,rgba(16,185,129,0.88),rgba(6,120,90,0.94)); border-color: rgba(94,234,212,0.48); }
+:root.aurora .srow-hd { background: linear-gradient(90deg,rgba(16,185,129,0.12),transparent); border-color: rgba(45,212,191,0.20); }
+:root.aurora .wdb-rain-bar-fill { background: linear-gradient(90deg,#0d9488,#5eead4); }
+:root.aurora .gau-tile { background: linear-gradient(180deg,rgba(45,212,191,0.06),rgba(255,255,255,0.004)),rgba(8,34,28,0.92); border-color: rgba(45,212,191,0.20); }
+:root.aurora .mon-hum-bar-fill { background: linear-gradient(180deg,#99f6e4,#0d9488); box-shadow: 0 0 8px rgba(45,212,191,0.5),inset 0 1px 0 rgba(255,255,255,0.15); }
+:root.aurora .mon-pres-bar-dot { background: #2dd4bf; box-shadow: 0 0 10px rgba(45,212,191,0.85); }
+:root.aurora .theme-swatch.active { border-color: #2dd4bf; box-shadow: 0 0 14px rgba(45,212,191,0.40); }
+
+/* ── Sunset theme (Caribbean dusk — coral / amber / magenta) ── */
+:root.sunset {
+  --bg:    #16080f;
+  --card:  rgba(44,16,28,0.90);
+  --bdr:   rgba(251,146,60,0.18);
+  --bdrb:  rgba(253,186,116,0.44);
+  --txt:   #fff0ea;
+  --muted: #c0758c;
+  --acc:   #fb923c;
+  --acc2:  #f43f5e;
+  --accd:  rgba(251,146,60,0.14);
+  --red:   #f43f5e;
+  --redd:  rgba(244,63,94,0.12);
+  --grn:   #34d399;
+  --grnd:  rgba(52,211,153,0.10);
+  --ylw:   #fcd34d;
+  --ylwd:  rgba(252,211,77,0.10);
+  --pur:   #f472b6;
+  --purd:  rgba(244,114,182,0.12);
+  --gauge-track: rgba(251,146,60,0.18);
+  --gauge-halo:  rgba(244,63,94,0.22);
+}
+:root.sunset body { background: linear-gradient(150deg,#16080f 0%,#3a1018 50%,#2a1226 100%) !important; }
+:root.sunset body::before {
+  background:
+    radial-gradient(ellipse 1080px 740px at 6% 0%,   rgba(251,146,60,0.26) 0%, transparent 62%),
+    radial-gradient(ellipse 820px  650px at 95% 98%,  rgba(244,63,94,0.24) 0%, transparent 60%),
+    radial-gradient(ellipse 560px  460px at 50% 45%,  rgba(244,114,182,0.10) 0%, transparent 55%) !important;
+}
+:root.sunset .topbar  { background: rgba(26,8,16,0.90); border-bottom: 1px solid rgba(251,146,60,0.28); }
+:root.sunset nav.tabs { background: rgba(22,7,14,0.93); }
+:root.sunset .tab     { color: rgba(245,165,140,0.55); }
+:root.sunset .tab.active { background: linear-gradient(180deg,rgba(251,146,60,0.92),rgba(225,55,90,0.94)); border-color: rgba(253,186,116,0.52); box-shadow: 0 5px 18px rgba(225,80,60,0.48), 0 0 22px rgba(251,146,60,0.16), inset 0 1px 0 rgba(255,225,200,0.22); color: #fff6f0; }
+:root.sunset .tab:hover:not(.active) { background: rgba(251,146,60,0.14); color: #fdba74; }
+:root.sunset .mon-tile,:root.sunset .mcard,:root.sunset .tcard,:root.sunset .wcard,:root.sunset .srow,:root.sunset .gfx-card,:root.sunset .gfx-tile,:root.sunset .map-cell,:root.sunset .wdb-metric,:root.sunset .wdb-hero,:root.sunset .wdb-chart-wrap,:root.sunset .wdb-sunrise,:root.sunset .wdb-aq-wrap,:root.sunset .wdb-rain-wrap,:root.sunset .wdb-fstrip-card,:root.sunset .sycard,:root.sunset .sforecast {
+  background: linear-gradient(135deg, rgba(70,24,40,0.55), rgba(30,10,20,0.84));
+  border-color: rgba(251,146,60,0.24);
+}
+:root.sunset .chip      { background: rgba(180,70,40,0.28); border-color: rgba(251,146,60,0.30); }
+:root.sunset .chip.cred { background: rgba(190,20,60,0.30); }
+:root.sunset .chip.cwrn { background: rgba(160,90,0,0.30); }
+:root.sunset .chip.cinf { background: rgba(190,60,120,0.26); }
+:root.sunset .hdr-ttl { background: linear-gradient(90deg,#fb923c,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
+:root.sunset .mon-style-btn.active { background: linear-gradient(180deg,rgba(251,146,60,0.90),rgba(225,55,90,0.92)); border-color: rgba(253,186,116,0.50); }
+:root.sunset .srow-hd { background: linear-gradient(90deg,rgba(251,146,60,0.12),transparent); border-color: rgba(251,146,60,0.20); }
+:root.sunset .wdb-rain-bar-fill { background: linear-gradient(90deg,#f43f5e,#fb923c); }
+:root.sunset .gau-tile { background: linear-gradient(180deg,rgba(251,146,60,0.06),rgba(255,255,255,0.004)),rgba(44,16,28,0.92); border-color: rgba(251,146,60,0.20); }
+:root.sunset .mon-hum-bar-fill { background: linear-gradient(180deg,#fdba74,#f43f5e); box-shadow: 0 0 8px rgba(251,146,60,0.5),inset 0 1px 0 rgba(255,255,255,0.15); }
+:root.sunset .mon-pres-bar-dot { background: #fb923c; box-shadow: 0 0 10px rgba(251,146,60,0.85); }
+:root.sunset .theme-swatch.active { border-color: #fb923c; box-shadow: 0 0 14px rgba(251,146,60,0.40); }
+
+/* ── Mono theme (clean slate / cyan minimalist) ── */
+:root.mono {
+  --bg:    #0a0e14;
+  --card:  rgba(22,28,38,0.94);
+  --bdr:   rgba(120,140,170,0.16);
+  --bdrb:  rgba(160,182,210,0.36);
+  --txt:   #eef2f8;
+  --muted: #7b8aa0;
+  --acc:   #38bdf8;
+  --acc2:  #475569;
+  --accd:  rgba(56,189,248,0.12);
+  --red:   #f87171;
+  --redd:  rgba(248,113,113,0.12);
+  --grn:   #34d399;
+  --grnd:  rgba(52,211,153,0.10);
+  --ylw:   #fbbf24;
+  --ylwd:  rgba(251,191,36,0.10);
+  --pur:   #a78bfa;
+  --purd:  rgba(167,139,250,0.10);
+  --gauge-track: rgba(148,163,184,0.16);
+  --gauge-halo:  rgba(56,189,248,0.20);
+}
+:root.mono body { background: linear-gradient(160deg,#0a0e14 0%,#10151e 60%,#0c1119 100%) !important; }
+:root.mono body::before {
+  background:
+    radial-gradient(ellipse 1000px 700px at 12% -2%, rgba(56,189,248,0.10) 0%, transparent 58%),
+    radial-gradient(ellipse 760px  580px at 90% 95%,  rgba(100,116,139,0.10) 0%, transparent 55%) !important;
+}
+:root.mono .topbar  { background: rgba(10,14,20,0.90); border-bottom: 1px solid rgba(120,140,170,0.22); }
+:root.mono nav.tabs { background: rgba(8,12,18,0.93); }
+:root.mono .tab     { color: rgba(150,168,195,0.55); }
+:root.mono .tab.active { background: linear-gradient(180deg,rgba(56,140,200,0.55),rgba(30,55,85,0.92)); border-color: rgba(56,189,248,0.45); box-shadow: 0 5px 18px rgba(20,40,70,0.55), 0 0 18px rgba(56,189,248,0.12), inset 0 1px 0 rgba(180,210,240,0.18); color: #f0f6fc; }
+:root.mono .tab:hover:not(.active) { background: rgba(56,189,248,0.10); color: #7dd3fc; }
+:root.mono .mon-tile,:root.mono .mcard,:root.mono .tcard,:root.mono .wcard,:root.mono .srow,:root.mono .gfx-card,:root.mono .gfx-tile,:root.mono .map-cell,:root.mono .wdb-metric,:root.mono .wdb-hero,:root.mono .wdb-chart-wrap,:root.mono .wdb-sunrise,:root.mono .wdb-aq-wrap,:root.mono .wdb-rain-wrap,:root.mono .wdb-fstrip-card,:root.mono .sycard,:root.mono .sforecast {
+  background: linear-gradient(135deg, rgba(30,38,52,0.60), rgba(16,21,30,0.86));
+  border-color: rgba(120,140,170,0.22);
+}
+:root.mono .chip      { background: rgba(60,72,92,0.32); border-color: rgba(120,140,170,0.26); }
+:root.mono .chip.cred { background: rgba(150,50,50,0.28); }
+:root.mono .chip.cwrn { background: rgba(140,100,30,0.28); }
+:root.mono .chip.cinf { background: rgba(40,90,140,0.28); }
+:root.mono .hdr-ttl { background: linear-gradient(90deg,#38bdf8,#94a3b8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:none; }
+:root.mono .mon-style-btn.active { background: linear-gradient(180deg,rgba(56,140,200,0.55),rgba(30,55,85,0.9)); border-color: rgba(56,189,248,0.42); }
+:root.mono .srow-hd { background: linear-gradient(90deg,rgba(56,189,248,0.10),transparent); border-color: rgba(120,140,170,0.20); }
+:root.mono .wdb-rain-bar-fill { background: linear-gradient(90deg,#475569,#38bdf8); }
+:root.mono .gau-tile { background: linear-gradient(180deg,rgba(56,189,248,0.05),rgba(255,255,255,0.004)),rgba(22,28,38,0.94); border-color: rgba(120,140,170,0.20); }
+:root.mono .mon-hum-bar-fill { background: linear-gradient(180deg,#7dd3fc,#475569); box-shadow: 0 0 8px rgba(56,189,248,0.45),inset 0 1px 0 rgba(255,255,255,0.15); }
+:root.mono .mon-pres-bar-dot { background: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.85); }
+:root.mono .theme-swatch.active { border-color: #38bdf8; box-shadow: 0 0 14px rgba(56,189,248,0.38); }
+
 /* ── Theme polish (added depth, sheen & glow) ───────────────────────────── */
 /* Glass: frosted top-edge highlight + soft violet drop shadow for real depth */
 :root.glass .mon-tile, :root.glass .mcard, :root.glass .tcard, :root.glass .wcard,
@@ -1980,12 +2132,15 @@ body.tab-hidden *{animation-play-state:paused !important;}
 }
 #settings-panel.open { display: flex; }
 .settings-section-ttl { font-family: var(--cond); font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.theme-swatches { display: flex; gap: 8px; }
+.theme-swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .theme-swatch { flex: 1; padding: 9px 6px; border-radius: 11px; border: 2px solid transparent; cursor: pointer; text-align: center; font-family: var(--cond); font-size: 13px; font-weight: 700; letter-spacing: .4px; transition: all .2s; }
 .theme-swatch[data-theme="navy"]  { background: linear-gradient(160deg,#020c16,#051828); color: #4db8ff; border-color: rgba(77,184,255,0.22); }
 .theme-swatch[data-theme="glass"] { background: linear-gradient(160deg,#1a0a3c,#0d1a4a); color: #c084fc; border-color: rgba(192,132,252,0.22); }
 .theme-swatch[data-theme="neon"]  { background: linear-gradient(160deg,#080318,#1a0050); color: #00e5ff; border-color: rgba(0,229,255,0.22); }
 .theme-swatch[data-theme="storm"] { background: linear-gradient(160deg,#060b20,#0f2a7a); color: #60a5fa; border-color: rgba(96,165,250,0.22); }
+.theme-swatch[data-theme="aurora"]{ background: linear-gradient(160deg,#04140f,#0a4a3a); color: #2dd4bf; border-color: rgba(45,212,191,0.22); }
+.theme-swatch[data-theme="sunset"]{ background: linear-gradient(160deg,#16080f,#7a2030); color: #fb923c; border-color: rgba(251,146,60,0.24); }
+.theme-swatch[data-theme="mono"]  { background: linear-gradient(160deg,#0a0e14,#28323f); color: #38bdf8; border-color: rgba(120,140,170,0.26); }
 .theme-swatch.active { box-shadow: 0 0 14px var(--accd); }
 .theme-swatch:hover:not(.active) { filter: brightness(1.15); }
 .icon-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -11065,10 +11220,9 @@ function applyTheme(t){
   localStorage.setItem('rwc-theme', t);
   const root = document.documentElement;
   // Only remove theme classes, never touch 'night'
-  root.classList.remove('glass','neon','storm');
-  if(t === 'glass') root.classList.add('glass');
-  else if(t === 'neon') root.classList.add('neon');
-  else if(t === 'storm') root.classList.add('storm');
+  root.classList.remove('glass','neon','storm','aurora','sunset','mono');
+  // 'navy' is the base (no class); every other theme is a single class toggle.
+  if(t !== 'navy') root.classList.add(t);
   // Update swatch active state
   document.querySelectorAll('.theme-swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.theme === t);
@@ -11110,6 +11264,15 @@ function buildSettingsPanel(){
         </div>
         <div class="theme-swatch ${__currentTheme==='storm'?'active':''}" data-theme="storm" onclick="applyTheme('storm')">
           <div style="font-size:16px;margin-bottom:3px;">&#9928;</div>Storm
+        </div>
+        <div class="theme-swatch ${__currentTheme==='aurora'?'active':''}" data-theme="aurora" onclick="applyTheme('aurora')">
+          <div style="font-size:16px;margin-bottom:3px;">\u{1F33F}</div>Aurora
+        </div>
+        <div class="theme-swatch ${__currentTheme==='sunset'?'active':''}" data-theme="sunset" onclick="applyTheme('sunset')">
+          <div style="font-size:16px;margin-bottom:3px;">\u{1F305}</div>Sunset
+        </div>
+        <div class="theme-swatch ${__currentTheme==='mono'?'active':''}" data-theme="mono" onclick="applyTheme('mono')">
+          <div style="font-size:16px;margin-bottom:3px;">\u{1F311}</div>Mono
         </div>
       </div>
     </div>

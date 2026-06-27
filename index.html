@@ -1263,6 +1263,16 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .map-cell-shield.active{display:none;}
 
 
+/* ── Dashboard mini Windy radar + satellite (ABC-focused, built once) ── */
+.dash-windy-maps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.dash-windy-cell{position:relative;border:1px solid var(--bdr);border-radius:14px;overflow:hidden;background:rgba(5,18,34,0.6);}
+.dash-windy-hd{display:flex;align-items:center;gap:6px;padding:7px 11px;font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--acc);background:linear-gradient(90deg,rgba(26,111,255,0.12),transparent);border-bottom:1px solid var(--bdr);}
+.dash-windy-frame-wrap{position:relative;height:240px;}
+.dash-windy-frame-wrap iframe{width:100%;height:100%;border:none;display:block;}
+.dash-windy-ext{position:absolute;top:6px;right:6px;z-index:5;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(5,18,34,0.82);border:1px solid var(--bdrb);color:var(--acc);font-size:15px;text-decoration:none;backdrop-filter:blur(6px);}
+.dash-windy-ext:hover{background:rgba(77,184,255,0.22);}
+@media(max-width:760px){.dash-windy-maps{grid-template-columns:1fr;}.dash-windy-frame-wrap{height:220px;}}
+
 /* ═══ Weather Dashboard (IMG_6875 reference) ═══ */
 .wdb-wrap{display:flex;flex-direction:column;gap:10px;}
 /* TOP ROW: hero + forecast strip */
@@ -2531,6 +2541,8 @@ html,body{max-width:100%;overflow-x:hidden;}
     </div>
     <div class="mon-view" id="monViewDash" style="display:none;">
       <div id="dashboardsContent"></div>
+      <!-- Persistent Windy radar + satellite (built once so the iframes never reload on refresh) -->
+      <div id="dashWindyMaps" class="dash-windy-maps"></div>
     </div>
     <div class="mon-view" id="monViewSky" style="display:none;"></div>
     <div class="mon-view" id="monViewGauges" style="display:none;"></div>
@@ -6699,7 +6711,7 @@ async function updateMonitor(){
     // SkySense & Gauges views use forecast data for hourly/weekly strips.
     // If a non-current view is active and the forecast cache is empty, fetch it
     // independently (without needing the Forecast tab) and re-render that view.
-    if((__monStyle === 'sky' || __monStyle === 'gauges' || __monStyle === 'graphics') && !__lastForecastData){
+    if((__monStyle === 'sky' || __monStyle === 'gauges' || __monStyle === 'graphics' || __monStyle === 'home' || __monStyle === 'dashboards') && !__lastForecastData){
       updateForecast().then(() => { if(__monLastData) renderMonitorViews(__monLastData); }).catch(()=>{});
     }
   }
@@ -7449,9 +7461,63 @@ function renderDashboards(){
 window.renderDashboards = renderDashboards;
 
 /* Render dashboards to the Dashboards tab */
+/* Build the ABC-focused Windy radar + satellite once. The iframes live in a
+   persistent container (#dashWindyMaps) that renderDashboardsTab never rewrites,
+   so they keep streaming and never reload on the 60s dashboard refresh. */
+function ensureDashWindyMaps(){
+  const box = byId('dashWindyMaps');
+  if(!box || box.dataset.built) return;
+  box.dataset.built = '1';
+  // ABC islands centre (between Aruba, Curaçao, Bonaire)
+  const base = 'https://embed.windy.com/embed2.html?lat=12.2&lon=-69.0&detailLat=12.2&detailLon=-69.0&zoom=8&level=surface&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C';
+  const radarSrc = base + '&overlay=radar&product=radar';
+  const satSrc   = base + '&overlay=satellite&product=satellite';
+  box.innerHTML =
+    '<div class="dash-windy-cell">'
+      + '<div class="dash-windy-hd">\u{1F326} Radar · ABC Islands</div>'
+      + '<div class="dash-windy-frame-wrap">'
+        + '<a class="dash-windy-ext" href="https://www.windy.com/?radar,12.2,-69.0,8" target="_blank" rel="noopener" title="Open radar in Windy">↗</a>'
+        + '<iframe src="' + radarSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
+      + '</div>'
+    + '</div>'
+    + '<div class="dash-windy-cell">'
+      + '<div class="dash-windy-hd">\u{1F6F0}️ Satellite · ABC Islands</div>'
+      + '<div class="dash-windy-frame-wrap">'
+        + '<a class="dash-windy-ext" href="https://www.windy.com/?satellite,12.2,-69.0,8" target="_blank" rel="noopener" title="Open satellite in Windy">↗</a>'
+        + '<iframe src="' + satSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
+      + '</div>'
+    + '</div>';
+}
+
+/* Make sure every data source the dashboard reads is actually being fetched,
+   even if the user lands on the dashboard without opening Weather/Forecast. */
+function ensureDashData(){
+  // 7-day + hourly forecast (week strip, hourly tiles, temp curve)
+  if(!__lastForecastData && typeof updateForecast==='function' && !window.__dashFcLoading){
+    window.__dashFcLoading = true;
+    updateForecast()
+      .then(()=>{ window.__dashFcLoading=false; try{ renderDashboardsTab(); }catch(e){} })
+      .catch(()=>{ window.__dashFcLoading=false; });
+  }
+  // Air quality + UV + sun (Air Quality section) — normally only loaded by the Weather tab
+  const aqMissing = !(WX_EXTRA && WX_EXTRA.curacao && WX_EXTRA.curacao.aq);
+  if(aqMissing && typeof fetchWxExtra==='function' && !window.__dashAqLoading){
+    window.__dashAqLoading = true;
+    Promise.allSettled(['aruba','curacao','bonaire'].map(k=>fetchWxExtra(k)))
+      .then(()=>{ window.__dashAqLoading=false; try{ renderDashboardsTab(); }catch(e){} });
+  }
+  // Live conditions (synop/Open-Meteo/sea temp) if the monitor never ran
+  if(!__monLastData && typeof updateMonitor==='function' && !window.__dashMonLoading){
+    window.__dashMonLoading = true;
+    updateMonitor().then(()=>{ window.__dashMonLoading=false; }).catch(()=>{ window.__dashMonLoading=false; });
+  }
+}
+
 function renderDashboardsTab(){
   const host = byId('dashboardsContent');
   if(!host) return;
+  ensureDashWindyMaps();
+  ensureDashData();
   const d = __monLastData;
 
   // Apply / remove palette class on host

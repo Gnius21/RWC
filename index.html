@@ -429,6 +429,23 @@ tr:last-child td{border-bottom:none;}
 #tab-atc .atcvol{grid-area:v;}
 @media(max-width:480px){.atc-audio-bar-ttl{font-size:12px;letter-spacing:.5px;}}
 
+/* ── DESKTOP OPTIMIZATIONS (≥1000px / mouse) ── */
+@media(min-width:1000px){
+  /* ATC: radar and audio side by side instead of stacked */
+  #tab-atc .atc-layout{flex-direction:row;gap:0;}
+  #tab-atc .adsbcard{flex:1 1 auto;}
+  #tab-atc .atc-audio-section{flex:0 0 380px;border-top:none;border-left:1px solid var(--bdrb);}
+  #tab-atc .atcplayers{grid-template-columns:1fr;}
+  /* Slimmer tab bar for mouse use */
+  .tab{padding:12px 14px;min-height:48px;font-size:15px;}
+  /* Conditions map fills more vertical space on desktop */
+  .cond-map-body{height:calc(100vh - 280px);min-height:520px;}
+}
+@media(min-width:1500px){
+  #tab-atc .atc-audio-section{flex-basis:440px;}
+  #tab-atc .atcplayers{grid-template-columns:1fr 1fr;}
+}
+
 /* FORECAST ANIMATIONS */
 .fc-day-card{animation:fcCardSlide 0.6s cubic-bezier(0.22,0.61,0.36,1) backwards;}
 .fc-day-card:nth-child(2){animation-delay:0.05s;}
@@ -2138,7 +2155,7 @@ html,body{max-width:100%;overflow-x:hidden;}
 }
 @media(min-width:1600px){
   .topbar,.tabs,.content,.footer{max-width:1600px;}
-  .cond-map-body{height:520px;}
+  .cond-map-body{height:calc(100vh - 280px);min-height:560px;}
 }
 
 

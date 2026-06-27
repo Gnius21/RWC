@@ -3254,7 +3254,7 @@ function paintAvTs(){
   }
 }
 function setAvTs(id, label){ __avTs[id] = {label:label, at:Date.now(), clock:nowStamp()}; paintAvTs(); }
-setInterval(function(){ try { paintAvTs(); } catch(e){} }, 30000);
+setInterval(function(){ if(document.hidden) return; try { paintAvTs(); } catch(e){} }, 30000);
 
 /* ─── AUDIO ─── */
 let _ac=null;
@@ -5067,6 +5067,9 @@ function switchTab(name){
   tabs.forEach(t=>{ const on=t.dataset.tab===name; t.classList.toggle('active',on); t.setAttribute('aria-selected', on?'true':'false'); });
   Object.entries(panels).forEach(([k,p])=>p&&p.classList.toggle('hidden',k!==name));
   if(name!=='monitor' && __pwClockTimer){ clearInterval(__pwClockTimer); __pwClockTimer=null; }
+  // Stop the ADS-B flight poll (15s) when leaving the Maps tab — it otherwise
+  // keeps hitting a third-party API forever once the flights layer was enabled.
+  if(name!=='maps' && typeof __flightTimer!=='undefined' && __flightTimer){ clearInterval(__flightTimer); __flightTimer=null; }
   if(name==='stations'){
     if(!stationsTabOpened){ stationsTabOpened = true; fetchStationsData(); }
     setTimeout(()=>{if(leafMap&&!byId('mapCard').classList.contains('hidden'))leafMap.invalidateSize(); if(condMap) condMap.invalidateSize();},250);
@@ -9633,7 +9636,7 @@ function initCondMap(){
     // Tapping empty map closes the open station info box.
     if(__condSelectedStn){ __condSelectedStn = null; renderCondMap(); }
   });
-  // Auto-refresh rain + satellite tiles every 10 min
+  // Auto-refresh rain + satellite tiles every 3 min
   setInterval(function(){
     if(!condMap) return;
     fetch('https://api.rainviewer.com/public/weather-maps.json')
@@ -9644,20 +9647,29 @@ function initCondMap(){
           if(j.radar&&j.radar.nowcast) frames=frames.concat(j.radar.nowcast);
           var frame=frames.length?frames[frames.length-1]:null;
           if(frame&&j.host){
+            window.__rainFrames=frames.map(function(f){return f.path;}); window.__rainHost=j.host;
             var newRain=L.tileLayer(j.host+frame.path+'/256/{z}/{x}/{y}/8/1_1.png',{opacity:0.75,maxZoom:12,attribution:'RainViewer'});
-            if(condRainLayer&&condMap.hasLayer(condRainLayer)){ newRain.addTo(condMap); condMap.removeLayer(condRainLayer); }
+            // Swap based on the toggle state, not just current attachment, so a
+            // freshly-toggled rain layer still gets the newest frame.
+            if(__condMapLayers.rain) newRain.addTo(condMap);
+            if(condRainLayer&&condMap.hasLayer(condRainLayer)) condMap.removeLayer(condRainLayer);
             condRainLayer=newRain;
           }
           var sat=(j.satellite&&j.satellite.infrared)?j.satellite.infrared:[];
           var sframe=sat.length?sat[sat.length-1]:null;
           if(sframe&&j.host){
-            var _oldSat=condSatLive;
             var newSat=L.tileLayer(j.host+sframe.path+'/256/{z}/{x}/{y}/1/1_1.png',{opacity:0,className:'cond-ir-tiles',maxZoom:12,attribution:'RainViewer IR · GOES-19',zIndex:200});
-            newSat.addTo(condMap);
-            newSat.once('load',function(){
-              newSat.setOpacity(0.75);
-              if(_oldSat&&condMap.hasLayer(_oldSat)) condMap.removeLayer(_oldSat);
-            });
+            // Only paint the refreshed IR when the satellite toggle is ON; renderCondMap
+            // adds it correctly if the user re-enables the layer later.
+            if(__condMapLayers.satellite){
+              var _oldSat=condSatLive;
+              newSat.addTo(condMap);
+              newSat.once('load',function(){
+                newSat.setOpacity(0.75);
+                if(_oldSat&&condMap.hasLayer(_oldSat)) condMap.removeLayer(_oldSat);
+                if(condSatLayer&&condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
+              });
+            }
             condSatLive=newSat;
           }
         }catch(e){}
@@ -9988,6 +10000,10 @@ function buildStationBox(s, mp){
 
 function renderCondMap(){
   if(!condMap || !__condMapReady) return;
+  // Skip all marker/layer/network work when the Maps tab isn't visible — the
+  // METAR (30s) and KNMI (5min) refresh loops call this regardless of tab.
+  var _mapsTab = byId('tab-maps');
+  if(_mapsTab && _mapsTab.classList.contains('hidden')) return;
   // Station condition markers
   condMarkerLayer.clearLayers();
   if(__condMapLayers.stations || __condMapLayers.wind){
@@ -10959,7 +10975,7 @@ function updateTitle(){
   });
   document.title = (crit?`\u{1F534} `:warn?`\u{1F7E1} `:'') + 'RWC Caribbean' + (crit?` \u00b7 ${crit} alert${crit>1?'s':''}`:'');
 }
-setInterval(updateTitle, 5000);
+setInterval(function(){ if(!document.hidden) updateTitle(); }, 5000);
 
 init();
 
@@ -11086,7 +11102,7 @@ window.toggleMapLock = toggleMapLock;
     txt.textContent = label;
     el.className = 'fresh-badge' + (sec >= 1800 ? ' old' : sec >= 300 ? ' stale' : '');
   }
-  if(typeof setInterval==='function') setInterval(updateFreshBadge, 5000);
+  if(typeof setInterval==='function') setInterval(function(){ if(!document.hidden) updateFreshBadge(); }, 5000);
   setTimeout(updateFreshBadge, 1500);
 })();
 

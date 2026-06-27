@@ -540,6 +540,10 @@ tr:last-child td{border-bottom:none;}
 .mon-grid{display:grid;grid-template-columns:1.05fr 1.35fr 1.35fr;grid-template-rows:1fr 1fr 1fr 1fr;gap:8px;flex:1;min-height:0;}
 .mon-wind,.mon-temp{grid-row:span 2;}
 .mon-hum{grid-row:span 2;}
+/* Dashboard / alternate faces have long content — let them scroll within the
+   fixed-height monitor tab on desktop (otherwise overflow:hidden clips the
+   Windy maps and lower cards). */
+#monViewDash,#monViewHome,#monViewSky,#monViewGauges,#monViewGraphics{flex:1;min-height:0;overflow-y:auto;}
 @media(max-width:1100px){
   #tab-monitor{height:auto;overflow:visible;}
   .mon-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:auto;flex:initial;}

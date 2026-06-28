@@ -9776,6 +9776,15 @@ var CMAP_STNS = [
 var CMAP_EXTRA_ICAOS = ['TJSJ','TBPB','TTPP'];
 window.__cmapMetars = {};
 
+/* Recent GIBS timestamp for GOES near-real-time IR: 30 min back, floored to a
+   10-min boundary, formatted YYYY-MM-DDTHH:MM:SSZ (covers GIBS ingest latency). */
+function _gibsIRTime(){
+  var d = new Date(Date.now() - 30*60*1000);
+  d.setUTCSeconds(0,0);
+  d.setUTCMinutes(Math.floor(d.getUTCMinutes()/10)*10);
+  return d.toISOString().slice(0,19) + 'Z';
+}
+
 function initCondMap(){
   if(condMap || typeof L==='undefined') return;
   // Locked view: ABC islands + eastern Caribbean out to Barbados / San Juan.
@@ -9813,13 +9822,16 @@ function initCondMap(){
     version: '1.3.0', attribution: 'NOAA NHC', minZoom: 8, maxZoom: 9
   });
 
-  // ── SATELLITE: GOES-19 East infrared (nowCOAST WMS, 5-min updates, 2km) ──
-  // Primary fallback while RainViewer IR loads; GOES-19 East covers the Caribbean at 75.2°W
-  condSatLayer = L.tileLayer.wms('https://nowcoast.noaa.gov/geoserver/satellite/wms', {
-    layers: 'goes_east_longwave_imagery', format: 'image/png', transparent: true,
-    opacity: 0.7, className: 'cond-ir-tiles', version: '1.3.0',
-    attribution: 'GOES-19 East · NOAA/NESDIS', maxZoom: 12
+  // ── SATELLITE: GOES-East Clean Infrared via NASA GIBS WMS (free, no key, CORS) ──
+  // WMS (not WMTS) so we don't depend on a specific tile-matrix level; GIBS serves
+  // near-real-time geostationary IR with a sub-daily TIME dimension (~10-min frames).
+  // mix-blend-mode:screen (.cond-ir-tiles) keeps only the bright clouds (Windy-style).
+  condSatLayer = L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi', {
+    layers: 'GOES-East_ABI_Band13_Clean_Infrared', format: 'image/png', transparent: true,
+    opacity: 0.72, className: 'cond-ir-tiles', maxZoom: 12, zIndex: 200,
+    attribution: 'NASA GIBS · GOES-East IR', TIME: _gibsIRTime()
   });
+  if(__condMapLayers.satellite && condMap) condSatLayer.addTo(condMap);
 
   // ── RAIN + LIVE INFRARED SATELLITE: RainViewer (free, no key) — same API ──
   fetch('https://api.rainviewer.com/public/weather-maps.json')
@@ -9836,17 +9848,8 @@ function initCondMap(){
             {opacity:0.75, maxZoom:12, attribution:'RainViewer'});
           if(__condMapLayers.rain && condMap) condRainLayer.addTo(condMap);
         }
-        // LIVE infrared satellite (~10-min updates) — preferred over the laggy GMGSI WMS
-        var sat = (j.satellite && j.satellite.infrared) ? j.satellite.infrared : [];
-        var sframe = sat.length ? sat[sat.length-1] : null;
-        if(sframe && j.host){
-          condSatLive = L.tileLayer(j.host + sframe.path + '/256/{z}/{x}/{y}/1/1_1.png',
-            {opacity:0.75, className:'cond-ir-tiles', maxZoom:12, attribution:'RainViewer IR · GOES-19', zIndex:200});
-          if(__condMapLayers.satellite && condMap){
-            if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
-            condSatLive.addTo(condMap);
-          }
-        }
+        // Satellite is served by NASA GIBS (condSatLayer) — RainViewer no longer
+        // provides an infrared product, so only rain comes from this feed.
       }catch(e){}
     })
     .catch(function(){});
@@ -9885,25 +9888,12 @@ function initCondMap(){
             if(condRainLayer&&condMap.hasLayer(condRainLayer)) condMap.removeLayer(condRainLayer);
             condRainLayer=newRain;
           }
-          var sat=(j.satellite&&j.satellite.infrared)?j.satellite.infrared:[];
-          var sframe=sat.length?sat[sat.length-1]:null;
-          if(sframe&&j.host){
-            var newSat=L.tileLayer(j.host+sframe.path+'/256/{z}/{x}/{y}/1/1_1.png',{opacity:0,className:'cond-ir-tiles',maxZoom:12,attribution:'RainViewer IR · GOES-19',zIndex:200});
-            // Only paint the refreshed IR when the satellite toggle is ON; renderCondMap
-            // adds it correctly if the user re-enables the layer later.
-            if(__condMapLayers.satellite){
-              var _oldSat=condSatLive;
-              newSat.addTo(condMap);
-              newSat.once('load',function(){
-                newSat.setOpacity(0.75);
-                if(_oldSat&&condMap.hasLayer(_oldSat)) condMap.removeLayer(_oldSat);
-                if(condSatLayer&&condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
-              });
-            }
-            condSatLive=newSat;
-          }
         }catch(e){}
       }).catch(function(){});
+    // Refresh the GIBS GOES IR frame to the newest available timestamp.
+    if(condSatLayer && typeof condSatLayer.setParams === 'function'){
+      condSatLayer.setParams({ TIME: _gibsIRTime() });
+    }
   }, 3*60*1000);
 }
 
@@ -10368,17 +10358,10 @@ function renderCondMap(){
     else if(condMap.hasLayer(condRainLayer)){ condMap.removeLayer(condRainLayer); }
   }
 
-  // Satellite — prefer RainViewer live IR; fall back to NOAA WMS while it loads
-  if(__condMapLayers.satellite){
-    if(condSatLive){
-      condSatLive.addTo(condMap);
-      if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
-    } else if(condSatLayer){
-      condSatLayer.addTo(condMap);
-    }
-  } else {
-    if(condSatLive && condMap.hasLayer(condSatLive)) condMap.removeLayer(condSatLive);
-    if(condSatLayer && condMap.hasLayer(condSatLayer)) condMap.removeLayer(condSatLayer);
+  // Satellite — NASA GIBS GOES-East Clean IR
+  if(condSatLayer){
+    if(__condMapLayers.satellite){ condSatLayer.addTo(condMap); }
+    else if(condMap.hasLayer(condSatLayer)){ condMap.removeLayer(condSatLayer); }
   }
 
   // Storm cone (NHC) — only paints pixels when a storm is active, otherwise transparent

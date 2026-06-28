@@ -9864,6 +9864,11 @@ function initCondMap(){
   // Auto-refresh rain + satellite tiles every 3 min
   setInterval(function(){
     if(!condMap) return;
+    // Don't fetch/rebuild tile layers while backgrounded or off the Maps tab —
+    // renderCondMap re-adds the current layers when the user returns.
+    if(document.hidden) return;
+    var _mt = byId('tab-maps');
+    if(_mt && _mt.classList.contains('hidden')) return;
     fetch('https://api.rainviewer.com/public/weather-maps.json')
       .then(function(r){ return r.json(); })
       .then(function(j){

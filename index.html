@@ -9829,7 +9829,8 @@ function initCondMap(){
   condSatLayer = L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi', {
     layers: 'GOES-East_ABI_Band13_Clean_Infrared', format: 'image/png', transparent: true,
     opacity: 0.72, className: 'cond-ir-tiles', maxZoom: 12, zIndex: 200,
-    attribution: 'NASA GIBS · GOES-East IR', TIME: _gibsIRTime()
+    attribution: 'NASA GIBS · GOES-East IR', TIME: _gibsIRTime(),
+    bounds: L.latLngBounds(VIEW_BOUNDS)   // only request/show tiles over the Caribbean
   });
   if(__condMapLayers.satellite && condMap) condSatLayer.addTo(condMap);
 

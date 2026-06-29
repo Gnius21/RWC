@@ -9817,12 +9817,13 @@ function initCondMap(){
     minZoom: 6, maxZoom: 9
   }).fitBounds([[9.5,-75.5],[17.5,-59.0]]);
   condMap.setMaxBounds(VIEW_BOUNDS);
-  // Real-colour satellite basemap (Windy-style: blue sea, green islands)
-  // with a transparent place-name layer on top so the towns stay readable.
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {maxZoom:13, attribution:'&copy; Esri World Imagery'}).addTo(condMap);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
-    {maxZoom:13, subdomains:'abcd', attribution:'&copy; CartoDB', pane:'overlayPane', opacity:0.9}).addTo(condMap);
+  // Dark basemap (CartoDB Dark Matter): a near-black land/sea canvas so the
+  // coloured overlays (rain radar, satellite clouds, wind vanes, buoys) read with
+  // high contrast. Light place-name labels sit on top so towns stay readable.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    {maxZoom:19, subdomains:'abcd', attribution:'&copy; CartoDB'}).addTo(condMap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',
+    {maxZoom:19, subdomains:'abcd', attribution:'&copy; CartoDB', pane:'overlayPane', opacity:0.85}).addTo(condMap);
   condMarkerLayer = L.layerGroup().addTo(condMap);
 
   // Rain status badge (bottom-left): cell movement direction + short-term outlook

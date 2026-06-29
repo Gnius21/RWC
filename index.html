@@ -670,7 +670,10 @@ tr:last-child td{border-bottom:none;}
 .mon-radar{padding:0;overflow:hidden;}
 .mon-radar .mon-tile-hd{padding:10px 12px 6px;margin-bottom:0;background:linear-gradient(180deg,rgba(8,18,32,0.92),rgba(8,18,32,0.6));backdrop-filter:blur(4px);position:relative;z-index:2;}
 .mon-radar-body{flex:1;position:relative;min-height:320px;background:#0a1525;border-radius:8px;overflow:hidden;}
-.mon-radar-body iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
+/* Oversize + offset the Windy iframe so its chrome (logo, overlay-name pill, zoom
+   buttons, bottom timeline + colour legend) is pushed outside the clipped wrapper
+   — leaving just the live map image. */
+.mon-radar-body iframe{position:absolute;top:-52px;left:-52px;width:calc(100% + 104px);height:calc(100% + 140px);border:0;display:block;}
 .mon-radar-link{position:absolute;top:8px;right:8px;z-index:3;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(8,18,32,0.85);border:1px solid var(--bdr);color:var(--acc);font-size:15px;text-decoration:none;backdrop-filter:blur(4px);transition:all .2s;}
 .mon-radar-link:hover{background:rgba(77,184,255,0.15);border-color:rgba(77,184,255,0.45);transform:translate(1px,-1px);}
 .mon-radar::before{display:none;}
@@ -1258,8 +1261,9 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .map-cell-ic{font-size:15px;}
 .map-cell-ext{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);text-decoration:none;line-height:1;transition:color .15s;}
 .map-cell-ext:hover{color:var(--acc);}
-.map-cell-frame{flex:1;position:relative;min-height:0;height:100%;}
-.windy-frame{width:100%;height:100%;min-height:320px;border:none;display:block;}
+.map-cell-frame{flex:1;position:relative;min-height:320px;height:100%;overflow:hidden;}
+/* Crop the Windy chrome (logo / labels / zoom / timeline / legend) out of view */
+.windy-frame{position:absolute;top:-52px;left:-52px;width:calc(100% + 104px);height:calc(100% + 140px);border:none;display:block;}
 /* Shield: transparent overlay that captures scroll, click activates iframe */
 .map-cell-shield{position:absolute;inset:0;z-index:2;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.01);transition:background .2s;}
 .map-cell-shield::after{content:'\1F512  Click to interact';font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.5px;color:rgba(200,225,255,0.0);background:rgba(8,18,40,0.0);padding:5px 10px;border-radius:20px;transition:all .2s;pointer-events:none;}
@@ -1272,7 +1276,9 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .dash-windy-cell{position:relative;border:1px solid var(--bdr);border-radius:14px;overflow:hidden;background:rgba(5,18,34,0.6);}
 .dash-windy-hd{display:flex;align-items:center;gap:6px;padding:7px 11px;font-family:var(--cond);font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--acc);background:linear-gradient(90deg,rgba(26,111,255,0.12),transparent);border-bottom:1px solid var(--bdr);}
 .dash-windy-frame-wrap{position:relative;height:240px;}
-.dash-windy-frame-wrap iframe{width:100%;height:100%;border:none;display:block;}
+.dash-windy-frame-wrap{position:relative;overflow:hidden;}
+/* Crop the Windy chrome out so only the live map image shows */
+.dash-windy-frame-wrap iframe{position:absolute;top:-52px;left:-52px;width:calc(100% + 104px);height:calc(100% + 140px);border:none;display:block;}
 .dash-windy-ext{position:absolute;top:6px;right:6px;z-index:5;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(5,18,34,0.82);border:1px solid var(--bdrb);color:var(--acc);font-size:16px;text-decoration:none;backdrop-filter:blur(6px);}
 .dash-windy-ext:hover{background:rgba(77,184,255,0.22);}
 @media(max-width:760px){.dash-windy-maps{grid-template-columns:1fr;}.dash-windy-frame-wrap{height:220px;}}

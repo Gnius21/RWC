@@ -3186,7 +3186,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <button class="cmap-btn" data-layer="stations" onclick="condMapToggle('stations',this)" title="Show weather station markers">&#9681; Stations</button>
             <button class="cmap-btn active" data-layer="wind" onclick="condMapToggle('wind',this)" title="Show wind vanes">&#127788; Wind</button>
             <button class="cmap-btn active" data-layer="rain" onclick="condMapToggle('rain',this)" title="RainViewer radar">&#127783; Rain</button>
-            <button class="cmap-btn active" data-layer="satellite" onclick="condMapToggle('satellite',this)" title="Live infrared satellite">&#128752; Satellite</button>
+            <button class="cmap-btn" data-layer="satellite" onclick="condMapToggle('satellite',this)" title="Live infrared satellite">&#128752; Satellite</button>
             <button class="cmap-btn" data-layer="dust" onclick="condMapToggle('dust',this)" title="Saharan dust overlay">&#127773; Dust</button>
             <button class="cmap-btn" data-layer="marine" onclick="condMapToggle('marine',this)" title="Wave &amp; swell data">&#127754; Waves</button>
             <button class="cmap-btn active" data-layer="buoys" onclick="condMapToggle('buoys',this)" title="NDBC ocean buoys">&#128679; Buoys</button>
@@ -9760,7 +9760,7 @@ window.__fcDebug = () => __lastForecastData;
 var condMap = null, condMarkerLayer = null, condWindLayer = null;
 var condRainLayer = null, condSatLayer = null, condSatLive = null, condDustCircle = null, condMarineMarker = null, condBuoyLayer = null, __buoyCache = null, condStormLayer = null, __satMode = null;
 var condFlightLayer = null, __flightTimer = null, __flightBusy = false;
-var __condMapLayers = {stations:false, wind:true, rain:true, satellite:true, dust:false, marine:false, buoys:true, storm:true, flights:false, info:true};
+var __condMapLayers = {stations:false, wind:true, rain:true, satellite:false, dust:false, marine:false, buoys:true, storm:true, flights:false, info:true};
 var __condMapReady = false;
 var __condSelectedStn = null;   // station whose full info box is currently shown (tap to select)
 
@@ -9782,10 +9782,11 @@ var CMAP_STNS = [
 var CMAP_EXTRA_ICAOS = ['TJSJ','TBPB','TTPP'];
 window.__cmapMetars = {};
 
-/* Recent GIBS timestamp for GOES near-real-time IR: 30 min back, floored to a
-   10-min boundary, formatted YYYY-MM-DDTHH:MM:SSZ (covers GIBS ingest latency). */
+/* GIBS timestamp for GOES IR: 70 min back, floored to a 10-min boundary
+   (YYYY-MM-DDTHH:MM:SSZ). Using a fully-ingested older frame avoids the blank
+   tiles that appear when the very latest frame is only partially written. */
 function _gibsIRTime(){
-  var d = new Date(Date.now() - 30*60*1000);
+  var d = new Date(Date.now() - 70*60*1000);
   d.setUTCSeconds(0,0);
   d.setUTCMinutes(Math.floor(d.getUTCMinutes()/10)*10);
   return d.toISOString().slice(0,19) + 'Z';
@@ -9952,10 +9953,11 @@ window.condMapPlay = condMapPlay;
    Free, key-less community feeds (CORS-enabled). We query a single 250 nm
    circle centred on the ABC chain and plot each contact as a heading-rotated
    plane. Endpoints are tried in order so one outage doesn't kill the layer. */
+// Centred on Curaçao/Hato (TNCC) with a tight radius — we only show Curaçao traffic.
 var FLIGHT_SRCS = [
-  'https://api.adsb.lol/v2/lat/12.4/lon/-68.4/dist/250',
-  'https://opendata.adsb.fi/api/v2/lat/12.4/lon/-68.4/dist/250',
-  'https://api.airplanes.live/v2/point/12.4/-68.4/250'
+  'https://api.adsb.lol/v2/lat/12.19/lon/-68.96/dist/90',
+  'https://opendata.adsb.fi/api/v2/lat/12.19/lon/-68.96/dist/90',
+  'https://api.airplanes.live/v2/point/12.19/-68.96/90'
 ];
 function planeSvg(col){
   // Plane pointing NORTH (0°); caller rotates the wrapper by the track angle.
@@ -9980,8 +9982,18 @@ async function fetchCondFlights(){
   __flightBusy = false;
   if(!data || !condFlightLayer || !__condMapLayers.flights) return;
   condFlightLayer.clearLayers();
-  // Closest-first, capped so a busy sky stays readable.
-  data = data.filter(function(a){ return a && a.lat!=null && a.lon!=null; }).slice(0, 140);
+  // Curaçao (Hato/TNCC) traffic only. ADS-B carries no flight plan, so we proxy
+  // "to/from Curaçao" as: within ~100 km of Hato AND at climb/descent altitude
+  // (or on the ground) — i.e. arrivals/departures, not high overflights.
+  var _TNCC_LAT = 12.19, _TNCC_LON = -68.96;
+  data = data.filter(function(a){
+    if(!a || a.lat==null || a.lon==null) return false;
+    if(knDist(_TNCC_LAT, _TNCC_LON, a.lat, a.lon) > 100) return false;
+    var alt = a.alt_baro;
+    if(alt === 'ground') return true;
+    if(typeof alt !== 'number') return true;   // unknown alt — keep (likely low)
+    return alt < 26000;                         // exclude high overflights
+  }).slice(0, 140);
   data.forEach(function(a){
     var alt = a.alt_baro;
     var onGround = (alt === 'ground');

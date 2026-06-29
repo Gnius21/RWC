@@ -9822,14 +9822,14 @@ function initCondMap(){
     version: '1.3.0', attribution: 'NOAA NHC', minZoom: 8, maxZoom: 9
   });
 
-  // ── SATELLITE: GOES-East Clean Infrared via NASA GIBS WMS (free, no key, CORS) ──
-  // WMS (not WMTS) so we don't depend on a specific tile-matrix level; GIBS serves
-  // near-real-time geostationary IR with a sub-daily TIME dimension (~10-min frames).
-  // mix-blend-mode:screen (.cond-ir-tiles) keeps only the bright clouds (Windy-style).
+  // ── SATELLITE: GOES-East GeoColor via NASA GIBS WMS (free, no key, CORS) ──
+  // GeoColor is a true satellite-imagery product (realistic clouds day, IR-blue
+  // clouds at night) — shown as a normal overlay (no screen-blend, which made the
+  // Clean-IR product look like a flat grey rectangle). WMS serves any zoom level.
   condSatLayer = L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi', {
-    layers: 'GOES-East_ABI_Band13_Clean_Infrared', format: 'image/png', transparent: true,
-    opacity: 0.72, className: 'cond-ir-tiles', maxZoom: 12, zIndex: 200,
-    attribution: 'NASA GIBS · GOES-East IR', TIME: _gibsIRTime(),
+    layers: 'GOES-East_ABI_GeoColor', format: 'image/png', transparent: true,
+    opacity: 0.85, maxZoom: 12, zIndex: 200,
+    attribution: 'NASA GIBS · GOES-East GeoColor', TIME: _gibsIRTime(),
     bounds: L.latLngBounds(VIEW_BOUNDS)   // only request/show tiles over the Caribbean
   });
   if(__condMapLayers.satellite && condMap) condSatLayer.addTo(condMap);

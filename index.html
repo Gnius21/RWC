@@ -9797,16 +9797,22 @@ var CMAP_VIEW_BOUNDS = [[9.0,-76.0],[19.5,-58.5]];
    - 'night' → GOES-East Clean IR, screen-blended (.cond-ir-tiles) so clouds read
                light over the dark night map */
 function makeSatLayer(mode){
-  var common = { format:'image/png', transparent:true, maxZoom:12, zIndex:200,
-    TIME:_gibsIRTime(), bounds:L.latLngBounds(CMAP_VIEW_BOUNDS) };
+  var common = { maxZoom:12, zIndex:200, TIME:_gibsIRTime(),
+    bounds:L.latLngBounds(CMAP_VIEW_BOUNDS) };
   if(mode === 'night'){
+    // Clean IR is a PNG product (transparent clear-sky); screen-blend so the
+    // cloud tops read light over the dark night map.
     return L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
       Object.assign({}, common, { layers:'GOES-East_ABI_Band13_Clean_Infrared',
-        opacity:0.8, className:'cond-ir-tiles', attribution:'NASA GIBS · GOES-East IR (night)' }));
+        format:'image/png', transparent:true, opacity:0.85, className:'cond-ir-tiles',
+        attribution:'NASA GIBS · GOES-East IR (night)' }));
   }
+  // GeoColor is a JPEG product (no alpha) — must be requested as image/jpeg, else
+  // GIBS returns nothing for a transparent-PNG request. Opaque overlay at 0.9.
   return L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
     Object.assign({}, common, { layers:'GOES-East_ABI_GeoColor',
-      opacity:0.85, attribution:'NASA GIBS · GOES-East GeoColor (day)' }));
+      format:'image/jpeg', transparent:false, opacity:0.9,
+      attribution:'NASA GIBS · GOES-East GeoColor (day)' }));
 }
 
 function initCondMap(){

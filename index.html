@@ -9792,17 +9792,15 @@ function _satIsDay(){
   return lh >= 6 && lh < 18.5;
 }
 var CMAP_VIEW_BOUNDS = [[9.0,-76.0],[19.5,-58.5]];
-/* Satellite = NASA GIBS GOES-East GeoColor, a full-coverage true-image product.
-   GeoColor renders true-colour clouds in daylight and automatically switches to a
-   lighter IR cloud rendering at night, so a single layer covers the whole map at
-   all hours. It's a JPEG product (no alpha) → must be requested as image/jpeg;
-   drawn as a normal overlay (NOT screen-blended — that only revealed clouds over
-   dark ocean, which is why earlier IR builds showed a partial rectangle). */
+/* Satellite = NASA GIBS GOES-East Clean Infrared (PNG) — the product that reliably
+   loads via GIBS WMS (GeoColor's JPEG request came back blank → black map). On the
+   dark basemap it's drawn as a plain overlay (NO screen-blend): white/grey cloud
+   tops over the near-black canvas give a full-coverage IR satellite view, 24/7. */
 function makeSatLayer(mode){
   return L.tileLayer.wms('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi', {
-    layers:'GOES-East_ABI_GeoColor', format:'image/jpeg', transparent:false,
-    opacity:0.9, maxZoom:12, zIndex:200, TIME:_gibsIRTime(),
-    bounds:L.latLngBounds(CMAP_VIEW_BOUNDS), attribution:'NASA GIBS · GOES-East GeoColor'
+    layers:'GOES-East_ABI_Band13_Clean_Infrared', format:'image/png', transparent:true,
+    opacity:0.85, maxZoom:12, zIndex:200, TIME:_gibsIRTime(),
+    bounds:L.latLngBounds(CMAP_VIEW_BOUNDS), attribution:'NASA GIBS · GOES-East IR'
   });
 }
 

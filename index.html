@@ -5323,6 +5323,12 @@ function switchWxView(view, btn){
 window.switchWxView = switchWxView;
 
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+// Island-average tiles in Monitor→Current open the embedded Stations tab
+document.querySelectorAll('.mon-islt, .mon-stavg').forEach(function(t){
+  t.style.cursor='pointer';
+  t.setAttribute('title','Open Stations');
+  t.addEventListener('click', function(){ switchTab('stations'); });
+});
 
 /* PWA shortcut deep-linking — manifest shortcuts pass a #hash */
 (function(){
@@ -6291,6 +6297,7 @@ function renderWxTileForecast(hours){
     '<div class="mon-wxfc-l">&nbsp;</div>' +
     '<div class="mon-wxfc-l">Feels</div>' +
     '<div class="mon-wxfc-l">Rain</div>' +
+    '<div class="mon-wxfc-l">mm</div>' +
     '<div class="mon-wxfc-l">Wind</div>' +
     '<div class="mon-wxfc-l">Dust</div>' +
   '</div>';
@@ -6307,7 +6314,8 @@ function renderWxTileForecast(hours){
     return '<div class="mon-wxfc-col">' +
       '<div class="mon-wxfc-hr">' + String(x.h).padStart(2,'0') + 'h</div>' +
       '<div class="mon-wxfc-v" style="color:' + fCol + '">' + (feels != null ? feels + '°' : '—') + '</div>' +
-      '<div class="mon-wxfc-v" style="color:' + rCol + '">' + (pop != null ? pop + '%' : '—') + (mm >= 0.1 ? ' <small>' + mm.toFixed(1) + '</small>' : '') + '</div>' +
+      '<div class="mon-wxfc-v" style="color:' + rCol + '">' + (pop != null ? pop + '%' : '—') + '</div>' +
+      '<div class="mon-wxfc-v" style="color:' + rCol + '"><small>' + (mm >= 0.1 ? mm.toFixed(1) : '—') + '</small></div>' +
       '<div class="mon-wxfc-v" style="color:' + wCol + '">' + (wind != null ? wind + '<small>kt</small>' : '—') + '</div>' +
       '<div class="mon-wxfc-v" style="color:' + dCol + '">' + (dust != null ? dust : '—') + '</div>' +
     '</div>';

@@ -151,7 +151,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 .mhd{padding:8px 12px 7px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bdr);background:linear-gradient(90deg,rgba(26,111,255,0.11),transparent);}
 .micao{font-family:var(--cond);font-weight:900;font-size:22.5px;color:var(--acc);letter-spacing:1.5px;display:flex;align-items:baseline;gap:8px;}
-.mflag{font-size:20.5px;line-height:1;}
+.mflag{font-size:20.5px;line-height:1;animation:flagGlow 2.8s ease-in-out infinite;}
+@keyframes flagGlow{0%,100%{filter:drop-shadow(0 0 3px var(--acc)) drop-shadow(0 0 1px var(--acc));}50%{filter:drop-shadow(0 0 9px var(--acc)) drop-shadow(0 0 4px rgba(255,255,255,0.55));}}
 .mtime-box{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
 .mtime{font-family:var(--mono);font-size:14px;color:#fff;}
 .mtime-lbl{font-family:var(--cond);font-size:14px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}

@@ -5341,6 +5341,9 @@ document.querySelectorAll('.mon-islt, .mon-stavg').forEach(function(t){
   wire('.mon-vis',  'Open KNMI data',   function(){ switchTab('knmi'); showKnmiSub('data'); });
   wire('.mon-wind', 'Open KNMI graphs', function(){ switchTab('knmi'); showKnmiSub('graphs'); });
   wire('.mon-hum',  'Open Forecast',    function(){ switchTab('forecast'); });
+  wire('.mon-rad',  'Open Power face',  function(){ setMonStyle('power'); });
+  wire('.mon-temp.cw-tile', 'Open METARs', function(){ switchTab('aviation'); showAviationSub('metar'); });
+  wire('.mon-synop','Open SYNOPs',      function(){ switchTab('aviation'); showAviationSub('synop'); });
 })();
 
 /* PWA shortcut deep-linking — manifest shortcuts pass a #hash */

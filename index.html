@@ -5329,6 +5329,19 @@ document.querySelectorAll('.mon-islt, .mon-stavg').forEach(function(t){
   t.setAttribute('title','Open Stations');
   t.addEventListener('click', function(){ switchTab('stations'); });
 });
+// Current-tile shortcuts: Visibility → KNMI data, Wind → KNMI graphs, Forecast → Forecast tab
+(function(){
+  function wire(sel, title, fn){
+    var t = document.querySelector(sel);
+    if(!t) return;
+    t.style.cursor='pointer';
+    t.setAttribute('title', title);
+    t.addEventListener('click', fn);
+  }
+  wire('.mon-vis',  'Open KNMI data',   function(){ switchTab('knmi'); showKnmiSub('data'); });
+  wire('.mon-wind', 'Open KNMI graphs', function(){ switchTab('knmi'); showKnmiSub('graphs'); });
+  wire('.mon-hum',  'Open Forecast',    function(){ switchTab('forecast'); });
+})();
 
 /* PWA shortcut deep-linking — manifest shortcuts pass a #hash */
 (function(){

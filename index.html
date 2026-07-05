@@ -1041,6 +1041,23 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .wx-style-btn-ic{font-size:14px;line-height:1;}
 .wx-view{animation:pin .3s cubic-bezier(.16,1,.3,1) both;}
 
+/* ─── Written public forecast bulletin ─── */
+.wr-lang{display:flex;gap:6px;}
+.wr-lang-btn{padding:5px 13px;border-radius:16px;border:1px solid var(--bdr);background:rgba(255,255,255,0.03);color:var(--muted);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.6px;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;}
+.wr-lang-btn.active{background:rgba(77,184,255,0.15);border-color:rgba(77,184,255,0.6);color:var(--acc);}
+.wr-card{border:1px solid var(--bdr);border-radius:var(--rl);background:var(--card);overflow:hidden;margin-bottom:12px;}
+.wr-hd{padding:12px 16px;background:linear-gradient(90deg,rgba(26,111,255,0.13),transparent);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.wr-ttl{font-family:var(--cond);font-size:17px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc);}
+.wr-issued{font-family:var(--mono);font-size:13px;color:var(--muted);}
+.wr-body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;}
+.wr-sec-ttl{font-family:var(--cond);font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--pur);margin-bottom:5px;}
+.wr-text{font-family:var(--sans);font-size:15.5px;line-height:1.65;color:var(--txt);}
+.wr-text b{color:var(--acc);font-weight:700;}
+.wr-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.wr-chip{padding:5px 11px;border-radius:8px;background:rgba(255,255,255,0.035);border:1px solid var(--bdr);font-family:var(--cond);font-size:14px;color:#cce4ff;display:inline-flex;align-items:center;gap:5px;}
+.wr-chip b{color:#fff;}
+.wr-foot{padding:8px 16px;background:rgba(0,0,0,0.22);border-top:1px solid var(--bdr);font-family:var(--mono);font-size:12.5px;color:rgba(120,160,200,0.55);}
+
 /* ─── SkySense view (Image 1) ─── */
 .sky-wrap{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;align-items:start;}
 @media(max-width:1000px){.sky-wrap{grid-template-columns:1fr;}}
@@ -3102,6 +3119,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <button class="wx-style-btn active" data-wxstyle="current" onclick="switchWxView('current',this)"><span class="wx-style-btn-ic">&#127777;</span>Current</button>
       <button class="wx-style-btn" data-wxstyle="forecast" onclick="switchWxView('forecast',this)"><span class="wx-style-btn-ic">&#127782;</span>Forecast</button>
       <button class="wx-style-btn" data-wxstyle="climate" onclick="switchWxView('climate',this)"><span class="wx-style-btn-ic">&#128200;</span>Climate</button>
+      <button class="wx-style-btn" data-wxstyle="written" onclick="switchWxView('written',this)"><span class="wx-style-btn-ic">&#128221;</span>Written</button>
     </div>
     <div class="wx-view" id="wxViewCurrent">
       <div class="shdr">
@@ -3161,6 +3179,16 @@ html,body{max-width:100%;overflow-x:hidden;}
       </div>
       <div id="climFeatured"></div>
       <div id="climBody"></div>
+    </div>
+    <div class="wx-view" id="wxViewWritten" style="display:none;">
+      <div class="shdr">
+        <div class="stitle">Public Weather Forecast &mdash; ABC Islands</div>
+        <div class="wr-lang">
+          <button class="wr-lang-btn active" data-wrlang="en" onclick="setWrittenLang('en',this)">&#127468;&#127463; English</button>
+          <button class="wr-lang-btn" data-wrlang="nl" onclick="setWrittenLang('nl',this)">&#127475;&#127473; Nederlands</button>
+        </div>
+      </div>
+      <div id="writtenBody"><div class="wloading">Loading forecast&hellip;</div></div>
     </div>
   </div>
 
@@ -5319,8 +5347,156 @@ function switchWxView(view, btn){
     if(__lastForecastData){ renderCurrentHourlyForecast(); }
     else if(typeof updateForecast==='function'){ updateForecast(); }
   }
+  if(view==='written'){
+    if(__lastForecastData){ renderWrittenForecast(); }
+    else if(typeof updateForecast==='function'){ updateForecast().then(renderWrittenForecast).catch(renderWrittenForecast); }
+  }
 }
 window.switchWxView = switchWxView;
+
+/* ─── Written public forecast (EN/NL) — bulletin style with synoptic situation ─── */
+var __wrLang = 'en';
+function setWrittenLang(lang, btn){
+  __wrLang = lang;
+  document.querySelectorAll('.wr-lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.wrlang===lang); });
+  renderWrittenForecast();
+}
+window.setWrittenLang = setWrittenLang;
+
+function renderWrittenForecast(){
+  var host = byId('writtenBody');
+  if(!host) return;
+  var fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
+  if(!fc || !fc.length){ host.innerHTML = '<div class="wloading">Waiting for forecast data…</div>'; return; }
+  var L = __wrLang, now = new Date();
+  var d0 = fc[0], d1 = fc[1] || d0, d2 = fc[2] || d1;
+
+  // Next-24h hourly slice
+  var cur = now.getHours(), hrs = [];
+  if(d0._hourly) hrs = d0._hourly.filter(function(h){ return h.hour >= cur; });
+  if(hrs.length < 24 && d1._hourly) hrs = hrs.concat(d1._hourly.slice(0, 24 - hrs.length));
+  var maxPop = 0, totPrecip = 0;
+  hrs.forEach(function(h){ if(h.pop != null && h.pop > maxPop) maxPop = Math.round(h.pop); totPrecip += (h.precip || 0); });
+  // When are showers most likely?
+  var popByPart = {night:0, morning:0, afternoon:0, evening:0};
+  hrs.forEach(function(h){
+    var p = h.pop || 0;
+    var part = h.hour < 6 ? 'night' : h.hour < 12 ? 'morning' : h.hour < 18 ? 'afternoon' : 'evening';
+    if(p > popByPart[part]) popByPart[part] = p;
+  });
+  var peakPart = Object.keys(popByPart).reduce(function(a,b){ return popByPart[b] > popByPart[a] ? b : a; }, 'night');
+
+  var COMP = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  var dirTxt = d0.windDir != null ? COMP[Math.round(d0.windDir/22.5)%16] : 'E';
+  var wLo = d0.wind != null ? Math.max(1, Math.round(d0.wind) - 2) : null;
+  var wHi = d0.wind != null ? Math.round(d0.wind) + 2 : null;
+  var gust = d0.windGust != null ? Math.round(d0.windGust) : null;
+  var tMax = d0.tempHigh != null ? Math.round(d0.tempHigh) : null;
+  var tMin = (d1.tempLow != null ? Math.round(d1.tempLow) : (d0.tempLow != null ? Math.round(d0.tempLow) : null));
+  var cloud = d0.cloud != null ? Math.round(d0.cloud) : null;
+  var uv = d0.uvMax != null ? Math.round(d0.uvMax) : null;
+
+  // Live extras for the synoptic section
+  var p = (typeof __monLastData==='object' && __monLastData && __monLastData.synopP) ? __monLastData.synopP : {};
+  var slp = p.slp != null ? p.slp.toFixed(1) : null;
+  var tend = p.tend_type || null;
+  var dust = null;
+  try { ['curacao','aruba','bonaire'].forEach(function(k){ if(dust==null && WX_EXTRA[k] && WX_EXTRA[k].aq && WX_EXTRA[k].aq.dust!=null) dust = WX_EXTRA[k].aq.dust; }); } catch(e){}
+  var wave = (window.__marine && window.__marine.wave_height != null) ? window.__marine.wave_height : null;
+
+  // Wording helpers per language
+  var isNL = (L === 'nl');
+  function cloudWord(c){
+    if(c == null) return isNL ? 'wisselend bewolkt' : 'partly cloudy';
+    if(c < 25) return isNL ? 'overwegend zonnig' : 'mostly sunny';
+    if(c < 50) return isNL ? 'gedeeltelijk bewolkt' : 'partly cloudy';
+    if(c < 75) return isNL ? 'half tot zwaar bewolkt' : 'partly to mostly cloudy';
+    return isNL ? 'overwegend bewolkt' : 'mostly cloudy';
+  }
+  function showerWord(pop){
+    if(pop < 20) return isNL ? 'vrijwel geen neerslag' : 'little or no rainfall';
+    if(pop < 40) return isNL ? 'een enkele lokale bui' : 'an isolated brief shower';
+    if(pop < 60) return isNL ? 'enkele verspreide buien' : 'some scattered showers';
+    return isNL ? 'perioden met buien' : 'periods of showers';
+  }
+  var PART = {
+    night:     isNL ? 'de nacht'   : 'the night',
+    morning:   isNL ? 'de ochtend' : 'the morning',
+    afternoon: isNL ? 'de middag'  : 'the afternoon',
+    evening:   isNL ? 'de avond'   : 'the evening'
+  };
+  var TEND_NL = {'Increasing':'stijgend','Inc slowly':'langzaam stijgend','Inc then dec':'stijgend, daarna dalend','Steady→inc':'stabiel, daarna stijgend','Steady':'stabiel','Dec then inc':'dalend, daarna stijgend','Decreasing':'dalend','Dec slowly':'langzaam dalend','Steady→dec':'stabiel, daarna dalend','Rapid dec':'snel dalend'};
+
+  // ── Synoptic situation ──
+  var syn = [];
+  if(isNL){
+    syn.push('Een ' + (d0.wind != null && d0.wind >= 20 ? 'vrij krachtige' : d0.wind != null && d0.wind >= 13 ? 'matige' : 'zwakke') + ' passaatstroming uit ' + (dirTxt.indexOf('E') >= 0 ? 'oostelijke' : 'wisselende') + ' richting overheerst het zuidelijk Caribisch gebied.');
+    if(slp) syn.push('De luchtdruk op zeeniveau bedraagt omstreeks <b>' + slp + ' hPa</b>' + (tend ? ' en is ' + (TEND_NL[tend] || tend.toLowerCase()) : '') + '.');
+    if(maxPop >= 40) syn.push('Een vochtiger luchtmassa trekt over de regio en verhoogt de kans op buien.');
+    else if(maxPop >= 20) syn.push('Plaatselijk kan wat onstabiliteit tot een korte bui leiden.');
+    else syn.push('Relatief droge en stabiele lucht overheerst.');
+    if(dust != null && dust >= 25) syn.push('Sahara-stof is aanwezig (' + Math.round(dust) + ' µg/m³) en kan het zicht licht verminderen.');
+    if(wave != null) syn.push('Golfhoogte in open water rond <b>' + wave.toFixed(1) + ' m</b>.');
+  } else {
+    syn.push('A ' + (d0.wind != null && d0.wind >= 20 ? 'fresh' : d0.wind != null && d0.wind >= 13 ? 'moderate' : 'light') + ' ' + (dirTxt.indexOf('E') >= 0 ? 'easterly' : 'variable') + ' trade-wind flow dominates the southern Caribbean.');
+    if(slp) syn.push('Sea-level pressure is near <b>' + slp + ' hPa</b>' + (tend ? ', ' + tend.toLowerCase() : '') + '.');
+    if(maxPop >= 40) syn.push('A moister air mass moving across the region raises the chance of showers.');
+    else if(maxPop >= 20) syn.push('Isolated instability may trigger a brief local shower.');
+    else syn.push('Relatively dry and stable air prevails.');
+    if(dust != null && dust >= 25) syn.push('Saharan dust is present (' + Math.round(dust) + ' µg/m³) and may slightly reduce visibility.');
+    if(wave != null) syn.push('Open-water wave heights near <b>' + wave.toFixed(1) + ' m</b>.');
+  }
+
+  // ── 24h forecast text ──
+  var fcTxt = [];
+  if(isNL){
+    fcTxt.push(cloudWord(cloud).charAt(0).toUpperCase() + cloudWord(cloud).slice(1) + ' met ' + showerWord(maxPop) + (maxPop >= 20 ? ', vooral in ' + PART[peakPart] : '') + '.');
+    if(tMax != null) fcTxt.push('Maximumtemperatuur rond <b>' + tMax + '°C</b>' + (tMin != null ? ', minimum in de nacht rond <b>' + tMin + '°C</b>' : '') + '.');
+    if(wLo != null) fcTxt.push('Wind uit ' + dirTxt + ' met <b>' + wLo + '–' + wHi + ' kt</b>' + (gust != null && gust >= wHi + 5 ? ', uitschieters tot <b>' + gust + ' kt</b>' : '') + '.');
+    if(maxPop >= 20) fcTxt.push('Kans op neerslag <b>' + maxPop + '%</b>' + (totPrecip >= 0.5 ? ' · verwachte hoeveelheid ' + totPrecip.toFixed(1) + ' mm' : '') + '.');
+    if(uv != null && uv >= 8) fcTxt.push('De UV-index loopt op tot <b>' + uv + '</b> (zeer hoog) — bescherming aanbevolen.');
+  } else {
+    fcTxt.push(cloudWord(cloud).charAt(0).toUpperCase() + cloudWord(cloud).slice(1) + ' with ' + showerWord(maxPop) + (maxPop >= 20 ? ', mainly during ' + PART[peakPart] : '') + '.');
+    if(tMax != null) fcTxt.push('Maximum temperature near <b>' + tMax + '°C</b>' + (tMin != null ? ', overnight low near <b>' + tMin + '°C</b>' : '') + '.');
+    if(wLo != null) fcTxt.push('Winds ' + dirTxt + ' at <b>' + wLo + '–' + wHi + ' kt</b>' + (gust != null && gust >= wHi + 5 ? ', gusting to <b>' + gust + ' kt</b>' : '') + '.');
+    if(maxPop >= 20) fcTxt.push('Chance of rain <b>' + maxPop + '%</b>' + (totPrecip >= 0.5 ? ' · expected amounts ' + totPrecip.toFixed(1) + ' mm' : '') + '.');
+    if(uv != null && uv >= 8) fcTxt.push('UV index reaching <b>' + uv + '</b> (very high) — protection advised.');
+  }
+
+  // ── Outlook (day 2-3) ──
+  var out;
+  var d2pop = d2.pop != null ? Math.round(d2.pop) : 0;
+  if(isNL){
+    out = 'Voor de daaropvolgende dagen: ' + cloudWord(d2.cloud) + ' met ' + showerWord(d2pop) + '; maxima rond ' + (d2.tempHigh != null ? Math.round(d2.tempHigh) : tMax) + '°C.';
+  } else {
+    out = 'For the following days: ' + cloudWord(d2.cloud) + ' with ' + showerWord(d2pop) + '; highs near ' + (d2.tempHigh != null ? Math.round(d2.tempHigh) : tMax) + '°C.';
+  }
+
+  var issued = now.toLocaleString(isNL ? 'nl-NL' : 'en-GB', {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'});
+  var T = isNL
+    ? {ttl:'Weerbericht ABC-eilanden', issued:'Uitgegeven', syn:'Synoptische situatie', fc:'Verwachting komende 24 uur', out:'Vooruitzichten', src:'Automatisch gegenereerd uit multi-model consensus (GFS · ECMWF · ICON) + live SYNOP/KNMI-waarnemingen'}
+    : {ttl:'Public Forecast ABC Islands', issued:'Issued', syn:'Synoptic Situation', fc:'Forecast Next 24 Hours', out:'Outlook', src:'Auto-generated from multi-model consensus (GFS · ECMWF · ICON) + live SYNOP/KNMI observations'};
+
+  var chips = '';
+  if(tMax != null) chips += '<span class="wr-chip">\u{1F321} <b>' + tMax + '°</b>/' + (tMin != null ? tMin + '°' : '—') + '</span>';
+  if(wLo != null)  chips += '<span class="wr-chip">\u{1F4A8} ' + dirTxt + ' <b>' + wLo + '–' + wHi + ' kt</b></span>';
+  chips += '<span class="wr-chip">\u{1F327} <b>' + maxPop + '%</b></span>';
+  if(uv != null)   chips += '<span class="wr-chip">☀ UV <b>' + uv + '</b></span>';
+  if(dust != null) chips += '<span class="wr-chip">\u{1F32B} <b>' + Math.round(dust) + '</b> µg/m³</span>';
+
+  host.innerHTML =
+    '<div class="wr-card">' +
+      '<div class="wr-hd"><span class="wr-ttl">\u{1F4DD} ' + T.ttl + '</span><span class="wr-issued">' + T.issued + ': ' + issued + '</span></div>' +
+      '<div class="wr-body">' +
+        '<div class="wr-meta">' + chips + '</div>' +
+        '<div><div class="wr-sec-ttl">' + T.syn + '</div><div class="wr-text">' + syn.join(' ') + '</div></div>' +
+        '<div><div class="wr-sec-ttl">' + T.fc + '</div><div class="wr-text">' + fcTxt.join(' ') + '</div></div>' +
+        '<div><div class="wr-sec-ttl">' + T.out + '</div><div class="wr-text">' + out + '</div></div>' +
+      '</div>' +
+      '<div class="wr-foot">' + T.src + '</div>' +
+    '</div>';
+}
+window.renderWrittenForecast = renderWrittenForecast;
 
 tabs.forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 // Island-average tiles in Monitor→Current open the embedded Stations tab

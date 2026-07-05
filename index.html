@@ -4687,6 +4687,9 @@ function decodeSynopText(rawText){
     if(looksLikeIRIX){
       const h  = g0[2];
       const vv = g0.slice(3,5);
+      // iX 1-3 = manned station (7-group = ww, WMO 4677);
+      // iX 4-7 = automatic station (7-group = wawa, WMO 4680).
+      r.P.ix = parseInt(g0[1], 10);
       if(h !== '/' && CLOUD_H[h])       r.P.cloud_base_h = CLOUD_H[h];
       if(vv !== '//' && !/\//.test(vv)) r.P.vis = decodeVV99(vv);
       idx++;
@@ -5823,6 +5826,40 @@ function ovzWwNL(ww){
   if(ww === 96 || ww === 99) return 'Onweer met hagel';
   return null;
 }
+/* Weertype uit wawa-code (WMO tabel 4680) — automatische stations (iX 4-7),
+   o.a. TNCB, TNCE en EHAM. Wijkt af van de ww-code (zie formulier "Nieuw"). */
+function ovzWawaNL(w){
+  if(w == null || isNaN(w)) return null;
+  if(w === 4 || w === 5) return 'Heiig';
+  if(w === 10) return 'Nevel';
+  if(w === 12) return 'Weerlicht';
+  if(w === 18) return 'Windstoten';
+  if(w === 20) return 'Bewolkt na mist';
+  if(w === 21) return 'Bewolkt na neerslag';
+  if(w === 22) return 'Bewolkt na motregen';
+  if(w === 23) return 'Bewolkt na regen';
+  if(w === 24) return 'Bewolkt na sneeuw';
+  if(w === 25) return 'Bewolkt na ijzel';
+  if(w === 26) return 'Bewolkt na onweer';
+  if(w === 27 || w === 28) return 'Bewolkt na driftsneeuw';
+  if(w >= 30 && w <= 35) return 'Mist';
+  if(w >= 40 && w <= 42) return 'Neerslag';
+  if(w === 43 || w === 44) return 'Regen';
+  if(w === 45 || w === 46) return 'Sneeuw';
+  if(w === 47 || w === 48) return 'IJzel';
+  if(w >= 50 && w <= 53) return 'Motregen';
+  if(w >= 54 && w <= 56) return 'Motregen met ijzel';
+  if(w === 57 || w === 58) return 'Regen en motregen';
+  if(w >= 60 && w <= 63) return 'Regen';
+  if(w >= 64 && w <= 66) return 'Regen met ijzel';
+  if(w === 67 || w === 68) return 'Regen en sneeuw';
+  if(w >= 70 && w <= 78) return 'Sneeuw';
+  if(w >= 80 && w <= 84) return 'Regenbui';
+  if(w >= 85 && w <= 87) return 'Sneeuwbui';
+  if(w === 89) return 'Hagelbui';
+  if(w >= 90 && w <= 96) return 'Onweer';
+  return null;
+}
 function ovzMetarWeertype(mp){
   if(!mp) return null;
   var wx = (mp.wxToks || []).join(' ');
@@ -5884,21 +5921,25 @@ async function ovzFetchSynop(wmo){
     if(P.temp_c != null && isFinite(P.temp_c)) tAll.push(P.temp_c);
     if(P.precip_24h != null && (out.precip == null || P.precip_24h > out.precip)) out.precip = P.precip_24h;
     if(P.precip_mm != null && isFinite(P.precip_mm)) out.precip6 += P.precip_mm;   // mm
-    // weertype: melding het dichtst bij 12Z (08:00 AST)
+    // weertype: melding het dichtst bij 12Z (08:00 AST). Automatische stations
+    // (iX 4-7, o.a. TNCB/TNCE/EHAM) coderen de 7-groep als wawa (WMO 4680).
     var d12 = Math.abs(hh - 12);
     if(best12 == null || d12 < best12){
-      var wt = ovzWwNL(P.ww) || ovzOktaNL(P.cloud_oktas);
+      var auto = P.ix != null && P.ix >= 4;
+      var wt = (auto ? ovzWawaNL(P.ww) : ovzWwNL(P.ww)) || ovzOktaNL(P.cloud_oktas);
       if(wt){ out.wt = wt; best12 = d12; }
     }
   });
-  // Robust min/max: a garbled group decodes as exactly 0.0 °C and would win the
-  // minimum. Drop exact-0.0 candidates when the station is clearly warm
-  // (max ≥ 15 °C) — genuine 0° (e.g. Amsterdam winter) survives because its max
-  // stays below that.
-  var maxCand = tMaxC.concat(tAll).filter(function(v){ return v > -80 && v < 60; });
+  // Robuuste min/max: verminkte groepen decoderen als onwaarschijnlijk lage
+  // waarden (0, 1, 5 °C op tropische stations). Verwerp kandidaten die meer dan
+  // 15 °C van de mediaan van de uurwaarnemingen afwijken (bij ≥3 obs); een echte
+  // koude dag blijft staan omdat de mediaan dan zelf laag is.
+  function median(a){ var s = a.slice().sort(function(x,y){ return x-y; }); return s.length ? s[Math.floor(s.length/2)] : null; }
+  var med = tAll.length >= 3 ? median(tAll) : null;
+  function plaus(v){ return v > -80 && v < 60 && (med == null || Math.abs(v - med) <= 15); }
+  var maxCand = tMaxC.concat(tAll).filter(plaus);
   out.tmax = maxCand.length ? Math.max.apply(null, maxCand) : null;
-  var minCand = tMinC.concat(tAll).filter(function(v){ return v > -80 && v < 60; });
-  if(out.tmax != null && out.tmax >= 15) minCand = minCand.filter(function(v){ return Math.abs(v) > 0.05; });
+  var minCand = tMinC.concat(tAll).filter(plaus);
   out.tmin = minCand.length ? Math.min.apply(null, minCand) : null;
   if(out.tmin != null && out.tmax != null && out.tmin > out.tmax){ var _t = out.tmin; out.tmin = out.tmax; out.tmax = _t; }
   if(out.precip == null && out.precip6 > 0) out.precip = out.precip6;   // mm
@@ -5969,7 +6010,7 @@ async function buildOverzicht(force){
   var eff = ovzEffDate();
   if(!force){
     try{
-      var c = JSON.parse(localStorage.getItem('rwc-ovz-v2') || 'null');
+      var c = JSON.parse(localStorage.getItem('rwc-ovz-v3') || 'null');
       if(c && c.date === eff && c.rows){ renderOvzTable(c.rows, eff); if(st) st.textContent = 'Gevuld om 08:30 l.t. · ' + eff; return; }
     }catch(e){}
   }
@@ -6001,7 +6042,7 @@ async function buildOverzicht(force){
     }
     return row;
   }));
-  try{ localStorage.setItem('rwc-ovz-v2', JSON.stringify({date: eff, rows: rows})); }catch(e){}
+  try{ localStorage.setItem('rwc-ovz-v3', JSON.stringify({date: eff, rows: rows})); }catch(e){}
   renderOvzTable(rows, eff);
   if(st) st.textContent = 'Gevuld · ' + eff;
 }
@@ -6047,7 +6088,7 @@ function renderOvzTable(rows, eff){
 /* Om 08:30 l.t. automatisch opnieuw vullen (check elke 5 min) */
 setInterval(function(){
   try{
-    var c = JSON.parse(localStorage.getItem('rwc-ovz-v2') || 'null');
+    var c = JSON.parse(localStorage.getItem('rwc-ovz-v3') || 'null');
     var v = byId('wxViewOverzicht');
     if(v && v.style.display !== 'none' && (!c || c.date !== ovzEffDate())) buildOverzicht();
   }catch(e){}

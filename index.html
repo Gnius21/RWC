@@ -5868,6 +5868,7 @@ async function ovzFetchSynop(wmo){
   if(!r || !r.text || !/AAXX/.test(r.text)) return null;
   var out = { tmax:null, tmin:null, precip:null, precip6:0, wt:null, src:'S' };
   var best12 = null;
+  var tAll = [], tMaxC = [], tMinC = [];
   r.text.split('\n').forEach(function(line){
     var m = line.match(/^(\d{5}),(\d{4}),(\d{2}),(\d{2}),(\d{2}),(\d{2}),(.*)$/);
     if(!m || m[1] !== String(wmo)) return;
@@ -5878,14 +5879,11 @@ async function ovzFetchSynop(wmo){
     try { dec = decodeSynopText(rep); } catch(e){ return; }
     if(!dec || !dec.reports || !dec.reports.length) return;
     var P = dec.reports[0].P || {};
-    if(P.temp_max != null && (out.tmax == null || P.temp_max > out.tmax)) out.tmax = P.temp_max;
-    if(P.temp_min != null && (out.tmin == null || P.temp_min < out.tmin)) out.tmin = P.temp_min;
-    if(P.temp_c != null){
-      if(out.tmax == null || P.temp_c > out.tmax) out.tmax = P.temp_c;
-      if(out.tmin == null || P.temp_c < out.tmin) out.tmin = P.temp_c;
-    }
+    if(P.temp_max != null && isFinite(P.temp_max)) tMaxC.push(P.temp_max);
+    if(P.temp_min != null && isFinite(P.temp_min)) tMinC.push(P.temp_min);
+    if(P.temp_c != null && isFinite(P.temp_c)) tAll.push(P.temp_c);
     if(P.precip_24h != null && (out.precip == null || P.precip_24h > out.precip)) out.precip = P.precip_24h;
-    if(P.precip_mm != null && isFinite(P.precip_mm)) out.precip6 += P.precip_mm;
+    if(P.precip_mm != null && isFinite(P.precip_mm)) out.precip6 += P.precip_mm;   // mm
     // weertype: melding het dichtst bij 12Z (08:00 AST)
     var d12 = Math.abs(hh - 12);
     if(best12 == null || d12 < best12){
@@ -5893,7 +5891,17 @@ async function ovzFetchSynop(wmo){
       if(wt){ out.wt = wt; best12 = d12; }
     }
   });
-  if(out.precip == null && out.precip6 > 0) out.precip = out.precip6;
+  // Robust min/max: a garbled group decodes as exactly 0.0 °C and would win the
+  // minimum. Drop exact-0.0 candidates when the station is clearly warm
+  // (max ≥ 15 °C) — genuine 0° (e.g. Amsterdam winter) survives because its max
+  // stays below that.
+  var maxCand = tMaxC.concat(tAll).filter(function(v){ return v > -80 && v < 60; });
+  out.tmax = maxCand.length ? Math.max.apply(null, maxCand) : null;
+  var minCand = tMinC.concat(tAll).filter(function(v){ return v > -80 && v < 60; });
+  if(out.tmax != null && out.tmax >= 15) minCand = minCand.filter(function(v){ return Math.abs(v) > 0.05; });
+  out.tmin = minCand.length ? Math.min.apply(null, minCand) : null;
+  if(out.tmin != null && out.tmax != null && out.tmin > out.tmax){ var _t = out.tmin; out.tmin = out.tmax; out.tmax = _t; }
+  if(out.precip == null && out.precip6 > 0) out.precip = out.precip6;   // mm
   if(out.tmax == null && out.tmin == null && out.wt == null) return null;
   return out;
 }
@@ -5961,7 +5969,7 @@ async function buildOverzicht(force){
   var eff = ovzEffDate();
   if(!force){
     try{
-      var c = JSON.parse(localStorage.getItem('rwc-ovz-v1') || 'null');
+      var c = JSON.parse(localStorage.getItem('rwc-ovz-v2') || 'null');
       if(c && c.date === eff && c.rows){ renderOvzTable(c.rows, eff); if(st) st.textContent = 'Gevuld om 08:30 l.t. · ' + eff; return; }
     }catch(e){}
   }
@@ -5993,7 +6001,7 @@ async function buildOverzicht(force){
     }
     return row;
   }));
-  try{ localStorage.setItem('rwc-ovz-v1', JSON.stringify({date: eff, rows: rows})); }catch(e){}
+  try{ localStorage.setItem('rwc-ovz-v2', JSON.stringify({date: eff, rows: rows})); }catch(e){}
   renderOvzTable(rows, eff);
   if(st) st.textContent = 'Gevuld · ' + eff;
 }
@@ -6039,7 +6047,7 @@ function renderOvzTable(rows, eff){
 /* Om 08:30 l.t. automatisch opnieuw vullen (check elke 5 min) */
 setInterval(function(){
   try{
-    var c = JSON.parse(localStorage.getItem('rwc-ovz-v1') || 'null');
+    var c = JSON.parse(localStorage.getItem('rwc-ovz-v2') || 'null');
     var v = byId('wxViewOverzicht');
     if(v && v.style.display !== 'none' && (!c || c.date !== ovzEffDate())) buildOverzicht();
   }catch(e){}

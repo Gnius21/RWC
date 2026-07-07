@@ -5927,6 +5927,10 @@ async function ovzFetchSynop(wmo){
     if(best12 == null || d12 < best12){
       var auto = P.ix != null && P.ix >= 4;
       var wt = (auto ? ovzWawaNL(P.ww) : ovzWwNL(P.ww)) || ovzOktaNL(P.cloud_oktas);
+      if(!wt && P.low_cloud_cover){
+        // 8-groep Nh-bedekking als laatste obs-bron vóór de model-fallback
+        wt = ({SKC:'Onbewolkt',FEW:'Licht bewolkt',SCT:'Half bewolkt',BKN:'Zwaar bewolkt',OVC:'Geheel bewolkt'})[P.low_cloud_cover] || null;
+      }
       if(wt){ out.wt = wt; best12 = d12; }
     }
   });
@@ -5948,34 +5952,48 @@ async function ovzFetchSynop(wmo){
 }
 /* 2) 24-uurs METARs via aviationweather.gov */
 async function ovzFetchMetars(icao){
+  var url = 'https://aviationweather.gov/api/data/metar?ids=' + icao + '&hours=26&format=raw';
+  var txt = null;
+  // Direct first; on failure retry once via CORS proxy so a blocked direct
+  // fetch doesn't push the station onto the model fallback.
   try{
     var ac = new AbortController(); setTimeout(function(){ ac.abort(); }, 9000);
-    var r = await fetch('https://aviationweather.gov/api/data/metar?ids=' + icao + '&hours=26&format=raw', {signal: ac.signal});
-    if(!r.ok) return null;
-    var txt = await r.text();
-    if(!txt || !txt.trim()) return null;
-    var out = { tmax:null, tmin:null, precip:null, wt:null, src:'M' };
-    var best12 = null;
-    txt.split('\n').forEach(function(line){
-      line = line.trim();
-      if(!line || line.indexOf(icao) < 0) return;
-      var mp; try { mp = parseMetar(line); } catch(e){ return; }
-      if(!mp) return;
-      if(mp.tempC != null){
-        if(out.tmax == null || mp.tempC > out.tmax) out.tmax = mp.tempC;
-        if(out.tmin == null || mp.tempC < out.tmin) out.tmin = mp.tempC;
-      }
-      var tm = line.match(/\b\d{2}(\d{2})\d{2}Z\b/);
-      var hh = tm ? parseInt(tm[1],10) : null;
-      var d12 = hh != null ? Math.abs(hh - 12) : 99;
-      if(best12 == null || d12 < best12){
-        var wt = ovzMetarWeertype(mp);
-        if(wt){ out.wt = wt; best12 = d12; }
-      }
-    });
-    if(out.tmax == null && out.wt == null) return null;
-    return out;
-  }catch(e){ return null; }
+    var r = await fetch(url, {signal: ac.signal});
+    if(r.ok) txt = await r.text();
+  }catch(e){}
+  if(!txt || !txt.trim()){
+    try{
+      var ac2 = new AbortController(); setTimeout(function(){ ac2.abort(); }, 9000);
+      var r2 = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), {signal: ac2.signal});
+      if(r2.ok) txt = await r2.text();
+    }catch(e){}
+  }
+  if(!txt || !txt.trim()) return null;
+  var out = { tmax:null, tmin:null, precip:null, wt:null, src:'M' };
+  var best12 = null, pSum = 0, pSeen = false;
+  txt.split('\n').forEach(function(line){
+    line = line.trim().replace(/^(METAR|SPECI)\s+/, '');
+    if(!line || line.indexOf(icao) < 0) return;
+    var mp; try { mp = parseMetar(line); } catch(e){ return; }
+    if(!mp) return;
+    if(mp.tempC != null){
+      if(out.tmax == null || mp.tempC > out.tmax) out.tmax = mp.tempC;
+      if(out.tmin == null || mp.tempC < out.tmin) out.tmin = mp.tempC;
+    }
+    // US-style RMK hourly precip group P#### (hundredths of inch) → mm
+    var pg = line.match(/\bP(\d{4})\b/);
+    if(pg){ pSum += parseInt(pg[1],10) * 0.254; pSeen = true; }
+    var tm = line.match(/\b\d{2}(\d{2})\d{2}Z\b/);
+    var hh = tm ? parseInt(tm[1],10) : null;
+    var d12 = hh != null ? Math.abs(hh - 12) : 99;
+    if(best12 == null || d12 < best12){
+      var wt = ovzMetarWeertype(mp);
+      if(wt){ out.wt = wt; best12 = d12; }
+    }
+  });
+  if(pSeen) out.precip = Math.round(pSum * 10) / 10;
+  if(out.tmax == null && out.wt == null) return null;
+  return out;
 }
 /* 3) Open-Meteo model-fallback */
 async function ovzFetchModel(lat, lon){
@@ -6010,7 +6028,7 @@ async function buildOverzicht(force){
   var eff = ovzEffDate();
   if(!force){
     try{
-      var c = JSON.parse(localStorage.getItem('rwc-ovz-v3') || 'null');
+      var c = JSON.parse(localStorage.getItem('rwc-ovz-v4') || 'null');
       if(c && c.date === eff && c.rows){ renderOvzTable(c.rows, eff); if(st) st.textContent = 'Gevuld om 08:30 l.t. · ' + eff; return; }
     }catch(e){}
   }
@@ -6023,12 +6041,13 @@ async function buildOverzicht(force){
       row.wt = syn.wt; row.tmax = syn.tmax; row.tmin = syn.tmin; row.precip = syn.precip;
       row.wsrc = row.wt != null ? 'S' : ''; row.tsrc = row.tmax != null ? 'S' : ''; row.psrc = row.precip != null ? 'S' : '';
     }
-    if(row.wt == null || row.tmax == null || row.tmin == null){
+    if(row.wt == null || row.tmax == null || row.tmin == null || row.precip == null){
       var met = await ovzFetchMetars(s.icao);
       if(met){
         if(row.wt == null && met.wt != null){ row.wt = met.wt; row.wsrc = 'M'; }
         if(row.tmax == null && met.tmax != null){ row.tmax = met.tmax; row.tsrc = 'M'; }
         if(row.tmin == null && met.tmin != null){ row.tmin = met.tmin; if(!row.tsrc) row.tsrc = 'M'; }
+        if(row.precip == null && met.precip != null){ row.precip = met.precip; row.psrc = 'M'; }
       }
     }
     if(row.wt == null || row.tmax == null || row.tmin == null || row.precip == null){
@@ -6042,7 +6061,7 @@ async function buildOverzicht(force){
     }
     return row;
   }));
-  try{ localStorage.setItem('rwc-ovz-v3', JSON.stringify({date: eff, rows: rows})); }catch(e){}
+  try{ localStorage.setItem('rwc-ovz-v4', JSON.stringify({date: eff, rows: rows})); }catch(e){}
   renderOvzTable(rows, eff);
   if(st) st.textContent = 'Gevuld · ' + eff;
 }
@@ -6088,7 +6107,7 @@ function renderOvzTable(rows, eff){
 /* Om 08:30 l.t. automatisch opnieuw vullen (check elke 5 min) */
 setInterval(function(){
   try{
-    var c = JSON.parse(localStorage.getItem('rwc-ovz-v3') || 'null');
+    var c = JSON.parse(localStorage.getItem('rwc-ovz-v4') || 'null');
     var v = byId('wxViewOverzicht');
     if(v && v.style.display !== 'none' && (!c || c.date !== ovzEffDate())) buildOverzicht();
   }catch(e){}

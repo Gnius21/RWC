@@ -1068,6 +1068,19 @@ body.tab-hidden *{animation-play-state:paused !important;}
 .meteo-sec-h{font-weight:700;font-size:15.5px;color:#111;margin-bottom:1px;}
 .meteo-sec-t{font-size:15.5px;line-height:1.5;color:#222;}
 .meteo-next{font-size:14.5px;line-height:1.5;color:#333;border-top:1px solid #e2e8ee;padding-top:11px;}
+/* Meteo bulletin edit form (dark, sits above the white bulletin) */
+.meteo-edit{border:1px solid var(--bdrb);border-radius:12px;background:rgba(8,20,38,0.96);padding:13px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:9px;}
+.me-ttl{width:100%;font-family:var(--cond);font-weight:800;font-size:16px;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;}
+.me-f{display:flex;flex-direction:column;gap:3px;flex:1 1 30%;min-width:120px;}
+.me-f.me-wide{flex:1 1 100%;}
+.me-f span{font-family:var(--cond);font-size:14px;color:var(--muted);letter-spacing:.5px;}
+.me-f span small{opacity:.65;text-transform:none;}
+.me-f input,.me-f textarea{background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:7px;color:var(--txt);font-family:var(--sans);font-size:14.5px;padding:7px 9px;outline:none;width:100%;resize:vertical;}
+.me-f input:focus,.me-f textarea:focus{border-color:var(--acc);}
+.me-actions{width:100%;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:2px;}
+.me-btn{padding:8px 16px;border-radius:9px;border:1px solid rgba(26,111,255,0.4);background:linear-gradient(180deg,rgba(26,111,255,0.85),rgba(10,80,200,0.85));color:#fff;font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.8px;cursor:pointer;text-transform:uppercase;}
+.me-btn.ghost{background:rgba(255,255,255,0.04);border-color:var(--bdr);color:var(--muted);}
+.me-btn:hover{filter:brightness(1.12);}
 /* ── Overzicht Weersgesteldheid (QF-OBS-OW paper form) ── */
 .ovz-card{background:#fff;color:#111;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.4);font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;}
 .ovz-hd{padding:12px 18px 8px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;border-bottom:2px solid #111;}
@@ -3223,6 +3236,7 @@ html,body{max-width:100%;overflow-x:hidden;}
       <div class="wr-modes">
         <button class="wr-mode-btn active" data-wrmode="bulletin" onclick="setWrittenMode('bulletin',this)">&#9889; Quick</button>
         <button class="wr-mode-btn" data-wrmode="meteo" onclick="setWrittenMode('meteo',this)">&#127963; Meteo</button>
+        <button class="wr-mode-btn" id="meteoEditBtn" onclick="toggleMeteoEdit()" style="display:none;margin-left:auto;">&#9998; Edit</button>
       </div>
       <div id="writtenBody"><div class="wloading">Loading forecast&hellip;</div></div>
     </div>
@@ -5413,6 +5427,8 @@ function renderWrittenForecast(){
   if(!host) return;
   var fc = (typeof __lastForecastData==='object' && __lastForecastData) ? __lastForecastData.days : null;
   if(!fc || !fc.length){ host.innerHTML = '<div class="wloading">Waiting for forecast data…</div>'; return; }
+  var _eb = byId('meteoEditBtn');
+  if(_eb) _eb.style.display = (__wrMode === 'meteo') ? '' : 'none';
   if(__wrMode === 'meteo'){ renderMeteoForecast(host, fc); return; }
   var L = __wrLang, now = new Date();
   var d0 = fc[0], d1 = fc[1] || d0, d2 = fc[2] || d1;
@@ -5601,12 +5617,29 @@ function renderMeteoForecast(host, fc){
   var hazy = dust != null && dust >= 25;
   var wave = (window.__marine && window.__marine.wave_height != null) ? window.__marine.wave_height : null;
 
+  // ── Forecaster overrides (Edit → Generate), valid for today's bulletin only ──
+  var ovDate = issueDay.toISOString().slice(0,10);
+  var ov = null;
+  try{ var _o = JSON.parse(localStorage.getItem('rwc-meteo-edit-v1') || 'null'); if(_o && _o.date === ovDate) ov = _o; }catch(e){}
+  if(ov && ov.v){
+    if(ov.v.tmax != null) tMax = ov.v.tmax;
+    if(ov.v.tmin != null) tMin = ov.v.tmin;
+    if(ov.v.pop  != null) maxPop = ov.v.pop;
+    if(ov.v.sunrise) sunrise = ov.v.sunrise;
+    if(ov.v.sunset)  sunset  = ov.v.sunset;
+  }
+
   // ── Wind → Beaufort ──
   var BFT = {1:[1,5,1,3],2:[6,11,4,6],3:[12,19,7,10],4:[20,28,11,16],5:[29,38,17,21],6:[39,49,22,27],7:[50,61,28,33],8:[62,74,34,40]};
   function forceOf(kt){ for(var f=1; f<=8; f++){ if(Math.round(kt) <= BFT[f][3]) return f; } return 8; }
   var wAvg = d0.wind != null ? d0.wind : 15;
   var fLo = forceOf(Math.max(1, wAvg - 2)), fHi = forceOf(wAvg + 2);
   var gust = d0.windGust != null ? d0.windGust : null;
+  if(ov && ov.v){
+    if(ov.v.wlo != null) fLo = forceOf(ov.v.wlo);
+    if(ov.v.whi != null) fHi = Math.max(fLo, forceOf(ov.v.whi));
+    if(ov.v.gust != null) gust = ov.v.gust;
+  }
   var fG = gust != null ? forceOf(gust) : null;
   var FN_EN = {1:'light',2:'light',3:'gentle',4:'moderate',5:'fresh',6:'strong',7:'near gale',8:'gale'};
   var FN_NL = {1:'zwak',2:'zwak',3:'matig',4:'matig',5:'vrij krachtig',6:'krachtig',7:'hard',8:'stormachtig'};
@@ -5676,6 +5709,10 @@ function renderMeteoForecast(host, fc){
   // ── Sea conditions ──
   var wLoM = wave != null ? Math.max(0.5, Math.floor(wave * 2) / 2) : 1;
   var wHiM = wave != null ? Math.max(wLoM + 0.5, Math.ceil(wave * 2) / 2 + 0.5) : 2;
+  if(ov && ov.v){
+    if(ov.v.wavelo != null) wLoM = ov.v.wavelo;
+    if(ov.v.wavehi != null) wHiM = Math.max(wLoM + 0.5, ov.v.wavehi);
+  }
   function ft(m){ return Math.round(m * 3.28084); }
   var seaState = wHiM <= 1.5 ? (isNL ? 'Vrij rustig' : 'Fairly calm') : wHiM <= 2.5 ? (isNL ? 'Over het algemeen matig' : 'Moderate in general') : (isNL ? 'Vrij ruw' : 'Rather rough');
   var seaTxt = isNL
@@ -5694,6 +5731,26 @@ function renderMeteoForecast(host, fc){
     ? (isNL ? 'Enigszins verminderd zicht door Saharastof.' : 'Slightly reduced visibility due to Saharan dust.')
     : (isNL ? 'Geen.' : 'None.');
 
+  // ── Apply free-text overrides (per language) + forecaster name ──
+  var otxt = (ov && ov.t && ov.t[isNL ? 'nl' : 'en']) || {};
+  if(otxt.weather) wxTxt   = otxt.weather;
+  if(otxt.wind)    windTxt = otxt.wind;
+  if(otxt.syn)     synTxt  = otxt.syn;
+  if(otxt.sea)     seaTxt  = otxt.sea;
+  if(otxt.special) special = otxt.special;
+  if(otxt.outlook) outTxt  = otxt.outlook;
+  var fcName = (ov && ov.v && ov.v.fcaster) ? ov.v.fcaster : 'RWC AutoMet.';
+
+  // Effective values for the edit form prefill
+  window.__meteoLast = {
+    date: ovDate, tmax: tMax, tmin: tMin, pop: maxPop, sunrise: sunrise, sunset: sunset,
+    wlo: (ov && ov.v && ov.v.wlo != null) ? ov.v.wlo : Math.max(1, Math.round(wAvg - 2)),
+    whi: (ov && ov.v && ov.v.whi != null) ? ov.v.whi : Math.round(wAvg + 2),
+    gust: gust != null ? Math.round(gust) : null,
+    wavelo: wLoM, wavehi: wHiM, fcaster: fcName,
+    t: (ov && ov.t) || {}
+  };
+
   // ── Assemble ──
   var secs = [];
   function sec(h, t){ secs.push('<div><div class="meteo-sec-h">' + h + '</div><div class="meteo-sec-t">' + t + '</div></div>'); }
@@ -5708,8 +5765,8 @@ function renderMeteoForecast(host, fc){
     sec('Zee condities:', seaTxt);
     sec('Bijzondere verschijnselen:', special);
     sec('Vooruitzichten tot ' + dNL(outlookDay) + per.nl + ':', outTxt);
-    sec('Meteoroloog:', 'RWC AutoMet.');
-    issued = 'Het volgende weerbericht zal worden uitgegeven om ' + pad2(nextSlotLt) + ':00 uur l.t. (' + nextUtc + ' UTC). Raadpleeg voor meer informatie: http://www.meteo.cw';
+    sec('Meteoroloog:', fcName);
+    issued = 'Het volgende weerbericht zal worden uitgegeven om ' + pad2(nextSlotLt) + ':00 uur l.t. (' + nextUtc + ' UTC).' + (ov ? ' · Handmatig aangepast.' : '');
   } else {
     bar = 'Forecast';
     lead = 'Weather Forecast for Curaçao and surroundings valid until ' + dEN(validDay) + ' ' + per.en + ' ' + per.vt + ' l.t., ' + dateEN(validDay) + '.';
@@ -5721,11 +5778,12 @@ function renderMeteoForecast(host, fc){
     sec('Significant tropical weather systems:', 'None.');
     sec('Special features:', special);
     sec('Outlook until ' + dEN(outlookDay) + ' ' + per.en + ':', outTxt);
-    sec('Forecaster:', 'RWC AutoMet.');
-    issued = 'The next weather forecast will be issued on ' + dEN(slot.lt === 17 ? validDay : issueDay) + ' ' + pad2(nextSlotLt) + ':00 l.t. (' + nextUtc + ' UTC).';
+    sec('Forecaster:', fcName);
+    issued = 'The next weather forecast will be issued on ' + dEN(slot.lt === 17 ? validDay : issueDay) + ' ' + pad2(nextSlotLt) + ':00 l.t. (' + nextUtc + ' UTC).' + (ov ? ' · Manually adjusted.' : '');
   }
 
   host.innerHTML =
+    (window.__meteoEditOpen ? meteoEditFormHtml(isNL) : '') +
     '<div class="meteo-card">' +
       '<div class="meteo-bar">' + bar + '</div>' +
       '<div class="meteo-body">' +
@@ -5736,6 +5794,82 @@ function renderMeteoForecast(host, fc){
     '</div>';
 }
 window.renderMeteoForecast = renderMeteoForecast;
+
+/* ─── Meteo bulletin edit mode: forecaster fills in data, then generates ─── */
+function meteoEditFormHtml(isNL){
+  var L = window.__meteoLast || {};
+  var t = (L.t && L.t[isNL ? 'nl' : 'en']) || {};
+  function esc(v){ return v == null ? '' : String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function inp(id, lbl, val, ph){
+    return '<label class="me-f"><span>' + lbl + '</span><input id="' + id + '" value="' + esc(val) + '" placeholder="' + (ph||'') + '"></label>';
+  }
+  function ta(id, lbl, val){
+    return '<label class="me-f me-wide"><span>' + lbl + ' <small>(' + (isNL ? 'leeg = automatisch' : 'empty = auto') + ')</small></span><textarea id="' + id + '" rows="2">' + esc(val) + '</textarea></label>';
+  }
+  var T = isNL
+    ? {ttl:'Bulletin bewerken', gen:'Genereer verwachting', auto:'Automatisch (wis)', close:'Sluiten',
+       tmax:'Max °C', tmin:'Min °C', pop:'Neerslagkans %', sr:'Zonsopgang', ss:'Zonsondergang',
+       wlo:'Wind van (kt)', whi:'Wind tot (kt)', gust:'Uitschieters (kt)', wvl:'Golf van (m)', wvh:'Golf tot (m)', fc:'Meteoroloog',
+       wx:'Weer', wnd:'Wind', syn:'Weeroverzicht', sea:'Zee condities', spc:'Bijzondere verschijnselen', out:'Vooruitzichten'}
+    : {ttl:'Edit bulletin', gen:'Generate forecast', auto:'Auto (clear)', close:'Close',
+       tmax:'Max °C', tmin:'Min °C', pop:'Rain chance %', sr:'Sunrise', ss:'Sunset',
+       wlo:'Wind from (kt)', whi:'Wind to (kt)', gust:'Gusts (kt)', wvl:'Wave from (m)', wvh:'Wave to (m)', fc:'Forecaster',
+       wx:'Weather', wnd:'Winds', syn:'Synopsis', sea:'Sea conditions', spc:'Special features', out:'Outlook'};
+  return '<div class="meteo-edit">' +
+    '<div class="me-ttl">&#9998; ' + T.ttl + ' · ' + (L.date || '') + '</div>' +
+    inp('me_tmax', T.tmax, L.tmax) + inp('me_tmin', T.tmin, L.tmin) + inp('me_pop', T.pop, L.pop) +
+    inp('me_sunrise', T.sr, L.sunrise, 'HH:MM') + inp('me_sunset', T.ss, L.sunset, 'HH:MM') +
+    inp('me_wlo', T.wlo, L.wlo) + inp('me_whi', T.whi, L.whi) + inp('me_gust', T.gust, L.gust) +
+    inp('me_wavelo', T.wvl, L.wavelo) + inp('me_wavehi', T.wvh, L.wavehi) + inp('me_fcaster', T.fc, L.fcaster) +
+    ta('me_weather', T.wx, t.weather) + ta('me_wind', T.wnd, t.wind) + ta('me_syn', T.syn, t.syn) +
+    ta('me_sea', T.sea, t.sea) + ta('me_special', T.spc, t.special) + ta('me_outlook', T.out, t.outlook) +
+    '<div class="me-actions">' +
+      '<button class="me-btn ghost" onclick="meteoClearEdit()">' + T.auto + '</button>' +
+      '<button class="me-btn ghost" onclick="toggleMeteoEdit()">' + T.close + '</button>' +
+      '<button class="me-btn" onclick="meteoApplyEdit()">&#10003; ' + T.gen + '</button>' +
+    '</div>' +
+  '</div>';
+}
+function toggleMeteoEdit(){
+  window.__meteoEditOpen = !window.__meteoEditOpen;
+  if(__wrMode !== 'meteo') setWrittenMode('meteo');
+  else renderWrittenForecast();
+}
+function meteoApplyEdit(){
+  function num(id){ var el = byId(id); if(!el) return null; var v = parseFloat(String(el.value).replace(',', '.')); return isFinite(v) ? v : null; }
+  function txt(id){ var el = byId(id); if(!el) return ''; return el.value.trim(); }
+  var L = window.__meteoLast || {};
+  var prev = null;
+  try{ prev = JSON.parse(localStorage.getItem('rwc-meteo-edit-v1') || 'null'); }catch(e){}
+  var ov = (prev && prev.date === L.date) ? prev : {date: L.date, v:{}, t:{}};
+  ov.v = ov.v || {}; ov.t = ov.t || {};
+  ov.v.tmax = num('me_tmax'); ov.v.tmin = num('me_tmin'); ov.v.pop = num('me_pop');
+  ov.v.wlo = num('me_wlo'); ov.v.whi = num('me_whi'); ov.v.gust = num('me_gust');
+  ov.v.wavelo = num('me_wavelo'); ov.v.wavehi = num('me_wavehi');
+  var sr = txt('me_sunrise'), ss = txt('me_sunset');
+  ov.v.sunrise = /^\d{1,2}:\d{2}$/.test(sr) ? sr : null;
+  ov.v.sunset  = /^\d{1,2}:\d{2}$/.test(ss) ? ss : null;
+  var fcv = txt('me_fcaster');
+  ov.v.fcaster = fcv && fcv !== 'RWC AutoMet.' ? fcv : null;
+  // Free texts stored per active language; the other language keeps its own.
+  var lang = (__wrLang === 'nl') ? 'nl' : 'en';
+  ov.t[lang] = {
+    weather: txt('me_weather') || null, wind: txt('me_wind') || null, syn: txt('me_syn') || null,
+    sea: txt('me_sea') || null, special: txt('me_special') || null, outlook: txt('me_outlook') || null
+  };
+  try{ localStorage.setItem('rwc-meteo-edit-v1', JSON.stringify(ov)); }catch(e){}
+  window.__meteoEditOpen = false;
+  renderWrittenForecast();
+}
+function meteoClearEdit(){
+  try{ localStorage.removeItem('rwc-meteo-edit-v1'); }catch(e){}
+  window.__meteoEditOpen = false;
+  renderWrittenForecast();
+}
+window.meteoEditFormHtml = meteoEditFormHtml;
+window.toggleMeteoEdit = toggleMeteoEdit;
+window.meteoApplyEdit = meteoApplyEdit;
+window.meteoClearEdit = meteoClearEdit;
 
 /* ─── OVERZICHT WEERSGESTELDHEID (QF-OBS-OW) ───
    Dagelijks om 08:30 l.t. automatisch gevuld. Databron-prioriteit per station:
@@ -9750,6 +9884,10 @@ const FORECAST_MODELS = [
   {key:'meteofrance_arome_france_hd',name:'AROME-HD', org:'MF AROME HD',         color:'#f9a8d4'},
   {key:'knmi_seamless',              name:'KNMI',     org:'KNMI \u00b7 Caribbean',    color:'#fb923c'},
   {key:'knmi_harmonie_arome_europe', name:'KNMI-AR',  org:'KNMI HARMONIE',       color:'#fdba74'},
+  /* Regional mesoscale models for the Caribbean \u2014 flagged experimental (exp):
+     if Open-Meteo rejects a key, the fetch cascade drops these and retries. */
+  {key:'meteofrance_arome_antilles',      name:'AROME-AN', org:'MF AROME Antilles',   color:'#f0abfc', exp:true},
+  {key:'knmi_harmonie_arome_caribbean',   name:'HARM-CAR', org:'KNMI HARMONIE Carib', color:'#fbbf24', exp:true},
   {key:'ukmo_seamless',              name:'UKMO',     org:'UK Met Office',       color:'#06b6d4'},
   {key:'metno_nordic',               name:'METNO',    org:'MET \u00b7 Norway',        color:'#22d3ee'},
   {key:'dmi_seamless',               name:'DMI',      org:'DMI \u00b7 Denmark',       color:'#a3e635'},
@@ -9798,11 +9936,12 @@ async function _fetchForecastAttempt(models){
 }
 
 async function fetchMultiModelForecast(){
-  // Try the full multi-model consensus first.
+  // Cascade: full list (incl. experimental regional models) → full minus
+  // experimental (an invalid key 400s the entire call) → guaranteed core set.
   let r = await _fetchForecastAttempt(FORECAST_MODELS);
-  // If the whole request failed (a bad key 400s the entire call) or yielded no
-  // usable model data, retry with the guaranteed-good core set so the forecast
-  // still works.
+  if(!r || !r.forecasts.length){
+    r = await _fetchForecastAttempt(FORECAST_MODELS.filter(m => !m.exp));
+  }
   if(!r || !r.forecasts.length){
     const core = FORECAST_MODELS.filter(m => FORECAST_CORE_KEYS.includes(m.key));
     r = await _fetchForecastAttempt(core);

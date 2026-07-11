@@ -10998,7 +10998,9 @@ function initAtcMap(){
   if(atcMap || typeof L === 'undefined' || !byId('atcMap')) return;
   atcMap = L.map('atcMap', {
     zoomControl: false, attributionControl: false,
-    center: [12.25, -68.95], zoom: 9, minZoom: 7, maxZoom: 12
+    // Wider default view so approaching rain cells around the islands are
+    // visible, with room to pinch further out over the southern Caribbean.
+    center: [12.6, -68.6], zoom: 7, minZoom: 5, maxZoom: 12
   });
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
     {maxZoom: 19, subdomains: 'abcd'}).addTo(atcMap);

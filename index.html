@@ -3205,6 +3205,10 @@ html,body{max-width:100%;overflow-x:hidden;}
         <div class="stitle">30-Year Climate Archive &mdash; ABC Islands</div>
         <span id="climStatus">Loading climate archive&hellip;</span>
       </div>
+      <div class="clim-switch" style="margin:2px 0 10px;">
+        <button class="mon-style-btn active" data-climview="table"><span class="mon-style-btn-ic">&#128203;</span>Tables</button>
+        <button class="mon-style-btn" data-climview="graphs"><span class="mon-style-btn-ic">&#128200;</span>Graphs</button>
+      </div>
       <div id="climFeatured"></div>
       <div id="climBody"></div>
     </div>
@@ -3325,19 +3329,6 @@ html,body{max-width:100%;overflow-x:hidden;}
         </div>
       </div>
     </div>
-  </div>
-
-  <div id="tab-climate" class="tpanel hidden" style="display:none!important;">
-    <div class="clim-hd">
-      <div class="clim-ttl">&#128200; Climate &mdash; Cura&ccedil;ao Historical Record</div>
-      <div class="clim-switch">
-        <button class="mon-style-btn active" data-climview="table"><span class="mon-style-btn-ic">&#128203;</span>Tables</button>
-        <button class="mon-style-btn" data-climview="graphs"><span class="mon-style-btn-ic">&#128200;</span>Graphs</button>
-      </div>
-    </div>
-    <div class="sbar" style="margin:6px 0 10px;"><span id="climStatus">Loading climate archive&hellip;</span></div>
-    <div id="climFeatured"></div>
-    <div id="climBody"></div>
   </div>
 
   <div id="tab-atc" class="tpanel hidden">

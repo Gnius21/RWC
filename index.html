@@ -10799,12 +10799,21 @@ function initCondMap(){
   rainCtl.addTo(condMap);
 
   // ── STORM CONE: NOAA NHC tropical weather (forecast cone + track). Auto-empty when no storms. ──
-  // minZoom:8 — ArcGIS MapServer returns "Zoom level not supported" error tiles at scales
-  // coarser than ~1:2M (zoom<8), so we suppress tile requests below that threshold.
-  condStormLayer = L.tileLayer.wms('https://mapservices.weather.noaa.gov/tropical/services/tropical/NHC_tropical_weather/MapServer/WMSServer', {
-    layers: '4,6,7,8', format: 'image/png', transparent: true, opacity: 0.85,
-    version: '1.3.0', attribution: 'NOAA NHC', minZoom: 8, maxZoom: 9
+  // Uses the ArcGIS dynamic /export endpoint instead of the cached WMS: the
+  // cache only covers certain scales and returns "Zoom level not supported"
+  // error tiles outside them, while /export renders live at ANY zoom.
+  var NhcExportLayer = L.TileLayer.extend({
+    getTileUrl: function(coords){
+      var R = 20037508.342789244, n = Math.pow(2, coords.z);
+      function mx(x){ return (x / n) * 2 * R - R; }
+      function my(y){ return R - (y / n) * 2 * R; }
+      var bbox = mx(coords.x) + ',' + my(coords.y + 1) + ',' + mx(coords.x + 1) + ',' + my(coords.y);
+      return 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/export' +
+        '?f=image&format=png32&transparent=true&size=256,256&bboxSR=3857&imageSR=3857&dpi=96' +
+        '&layers=show:4,6,7,8&bbox=' + bbox;
+    }
   });
+  condStormLayer = new NhcExportLayer('', {opacity: 0.85, attribution: 'NOAA NHC', tileSize: 256});
 
   // ── SATELLITE: NASA GIBS GOES-East GeoColor (full-coverage, free, no key, CORS) ──
   condSatLayer = makeSatLayer();

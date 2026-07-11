@@ -372,6 +372,7 @@ tr:last-child td{border-bottom:none;}
 .adsbdot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:pok 2s infinite;flex-shrink:0;}
 .adsb-wrap{position:relative;height:510px;overflow:hidden;}
 .adsb-wrap iframe{width:100%;height:100%;border:none;display:block;}
+#atcMap{position:absolute;inset:0;background:#0a0e14;z-index:1;}
 .adsb-blocker{position:absolute;inset:0;z-index:9;background:transparent;pointer-events:auto;touch-action:none;}
 .adsb-blocker.unlocked{pointer-events:none;}
 .adsb-lock{position:absolute;top:8px;right:8px;z-index:12;min-width:44px;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--bdrb);background:rgba(5,18,34,0.85);color:var(--acc);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.45);transition:all .2s;-webkit-tap-highlight-color:transparent;}
@@ -3349,7 +3350,7 @@ html,body{max-width:100%;overflow-x:hidden;}
     <div class="atc-layout">
       <div class="adsbcard">
         <div class="adsb-hd">
-          <div class="adsb-ttl"><span class="adsbdot"></span>&#9992; Live Traffic &mdash; ADS-B Exchange</div>
+          <div class="adsb-ttl"><span class="adsbdot"></span>&#9992; Live Traffic &mdash; ABC Radar &middot; below 10,000 ft</div>
           <span style="font-family:var(--mono);font-size:14px;color:var(--muted);letter-spacing:1px;">Cura&ccedil;ao &middot; Aruba &middot; Bonaire FIR</span>
         </div>
         <div class="adsb-wrap" id="adsbWrap">
@@ -3358,7 +3359,7 @@ html,body{max-width:100%;overflow-x:hidden;}
             <span class="adsb-lock-label">LOCKED</span>
           </button>
           <div class="adsb-blocker" id="adsbBlocker"></div>
-          <iframe id="adsbFrame" src="https://globe.adsbexchange.com/?zoom=8&lat=12.3&lon=-69.1&hideSidebar&hideButtons" title="ADS-B Exchange" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+          <div id="atcMap"></div>
         </div>
       </div>
       <div class="atc-audio-section" id="atcAudioOverlay">
@@ -5326,6 +5327,16 @@ function switchTab(name){
   // Stop the ADS-B flight poll (15s) when leaving the Maps tab — it otherwise
   // keeps hitting a third-party API forever once the flights layer was enabled.
   if(name!=='maps' && typeof __flightTimer!=='undefined' && __flightTimer){ clearInterval(__flightTimer); __flightTimer=null; }
+  // Same for the ATC radar's own traffic poll.
+  if(name!=='atc' && typeof __atcFlightTimer!=='undefined' && __atcFlightTimer){ clearInterval(__atcFlightTimer); __atcFlightTimer=null; }
+  if(name==='atc'){
+    if(typeof initAtcMap==='function') initAtcMap();
+    setTimeout(function(){ if(typeof atcMap!=='undefined' && atcMap) atcMap.invalidateSize(); }, 250);
+    if(typeof atcFetchFlights==='function'){
+      atcFetchFlights();
+      if(!__atcFlightTimer) __atcFlightTimer = setInterval(function(){ if(_atcVisible()) atcFetchFlights(); }, 15000);
+    }
+  }
   if(name==='stations'){
     if(!stationsTabOpened){ stationsTabOpened = true; fetchStationsData(); }
     setTimeout(()=>{if(leafMap&&!byId('mapCard').classList.contains('hidden'))leafMap.invalidateSize(); if(condMap) condMap.invalidateSize();},250);
@@ -10973,6 +10984,100 @@ async function fetchCondFlights(){
 }
 window.fetchCondFlights = fetchCondFlights;
 
+/* ═══ ATC RADAR MAP ═══
+   Own Leaflet radar (replaces the ADS-B Exchange iframe): dark basemap,
+   RainViewer rain overlay (default ON), and ADS-B traffic filtered to
+   arrivals/departures — on ground or below 10,000 ft. */
+var atcMap = null, atcPlaneLayer = null, atcRainLayer = null;
+var __atcFlightTimer = null, __atcFlightBusy = false;
+function _atcVisible(){
+  var t = byId('tab-atc');
+  return t && !t.classList.contains('hidden') && !document.hidden;
+}
+function initAtcMap(){
+  if(atcMap || typeof L === 'undefined' || !byId('atcMap')) return;
+  atcMap = L.map('atcMap', {
+    zoomControl: false, attributionControl: false,
+    center: [12.25, -68.95], zoom: 9, minZoom: 7, maxZoom: 12
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    {maxZoom: 19, subdomains: 'abcd'}).addTo(atcMap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',
+    {maxZoom: 19, subdomains: 'abcd', pane: 'overlayPane', opacity: 0.8}).addTo(atcMap);
+  atcPlaneLayer = L.layerGroup().addTo(atcMap);
+  atcRainRefresh();                                   // rain overlay — default ON
+  setInterval(function(){ if(_atcVisible()) atcRainRefresh(); }, 3 * 60 * 1000);
+  atcFetchFlights();
+}
+function atcRainRefresh(){
+  fetch('https://api.rainviewer.com/public/weather-maps.json')
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      try{
+        var frames = (j.radar && j.radar.past) ? j.radar.past : [];
+        if(j.radar && j.radar.nowcast) frames = frames.concat(j.radar.nowcast);
+        var frame = frames.length ? frames[frames.length - 1] : null;
+        if(!frame || !j.host || !atcMap) return;
+        var nl = L.tileLayer(j.host + frame.path + '/256/{z}/{x}/{y}/8/1_1.png',
+          {opacity: 0.7, maxZoom: 12, zIndex: 200});
+        nl.addTo(atcMap);
+        if(atcRainLayer && atcMap.hasLayer(atcRainLayer)) atcMap.removeLayer(atcRainLayer);
+        atcRainLayer = nl;
+      }catch(e){}
+    }).catch(function(){});
+}
+async function atcFetchFlights(){
+  if(__atcFlightBusy || !atcPlaneLayer) return;
+  __atcFlightBusy = true;
+  var data = null;
+  for(var i = 0; i < FLIGHT_SRCS.length; i++){
+    try{
+      var ac = new AbortController();
+      var to = setTimeout(function(){ ac.abort(); }, 8000);
+      var r = await fetch(FLIGHT_SRCS[i], {signal: ac.signal, headers: {'Accept': 'application/json'}});
+      clearTimeout(to);
+      if(!r.ok) continue;
+      var j = await r.json();
+      if(j && (j.ac || j.aircraft)){ data = j.ac || j.aircraft; break; }
+    }catch(e){}
+  }
+  __atcFlightBusy = false;
+  if(!data || !atcPlaneLayer) return;
+  atcPlaneLayer.clearLayers();
+  // ATC view: only traffic that matters to the tower — on ground or below 10,000 ft.
+  data = data.filter(function(a){
+    if(!a || a.lat == null || a.lon == null) return false;
+    var alt = a.alt_baro;
+    if(alt === 'ground') return true;
+    if(typeof alt !== 'number') return true;   // unknown alt — likely low VFR
+    return alt < 10000;
+  }).slice(0, 80);
+  data.forEach(function(a){
+    var alt = a.alt_baro;
+    var onGround = (alt === 'ground');
+    var altFt = (typeof alt === 'number') ? alt : null;
+    var track = (a.track != null) ? a.track : (a.true_heading != null ? a.true_heading : 0);
+    var col = onGround ? '#9fb3c8'
+            : altFt == null ? '#ffd479'
+            : altFt >= 5000 ? '#7dd3fc'
+            : altFt >= 2000 ? '#ffd479'
+            : '#ff9e57';
+    var call = (a.flight || a.r || a.hex || '').trim();
+    var html = '<div class="cmap-plane' + (onGround ? ' ground' : '') + '">' +
+      '<div style="transform:rotate(' + track + 'deg);width:26px;height:26px;">' + planeSvg(col) + '</div>' +
+      (call ? '<div class="cmap-plane-lbl">' + call + '</div>' : '') + '</div>';
+    var icon = L.divIcon({html: html, className: '', iconSize: [40,40], iconAnchor: [20,13]});
+    var mk = L.marker([a.lat, a.lon], {icon: icon, interactive: true, keyboard: false});
+    var altTxt = onGround ? 'On ground' : (altFt != null ? altFt.toLocaleString() + ' ft' : '—');
+    var spd = (a.gs != null) ? Math.round(a.gs) + ' kt' : '—';
+    mk.bindPopup('<div class="cmap-popup"><b>✈ ' + (call || 'Unknown') + '</b>' +
+      (a.t ? ' <span style="color:var(--muted)">' + a.t + '</span>' : '') + '<br>' +
+      'Altitude: ' + altTxt + '<br>Speed: ' + spd + (track != null ? ' · ' + Math.round(track) + '°' : '') + '</div>', {maxWidth: 200});
+    mk.addTo(atcPlaneLayer);
+  });
+}
+window.initAtcMap = initAtcMap;
+
 
 /* NDBC buoys — nearest reporting stations to the ABC islands.
    Coords are the real buoy positions; many are far (no buoys sit right by the ABCs). */
@@ -12038,37 +12143,75 @@ byId('toggleMap').addEventListener('click', () => {
 });
 byId('mapSearch').addEventListener('input', e => addMapMarkers(e.target.value));
 
-/* ═══ ATC AUDIO ═══ */
+/* ═══ ATC AUDIO ═══
+   - No crossOrigin: LiveATC sends no CORS headers, so anonymous mode made the
+     media fetch fail outright on several browsers (stuck on "Connecting").
+   - Auto-reconnect with backoff on error/stall/end so a dropped stream recovers.
+   - Media Session API so playback continues in the background / lock screen
+     and shows channel info with play/pause controls. */
 document.querySelectorAll('.atcplayer').forEach(player => {
   const streamUrl = player.dataset.stream;
   const btn = player.querySelector('.atcpbtn');
   const icon = player.querySelector('.atcpi');
   const statusT = player.querySelector('.atcst-t');
   const volSlider = player.querySelector('.atcvol-s');
-  let audio = null;
+  const lblEl = player.querySelector('.atclbl');
+  const chName = lblEl ? lblEl.textContent.trim() : 'ATC';
+  let audio = null, want = false, retries = 0, retryTimer = null;
   function setState(state){
     player.classList.remove('loading','playing','error');
     if(state) player.classList.add(state);
     const labels = {loading:'Connecting', playing:'Live', error:'Offline'};
     statusT.textContent = labels[state] || 'Idle';
-    icon.innerHTML = state==='playing' ? '\u23F8' : state==='loading' ? '\u27F3' : '\u25B6';
+    icon.innerHTML = state==='playing' ? '⏸' : state==='loading' ? '⟳' : '▶';
   }
-  btn.addEventListener('click', () => {
-    if(audio && !audio.paused){ audio.pause(); audio.src=''; audio=null; setState(null); return; }
-    // Simultaneous playback: do NOT stop other channels — each plays independently
+  function mediaSession(){
+    if(!('mediaSession' in navigator)) return;
+    try{
+      navigator.mediaSession.metadata = new MediaMetadata({ title: chName, artist: 'LiveATC · RWC Caribbean' });
+      navigator.mediaSession.playbackState = 'playing';
+      navigator.mediaSession.setActionHandler('play',  () => { if(audio) audio.play().catch(()=>{}); });
+      navigator.mediaSession.setActionHandler('pause', stopStream);
+      try{ navigator.mediaSession.setActionHandler('stop', stopStream); }catch(e){}
+    }catch(e){}
+  }
+  function stopStream(){
+    want = false; retries = 0;
+    if(retryTimer){ clearTimeout(retryTimer); retryTimer = null; }
+    if(audio){ try{ audio.pause(); audio.src=''; }catch(e){} audio = null; }
+    player.__audio = null;
+    setState(null);
+  }
+  function scheduleRetry(){
+    if(!want || retryTimer) return;
+    if(retries >= 6){ setState('error'); want = false; return; }
     setState('loading');
+    const delay = Math.min(16000, 2000 * Math.pow(2, retries));
+    retries++;
+    retryTimer = setTimeout(() => { retryTimer = null; if(want) startStream(); }, delay);
+  }
+  function startStream(){
+    want = true;
+    setState('loading');
+    if(audio){ try{ audio.pause(); audio.src=''; }catch(e){} }
     audio = new Audio();
-    audio.crossOrigin = 'anonymous';
     audio.preload = 'none';
     audio.volume = (volSlider ? volSlider.value : 80) / 100;
     audio.src = streamUrl + '?nocache=' + Date.now();
     player.__audio = audio;
-    audio.play().then(() => {}).catch(err => { console.warn('ATC play failed:', err); setState('error'); setTimeout(()=>{if(audio&&audio.paused)setState(null);}, 2500); });
-    audio.addEventListener('playing', () => setState('playing'));
+    audio.addEventListener('playing', () => { retries = 0; setState('playing'); });
     audio.addEventListener('waiting', () => setState('loading'));
-    audio.addEventListener('error', () => { setState('error'); setTimeout(()=>{if(!audio||audio.paused)setState(null);}, 2500); });
     audio.addEventListener('stalled', () => setState('loading'));
-  });
+    audio.addEventListener('error',   scheduleRetry);
+    audio.addEventListener('ended',   scheduleRetry);   // live streams never end - reconnect
+    // iOS pauses audio on interruptions (calls, Siri); resume if still wanted.
+    audio.addEventListener('pause', () => {
+      if(!want || !audio) return;
+      setTimeout(() => { if(want && audio && audio.paused){ audio.play().catch(scheduleRetry); } }, 1200);
+    });
+    audio.play().then(mediaSession).catch(scheduleRetry);
+  }
+  btn.addEventListener('click', () => { (want || (audio && !audio.paused)) ? stopStream() : startStream(); });
   if(volSlider){ volSlider.addEventListener('input', () => { if(audio) audio.volume = volSlider.value/100; }); }
 });
 

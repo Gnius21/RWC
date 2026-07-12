@@ -1,8 +1,12 @@
 name: Weather alerts push
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'   # every 30 min (GitHub may delay a few minutes)
+  # Schedule paused while the Pages suspension/account flag is reviewed —
+  # a fresh cron POSTing to an external service is a common false-positive
+  # trigger for GitHub's abuse automation. Re-enable after the account is
+  # cleared by uncommenting:
+  # schedule:
+  #   - cron: '0 * * * *'   # hourly
   workflow_dispatch:
     inputs:
       test:

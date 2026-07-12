@@ -12403,12 +12403,12 @@ function updateWxAlertStatus(){
   if(!('Notification' in window)){ st.textContent = 'Not supported in this browser.'; return; }
   if(on){
     if(btn) btn.textContent = '✓ Notifications on';
-    st.textContent = bgCapable
+    st.innerHTML = bgCapable
       ? 'Active · background checks ~hourly (also with the app closed).'
-      : 'Active while the app is open. iOS: install to Home Screen; closed-app push on iOS needs a server and isn’t available.';
+      : 'Active while the app is open. For closed-app alerts on iPhone: install the free <b>ntfy</b> app and subscribe to topic <b>rwc-abc-wx-gnius21-4q7kp2</b> — a GitHub cron checks every 30 min and pushes storm/wind/rain alerts.';
   } else {
     if(btn) btn.textContent = 'Enable notifications';
-    st.textContent = 'Alerts for strong wind, thunderstorms, heavy showers, high rain chance and active tropical systems.';
+    st.innerHTML = 'Alerts for strong wind, thunderstorms, heavy showers, high rain chance and active tropical systems.<br>Closed-app push on any phone: subscribe to topic <b>rwc-abc-wx-gnius21-4q7kp2</b> in the free <b>ntfy</b> app.';
   }
 }
 window.enableWxAlerts = enableWxAlerts;

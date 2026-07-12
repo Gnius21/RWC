@@ -12355,6 +12355,75 @@ function applyTheme(t){
 window.applyTheme = applyTheme;
 window.switchWxKey = switchWxKey;
 
+/* ═══ WEATHER ALERT NOTIFICATIONS ═══
+   Enable → permission + (where supported) periodic background sync, so the
+   service worker checks conditions ~hourly even with the app closed
+   (Chrome/Edge/Android installed PWA). iOS has no periodicsync and closed-app
+   web push needs a push server — there the shared checker runs while the app
+   (or Home-Screen PWA) is open, pinged every 15 min. */
+async function enableWxAlerts(){
+  var st = byId('wxAlertStatus');
+  if(!('Notification' in window) || !('serviceWorker' in navigator)){
+    if(st) st.textContent = 'Notifications are not supported in this browser.';
+    return;
+  }
+  var perm = await Notification.requestPermission();
+  if(perm !== 'granted'){
+    if(st) st.textContent = 'Permission denied — enable notifications for this site in your browser settings.';
+    return;
+  }
+  localStorage.setItem('rwc-alerts', 'on');
+  var reg = await navigator.serviceWorker.ready;
+  var periodic = false;
+  if('periodicSync' in reg){
+    try{
+      var ps = await navigator.permissions.query({name: 'periodic-background-sync'});
+      if(ps.state === 'granted'){
+        await reg.periodicSync.register('rwc-wx-alerts', {minInterval: 60 * 60 * 1000});
+        periodic = true;
+      }
+    }catch(e){}
+  }
+  try{
+    reg.showNotification('RWC weather alerts enabled', {
+      body: periodic
+        ? 'Background checks active (~hourly), even when the app is closed.'
+        : 'Alerts fire while the app is open. For alerts with the app closed, install to Home Screen (Android/Chrome supports full background checks).',
+      icon: './icon-192.png', tag: 'rwc-wx-setup'
+    });
+  }catch(e){}
+  if(reg.active) reg.active.postMessage({type: 'check-alerts'});
+  updateWxAlertStatus();
+}
+function updateWxAlertStatus(){
+  var st = byId('wxAlertStatus'), btn = byId('wxAlertBtn');
+  if(!st) return;
+  var on = localStorage.getItem('rwc-alerts') === 'on' && ('Notification' in window) && Notification.permission === 'granted';
+  var bgCapable = ('serviceWorker' in navigator) && ('PeriodicSyncManager' in window);
+  if(!('Notification' in window)){ st.textContent = 'Not supported in this browser.'; return; }
+  if(on){
+    if(btn) btn.textContent = '✓ Notifications on';
+    st.textContent = bgCapable
+      ? 'Active · background checks ~hourly (also with the app closed).'
+      : 'Active while the app is open. iOS: install to Home Screen; closed-app push on iOS needs a server and isn’t available.';
+  } else {
+    if(btn) btn.textContent = 'Enable notifications';
+    st.textContent = 'Alerts for strong wind, thunderstorms, heavy showers, high rain chance and active tropical systems.';
+  }
+}
+window.enableWxAlerts = enableWxAlerts;
+window.updateWxAlertStatus = updateWxAlertStatus;
+
+/* While the app is open, ping the SW checker every 15 min (all platforms). */
+setInterval(function(){
+  if(document.hidden) return;
+  if(localStorage.getItem('rwc-alerts') !== 'on') return;
+  if(!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return;
+  navigator.serviceWorker.ready.then(function(reg){
+    if(reg.active) reg.active.postMessage({type: 'check-alerts'});
+  }).catch(function(){});
+}, 15 * 60 * 1000);
+
 function buildSettingsPanel(){
   const existing = document.getElementById('settings-panel');
   if(existing) return;
@@ -12395,10 +12464,16 @@ function buildSettingsPanel(){
         </div>
       </div>
     </div>
+    <div>
+      <div class="settings-section-ttl">\u{1F514} Weather Alerts</div>
+      <button id="wxAlertBtn" onclick="enableWxAlerts()" style="width:100%;padding:9px;border-radius:10px;border:1px solid var(--bdrb);background:rgba(77,184,255,0.12);color:var(--acc);font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.8px;cursor:pointer;text-transform:uppercase;">Enable notifications</button>
+      <div id="wxAlertStatus" style="font-family:var(--cond);font-size:13.5px;color:var(--muted);margin-top:5px;line-height:1.45;"></div>
+    </div>
     <div style="font-family:var(--mono);font-size:14px;color:var(--muted);opacity:.6;text-align:center;padding-top:4px;">
       RWC Caribbean \u00b7 v2.0 \u00b7 ABC Islands
     </div>`;
   document.body.appendChild(panel);
+  try{ updateWxAlertStatus(); }catch(e){}
 
   // Close on outside click
   document.addEventListener('click', function(e){

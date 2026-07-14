@@ -372,19 +372,6 @@ tr:last-child td{border-bottom:none;}
 .adsbdot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:pok 2s infinite;flex-shrink:0;}
 .adsb-wrap{position:relative;height:510px;overflow:hidden;}
 .adsb-wrap iframe{width:100%;height:100%;border:none;display:block;}
-/* Windy radar + satellite mini-windows floating over the ADS-B traffic map,
-   focused on the ABC islands. Reuses the dashboard's dash-windy-* look
-   (cropped Windy chrome) at a smaller picture-in-picture size. */
-.atc-windy-pip{position:absolute;left:8px;bottom:8px;z-index:10;width:148px;display:flex;flex-direction:column;gap:6px;}
-.atc-windy-pip .dash-windy-cell{box-shadow:0 4px 16px rgba(0,0,0,0.55);}
-.atc-windy-pip .dash-windy-hd{padding:4px 8px;font-size:11.5px;gap:4px;letter-spacing:.5px;}
-.atc-windy-pip .dash-windy-frame-wrap{height:76px;}
-.atc-windy-pip .dash-windy-ext{width:22px;height:22px;font-size:13px;top:4px;right:4px;}
-@media(min-width:700px){
-  .atc-windy-pip{width:190px;}
-  .atc-windy-pip .dash-windy-frame-wrap{height:98px;}
-  .atc-windy-pip .dash-windy-hd{font-size:13px;}
-}
 .adsb-blocker{position:absolute;inset:0;z-index:9;background:transparent;pointer-events:auto;touch-action:none;}
 .adsb-blocker.unlocked{pointer-events:none;}
 .adsb-lock{position:absolute;top:8px;right:8px;z-index:12;min-width:44px;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--bdrb);background:rgba(5,18,34,0.85);color:var(--acc);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.45);transition:all .2s;-webkit-tap-highlight-color:transparent;}
@@ -421,43 +408,27 @@ tr:last-child td{border-bottom:none;}
 .atcvol-s{-webkit-appearance:none;appearance:none;width:85px;height:3px;background:var(--bdrb);border-radius:2px;outline:none;cursor:pointer;}
 .atcvol-s::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--acc);box-shadow:0 0 7px rgba(77,184,255,0.4);cursor:pointer;}
 
-/* Live ATC — radar fills the whole screen; audio floats as an overlay */
-#tab-atc{height:calc(100dvh - 100px);min-height:460px;display:flex;flex-direction:column;overflow:hidden;margin-left:-14px;margin-right:-14px;width:calc(100% + 28px);}
-#tab-atc .atc-layout{flex:1;min-height:0;display:flex;flex-direction:column;gap:0;}
-#tab-atc .adsbcard{flex:0 0 50%;min-height:0;display:flex;flex-direction:column;border:none;border-radius:0;background:#000;}
-#tab-atc .adsb-hd{display:none;}
-#tab-atc .adsb-wrap{flex:1;height:auto;min-height:0;}
-#tab-atc .atc-audio-section{flex:1;min-height:0;overflow-y:auto;background:rgba(5,18,34,0.97);border-top:1px solid var(--bdrb);}
-/* ATC audio section */
+/* Live ATC — stacked layout: frequencies on top, live map, Windy maps below */
+.atc-audio-section{border:1px solid var(--bdr);border-radius:var(--rl);background:rgba(5,18,34,0.6);overflow:hidden;}
 .atc-audio-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:rgba(5,18,34,0.94);border-bottom:1px solid var(--bdrb);}
 .atc-audio-bar-ttl{font-family:var(--cond);font-weight:700;font-size:14px;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .atc-audio-collapse{flex-shrink:0;background:rgba(77,184,255,0.12);border:1px solid var(--bdrb);color:var(--acc);border-radius:6px;font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1px;padding:4px 12px;cursor:pointer;text-transform:uppercase;transition:all .18s;-webkit-tap-highlight-color:transparent;}
 .atc-audio-collapse:hover{background:rgba(77,184,255,0.25);border-color:var(--acc);}
 .atc-audio-panel{padding:9px 11px;}
 .atc-audio-section.collapsed .atc-audio-panel{display:none;}
-#tab-atc .atcplayers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-#tab-atc .atcplayer{grid-template-columns:auto 1fr;grid-template-areas:"pb i" "s v";grid-template-rows:auto auto;gap:5px 8px;padding:8px 10px;}
-#tab-atc .atcpbtn{grid-area:pb;}
-#tab-atc .atcinfo{grid-area:i;}
-#tab-atc .atcst{grid-area:s;min-width:0;}
-#tab-atc .atcvol{grid-area:v;}
+@media(min-width:700px){ .atcplayers{display:grid;grid-template-columns:1fr 1fr;gap:10px;} }
 @media(max-width:480px){.atc-audio-bar-ttl{font-size:14px;letter-spacing:.5px;}}
+
+/* Windy radar + satellite — visible section below the live map, ABC-focused */
+.atc-windy-section-hd{font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.atc-windy-section .dash-windy-maps{margin-top:0;}
 
 /* ── DESKTOP OPTIMIZATIONS (≥1000px / mouse) ── */
 @media(min-width:1000px){
-  /* ATC: radar and audio side by side instead of stacked */
-  #tab-atc .atc-layout{flex-direction:row;gap:0;}
-  #tab-atc .adsbcard{flex:1 1 auto;}
-  #tab-atc .atc-audio-section{flex:0 0 380px;border-top:none;border-left:1px solid var(--bdrb);}
-  #tab-atc .atcplayers{grid-template-columns:1fr;}
   /* Slimmer tab bar for mouse use */
   .tab{padding:12px 14px;min-height:48px;font-size:16px;}
   /* Conditions map fills more vertical space on desktop */
   .cond-map-body{height:calc(100vh - 280px);min-height:520px;}
-}
-@media(min-width:1500px){
-  #tab-atc .atc-audio-section{flex-basis:440px;}
-  #tab-atc .atcplayers{grid-template-columns:1fr 1fr;}
 }
 
 /* FORECAST ANIMATIONS */
@@ -3360,21 +3331,6 @@ html,body{max-width:100%;overflow-x:hidden;}
 
   <div id="tab-atc" class="tpanel hidden">
     <div class="atc-layout">
-      <div class="adsbcard">
-        <div class="adsb-hd">
-          <div class="adsb-ttl"><span class="adsbdot"></span>&#9992; Live Traffic &mdash; ADS-B Exchange</div>
-          <span style="font-family:var(--mono);font-size:14px;color:var(--muted);letter-spacing:1px;">Cura&ccedil;ao &middot; Aruba &middot; Bonaire FIR</span>
-        </div>
-        <div class="adsb-wrap" id="adsbWrap">
-          <button class="adsb-lock locked" id="adsbLock" type="button" aria-label="Toggle map interaction" title="Map locked &mdash; tap to unlock pan/zoom">
-            <span class="adsb-lock-icon" data-locked="&#128274;" data-unlocked="&#128275;">&#128274;</span>
-            <span class="adsb-lock-label">LOCKED</span>
-          </button>
-          <div class="adsb-blocker" id="adsbBlocker"></div>
-          <iframe id="adsbFrame" src="https://globe.adsbexchange.com/?zoom=8&lat=12.3&lon=-69.1&hideSidebar&hideButtons" title="ADS-B Exchange" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-          <div class="atc-windy-pip" id="atcWindyPip"></div>
-        </div>
-      </div>
       <div class="atc-audio-section" id="atcAudioOverlay">
         <div class="atc-audio-bar">
           <span class="atc-audio-bar-ttl">&#127911; Live ATC Audio &mdash; Cura&ccedil;ao &middot; Aruba &middot; Bonaire</span>
@@ -3408,6 +3364,24 @@ html,body{max-width:100%;overflow-x:hidden;}
             </div>
           </div>
         </div>
+      </div>
+      <div class="adsbcard">
+        <div class="adsb-hd">
+          <div class="adsb-ttl"><span class="adsbdot"></span>&#9992; Live Traffic &mdash; ADS-B Exchange</div>
+          <span style="font-family:var(--mono);font-size:14px;color:var(--muted);letter-spacing:1px;">Cura&ccedil;ao &middot; Aruba &middot; Bonaire FIR</span>
+        </div>
+        <div class="adsb-wrap" id="adsbWrap">
+          <button class="adsb-lock locked" id="adsbLock" type="button" aria-label="Toggle map interaction" title="Map locked &mdash; tap to unlock pan/zoom">
+            <span class="adsb-lock-icon" data-locked="&#128274;" data-unlocked="&#128275;">&#128274;</span>
+            <span class="adsb-lock-label">LOCKED</span>
+          </button>
+          <div class="adsb-blocker" id="adsbBlocker"></div>
+          <iframe id="adsbFrame" src="https://globe.adsbexchange.com/?zoom=8&lat=12.3&lon=-69.1&hideSidebar&hideButtons" title="ADS-B Exchange" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+      </div>
+      <div class="atc-windy-section">
+        <div class="atc-windy-section-hd">&#127777; Windy &mdash; Radar &amp; Satellite &middot; ABC Islands</div>
+        <div class="dash-windy-maps" id="atcWindyMaps"></div>
       </div>
     </div>
   </div>
@@ -11005,7 +10979,7 @@ window.fetchCondFlights = fetchCondFlights;
    picture-in-picture panel (radar + satellite, ABC-focused) in the corner —
    built once, like the dashboard's Windy maps, so it never reloads. */
 function ensureAtcWindyMaps(){
-  var box = byId('atcWindyPip');
+  var box = byId('atcWindyMaps');
   if(!box || box.dataset.built) return;
   box.dataset.built = '1';
   var base = 'https://embed.windy.com/embed2.html?lat=12.2&lon=-69.0&detailLat=12.2&detailLon=-69.0&zoom=7&level=surface&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C';
@@ -11013,14 +10987,14 @@ function ensureAtcWindyMaps(){
   var satSrc   = base + '&overlay=satellite&product=satellite';
   box.innerHTML =
     '<div class="dash-windy-cell">'
-      + '<div class="dash-windy-hd">\u{1F326} Radar</div>'
+      + '<div class="dash-windy-hd">\u{1F326} Radar · ABC Islands</div>'
       + '<div class="dash-windy-frame-wrap">'
         + '<a class="dash-windy-ext" href="https://www.windy.com/?radar,12.2,-69.0,7" target="_blank" rel="noopener" title="Open radar in Windy">↗</a>'
         + '<iframe src="' + radarSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
       + '</div>'
     + '</div>'
     + '<div class="dash-windy-cell">'
-      + '<div class="dash-windy-hd">\u{1F6F0}️ Satellite</div>'
+      + '<div class="dash-windy-hd">\u{1F6F0}️ Satellite · ABC Islands</div>'
       + '<div class="dash-windy-frame-wrap">'
         + '<a class="dash-windy-ext" href="https://www.windy.com/?satellite,12.2,-69.0,7" target="_blank" rel="noopener" title="Open satellite in Windy">↗</a>'
         + '<iframe src="' + satSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'

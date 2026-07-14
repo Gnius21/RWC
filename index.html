@@ -372,12 +372,19 @@ tr:last-child td{border-bottom:none;}
 .adsbdot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:pok 2s infinite;flex-shrink:0;}
 .adsb-wrap{position:relative;height:510px;overflow:hidden;}
 .adsb-wrap iframe{width:100%;height:100%;border:none;display:block;}
-/* Rain radar overlay drawn above the ADS-B Exchange iframe — a borderless,
-   non-interactive Leaflet instance showing only the RainViewer tile layer
-   (no basemap), aligned to the same ABC-islands centre/zoom as the iframe so
-   the rain cells line up with the traffic map beneath. */
-#atcRainOverlay{position:absolute;inset:0;z-index:5;pointer-events:none;background:transparent;}
-#atcRainOverlay .leaflet-control-container{display:none;}
+/* Windy radar + satellite mini-windows floating over the ADS-B traffic map,
+   focused on the ABC islands. Reuses the dashboard's dash-windy-* look
+   (cropped Windy chrome) at a smaller picture-in-picture size. */
+.atc-windy-pip{position:absolute;left:8px;bottom:8px;z-index:10;width:148px;display:flex;flex-direction:column;gap:6px;}
+.atc-windy-pip .dash-windy-cell{box-shadow:0 4px 16px rgba(0,0,0,0.55);}
+.atc-windy-pip .dash-windy-hd{padding:4px 8px;font-size:11.5px;gap:4px;letter-spacing:.5px;}
+.atc-windy-pip .dash-windy-frame-wrap{height:76px;}
+.atc-windy-pip .dash-windy-ext{width:22px;height:22px;font-size:13px;top:4px;right:4px;}
+@media(min-width:700px){
+  .atc-windy-pip{width:190px;}
+  .atc-windy-pip .dash-windy-frame-wrap{height:98px;}
+  .atc-windy-pip .dash-windy-hd{font-size:13px;}
+}
 .adsb-blocker{position:absolute;inset:0;z-index:9;background:transparent;pointer-events:auto;touch-action:none;}
 .adsb-blocker.unlocked{pointer-events:none;}
 .adsb-lock{position:absolute;top:8px;right:8px;z-index:12;min-width:44px;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--bdrb);background:rgba(5,18,34,0.85);color:var(--acc);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.45);transition:all .2s;-webkit-tap-highlight-color:transparent;}
@@ -3365,7 +3372,7 @@ html,body{max-width:100%;overflow-x:hidden;}
           </button>
           <div class="adsb-blocker" id="adsbBlocker"></div>
           <iframe id="adsbFrame" src="https://globe.adsbexchange.com/?zoom=8&lat=12.3&lon=-69.1&hideSidebar&hideButtons" title="ADS-B Exchange" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-          <div id="atcRainOverlay"></div>
+          <div class="atc-windy-pip" id="atcWindyPip"></div>
         </div>
       </div>
       <div class="atc-audio-section" id="atcAudioOverlay">
@@ -5334,8 +5341,7 @@ function switchTab(name){
   // keeps hitting a third-party API forever once the flights layer was enabled.
   if(name!=='maps' && typeof __flightTimer!=='undefined' && __flightTimer){ clearInterval(__flightTimer); __flightTimer=null; }
   if(name==='atc'){
-    if(typeof initAtcMap==='function') initAtcMap();
-    setTimeout(function(){ if(typeof atcRainMap!=='undefined' && atcRainMap) atcRainMap.invalidateSize(); }, 250);
+    if(typeof ensureAtcWindyMaps==='function') ensureAtcWindyMaps();
   }
   if(name==='stations'){
     if(!stationsTabOpened){ stationsTabOpened = true; fetchStationsData(); }
@@ -10993,47 +10999,35 @@ async function fetchCondFlights(){
 }
 window.fetchCondFlights = fetchCondFlights;
 
-/* ═══ ATC MAP — rain overlay above the ADS-B Exchange iframe ═══
-   Reverted to the default live ADS-B Exchange globe (real traffic data,
-   focused on the ABC islands via the iframe's own zoom/lat/lon params).
-   A separate borderless, non-interactive Leaflet instance draws only the
-   RainViewer tile layer on top — same Web Mercator projection as the iframe's
-   own map, so the rain cells line up with the traffic beneath. Default ON. */
-var atcRainMap = null, atcRainLayer = null;
-function _atcVisible(){
-  var t = byId('tab-atc');
-  return t && !t.classList.contains('hidden') && !document.hidden;
+/* ═══ ATC — Windy radar + satellite mini-windows over the ADS-B traffic map ═══
+   Default live ADS-B Exchange globe (real traffic, focused on the ABC islands
+   via the iframe's own zoom/lat/lon params) with a small floating Windy
+   picture-in-picture panel (radar + satellite, ABC-focused) in the corner —
+   built once, like the dashboard's Windy maps, so it never reloads. */
+function ensureAtcWindyMaps(){
+  var box = byId('atcWindyPip');
+  if(!box || box.dataset.built) return;
+  box.dataset.built = '1';
+  var base = 'https://embed.windy.com/embed2.html?lat=12.2&lon=-69.0&detailLat=12.2&detailLon=-69.0&zoom=7&level=surface&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=kt&metricTemp=%C2%B0C';
+  var radarSrc = base + '&overlay=radar&product=radar';
+  var satSrc   = base + '&overlay=satellite&product=satellite';
+  box.innerHTML =
+    '<div class="dash-windy-cell">'
+      + '<div class="dash-windy-hd">\u{1F326} Radar</div>'
+      + '<div class="dash-windy-frame-wrap">'
+        + '<a class="dash-windy-ext" href="https://www.windy.com/?radar,12.2,-69.0,7" target="_blank" rel="noopener" title="Open radar in Windy">↗</a>'
+        + '<iframe src="' + radarSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
+      + '</div>'
+    + '</div>'
+    + '<div class="dash-windy-cell">'
+      + '<div class="dash-windy-hd">\u{1F6F0}️ Satellite</div>'
+      + '<div class="dash-windy-frame-wrap">'
+        + '<a class="dash-windy-ext" href="https://www.windy.com/?satellite,12.2,-69.0,7" target="_blank" rel="noopener" title="Open satellite in Windy">↗</a>'
+        + '<iframe src="' + satSrc + '" loading="lazy" frameborder="0" referrerpolicy="no-referrer" allow="fullscreen"></iframe>'
+      + '</div>'
+    + '</div>';
 }
-function initAtcMap(){
-  if(atcRainMap || typeof L === 'undefined' || !byId('atcRainOverlay')) return;
-  atcRainMap = L.map('atcRainOverlay', {
-    zoomControl: false, attributionControl: false, dragging: false,
-    scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false,
-    keyboard: false, tap: false, touchZoom: false,
-    // Match the ADS-B Exchange iframe's own view (zoom=8&lat=12.3&lon=-69.1).
-    center: [12.3, -69.1], zoom: 8
-  });
-  atcRainRefresh();
-  setInterval(function(){ if(_atcVisible()) atcRainRefresh(); }, 3 * 60 * 1000);
-}
-function atcRainRefresh(){
-  fetch('https://api.rainviewer.com/public/weather-maps.json')
-    .then(function(r){ return r.json(); })
-    .then(function(j){
-      try{
-        var frames = (j.radar && j.radar.past) ? j.radar.past : [];
-        if(j.radar && j.radar.nowcast) frames = frames.concat(j.radar.nowcast);
-        var frame = frames.length ? frames[frames.length - 1] : null;
-        if(!frame || !j.host || !atcRainMap) return;
-        var nl = L.tileLayer(j.host + frame.path + '/256/{z}/{x}/{y}/8/1_1.png',
-          {opacity: 0.75, maxZoom: 12, zIndex: 200});
-        nl.addTo(atcRainMap);
-        if(atcRainLayer && atcRainMap.hasLayer(atcRainLayer)) atcRainMap.removeLayer(atcRainLayer);
-        atcRainLayer = nl;
-      }catch(e){}
-    }).catch(function(){});
-}
-window.initAtcMap = initAtcMap;
+window.ensureAtcWindyMaps = ensureAtcWindyMaps;
 
 
 /* NDBC buoys — nearest reporting stations to the ABC islands.
